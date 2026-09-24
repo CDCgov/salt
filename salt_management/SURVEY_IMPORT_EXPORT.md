@@ -128,6 +128,7 @@ may omit them.
 | `description` | string | no | Free text. |
 | `languages` | JSON-string | no (default `"[\"en\"]"`) | JSON array of language identifiers, e.g. `"[\"en\",\"fr\"]"`. |
 | `eligibility_script` | string (JEXL) | no | Expression deciding eligibility. |
+| `coupon_count_script` | string (JEXL) | no | Evaluated at completion; can lower the coupons issued below the facility ceiling (number, or true/false for all/none). Blank = facility count. |
 | `eligibility_message_json` | JSON-string | no | Multilingual "not eligible" message. |
 | `version_notes` | string | no | Free text. |
 | `fingerprint_enabled` | 0 / 1 | no | Whether fingerprint enrollment is used. |
@@ -365,7 +366,8 @@ All other survey columns are copied from the bundle: `name`, `description`,
 `version_notes`, `fingerprint_enabled`, `re_enrollment_days`,
 `staff_validation_message_json`, `hiv_rapid_test_enabled`,
 `contact_info_enabled`, `staff_eligibility_screening`,
-`rapid_test_samples_after_eligibility`, `payment_audit_phone_enabled`.
+`rapid_test_samples_after_eligibility`, `payment_audit_phone_enabled`,
+`coupon_count_script`.
 
 ### Versioning
 

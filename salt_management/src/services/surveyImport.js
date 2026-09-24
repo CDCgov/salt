@@ -25,7 +25,7 @@ const SURVEY_COLUMNS = [
     'is_draft', 'fingerprint_enabled', 're_enrollment_days',
     'staff_validation_message_json', 'hiv_rapid_test_enabled', 'contact_info_enabled',
     'staff_eligibility_screening', 'rapid_test_samples_after_eligibility',
-    'payment_audit_phone_enabled'
+    'payment_audit_phone_enabled', 'coupon_count_script'
 ];
 
 // Validation failures carry `.validation = true` so HTTP callers can map them
@@ -67,6 +67,15 @@ async function importSurveyBundle(dbx, bundle, opts = {}) {
             'A question uses the reserved short_name "value". Rename it — '
             + '"value" is the JEXL variable bound to the current answer in '
             + 'validation and skip-to scripts.'
+        );
+    }
+    // `facility_coupons` is reserved — it is the facility coupon ceiling bound
+    // in the coupon_count_script context.
+    if (srcQuestions.some(q => q.short_name === 'facility_coupons')) {
+        throw validationError(
+            'A question uses the reserved short_name "facility_coupons". Rename it — '
+            + '"facility_coupons" is the JEXL variable bound to the facility coupon '
+            + 'ceiling in the coupon count script.'
         );
     }
     const srcSections = Array.isArray(bundle.sections) ? bundle.sections : [];

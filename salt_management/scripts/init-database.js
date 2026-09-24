@@ -90,7 +90,8 @@ CREATE TABLE IF NOT EXISTS surveys (
     contact_info_enabled BOOLEAN DEFAULT 0,
     staff_eligibility_screening BOOLEAN DEFAULT 0,
     rapid_test_samples_after_eligibility BOOLEAN DEFAULT 1,
-    payment_audit_phone_enabled INTEGER DEFAULT 0
+    payment_audit_phone_enabled INTEGER DEFAULT 0,
+    coupon_count_script TEXT
 );
 
 CREATE TABLE IF NOT EXISTS sections (

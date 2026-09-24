@@ -30,6 +30,7 @@ import kotlin.coroutines.resume
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import android.content.Context
+import com.dev.salt.util.CouponCountResolver
 import com.dev.salt.util.CouponGenerator
 
 // Navigation events for the survey
@@ -418,7 +419,10 @@ class SurveyViewModel(
                             try {
                                 // Get the number of coupons to issue from facility config
                                 val facilityConfig = database.facilityConfigDao().getFacilityConfig()
-                                val couponsToIssue = facilityConfig?.couponsToIssue ?: 3
+                                val facilityCoupons = facilityConfig?.couponsToIssue ?: 3
+                                // The survey's optional coupon_count_script may lower this
+                                // (never raise it) based on the participant's answers.
+                                val couponsToIssue = resolveCouponsToIssue(facilityCoupons)
 
                                 Log.i("SurveyViewModel", "Generating $couponsToIssue coupons for survey ${completedSurvey.id}")
                                 val generatedCoupons = couponGenerator.issueCouponsForSurvey(completedSurvey.id, couponsToIssue)
@@ -449,6 +453,36 @@ class SurveyViewModel(
                 }
             }
         }
+    }
+
+    /**
+     * Applies the survey's optional coupon_count_script to the facility coupon
+     * ceiling. Blank script, null result, or an evaluation error all yield the
+     * facility count; see [CouponCountResolver] for the full result semantics.
+     * The context is the standard answer context plus `facility_coupons`.
+     */
+    private suspend fun resolveCouponsToIssue(facilityCoupons: Int): Int {
+        val script = database.surveyConfigDao().getSurveyConfig()?.couponCountScript
+        if (script.isNullOrBlank()) {
+            return facilityCoupons
+        }
+        val context = buildJexlContext().toMutableMap()
+        context["facility_coupons"] = facilityCoupons
+        val result: Any? = try {
+            evaluateJexlScript(script, context)
+        } catch (e: Exception) {
+            Log.e("JEXLError", "Error evaluating coupon_count_script: ${e.message}")
+            null
+        }
+        val resolved = CouponCountResolver.resolve(result, facilityCoupons)
+        Log.i("SurveyViewModel", "coupon_count_script '$script' -> $result; issuing $resolved of facility ceiling $facilityCoupons")
+
+        showDebugDialogAndWait(
+            statement = script,
+            context = context,
+            scriptType = "Coupon Count (result: $result, issuing $resolved of $facilityCoupons)"
+        )
+        return resolved
     }
 
     fun evaluateCurrentQuestionPreScript(): String{

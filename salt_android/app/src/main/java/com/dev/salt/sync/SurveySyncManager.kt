@@ -320,11 +320,17 @@ class SurveySyncManager(private val context: Context) {
             try {
                 // Parse survey metadata including eligibility script and server survey ID
                 var eligibilityScript: String? = null
+                var couponCountScript: String? = null
                 var serverSurveyId: Long? = null
                 if (data.has("survey")) {
                     val surveyJson = data.getJSONObject("survey")
                     eligibilityScript = if (surveyJson.has("eligibility_script")) {
                         surveyJson.getString("eligibility_script")
+                    } else {
+                        null
+                    }
+                    couponCountScript = if (surveyJson.has("coupon_count_script") && !surveyJson.isNull("coupon_count_script")) {
+                        surveyJson.getString("coupon_count_script").takeIf { it.isNotBlank() }
                     } else {
                         null
                     }
@@ -374,6 +380,7 @@ class SurveySyncManager(private val context: Context) {
                         reEnrollmentDays = configJson.optInt("re_enrollment_days", 90),
                         lastSyncTime = System.currentTimeMillis(),
                         eligibilityScript = eligibilityScript,  // Store eligibility script in SurveyConfig
+                        couponCountScript = couponCountScript,
                         hivRapidTestEnabled = parseBoolean(configJson, "hiv_rapid_test_enabled"),
                         contactInfoEnabled = parseBoolean(configJson, "contact_info_enabled"),
                         staffEligibilityScreening = parseBoolean(configJson, "staff_eligibility_screening"),
@@ -381,7 +388,7 @@ class SurveySyncManager(private val context: Context) {
                         paymentAuditPhoneEnabled = parseBoolean(configJson, "payment_audit_phone_enabled")
                     )
                     database.surveyConfigDao().insertSurveyConfig(surveyConfig)
-                    Log.d("SurveySyncManager", "Survey config updated: serverSurveyId=${surveyConfig.serverSurveyId}, fingerprint=${surveyConfig.fingerprintEnabled}, reEnrollmentDays=${surveyConfig.reEnrollmentDays}, eligibilityScript=${surveyConfig.eligibilityScript}, contactInfoEnabled=${surveyConfig.contactInfoEnabled}, staffEligibilityScreening=${surveyConfig.staffEligibilityScreening}")
+                    Log.d("SurveySyncManager", "Survey config updated: serverSurveyId=${surveyConfig.serverSurveyId}, fingerprint=${surveyConfig.fingerprintEnabled}, reEnrollmentDays=${surveyConfig.reEnrollmentDays}, eligibilityScript=${surveyConfig.eligibilityScript}, couponCountScript=${surveyConfig.couponCountScript}, contactInfoEnabled=${surveyConfig.contactInfoEnabled}, staffEligibilityScreening=${surveyConfig.staffEligibilityScreening}")
                 }
                 
                 // Parse and save sections

@@ -30,7 +30,10 @@ data class SurveyConfig(
     @ColumnInfo(name = "contact_info_enabled", defaultValue = "0") val contactInfoEnabled: Boolean = false,
     @ColumnInfo(name = "staff_eligibility_screening", defaultValue = "0") val staffEligibilityScreening: Boolean = false,
     @ColumnInfo(name = "rapid_test_samples_after_eligibility", defaultValue = "1") val rapidTestSamplesAfterEligibility: Boolean = true,
-    @ColumnInfo(name = "payment_audit_phone_enabled", defaultValue = "0") val paymentAuditPhoneEnabled: Boolean = false
+    @ColumnInfo(name = "payment_audit_phone_enabled", defaultValue = "0") val paymentAuditPhoneEnabled: Boolean = false,
+    // Optional JEXL expression evaluated at survey completion; can lower the number of
+    // coupons issued below the facility ceiling. See CouponCountResolver.
+    @ColumnInfo(name = "coupon_count_script") val couponCountScript: String? = null
 )
 
 @Entity(tableName = "system_messages", primaryKeys = ["messageKey", "language"])
@@ -786,13 +789,14 @@ interface AppServerConfigDao {
     fun hasServerConfig(): Boolean
 }
 
-@Database(entities = [Section::class, Question::class, Option::class, Survey::class, Answer::class, User::class, SurveyUploadState::class, RecruitmentPaymentUploadState::class, SyncMetadata::class, SurveyConfig::class, SystemMessage::class, Coupon::class, FacilityConfig::class, SeedRecruitment::class, SubjectFingerprint::class, AppServerConfig::class, TestConfiguration::class, TestResult::class, LabTestConfiguration::class], version = 70, autoMigrations = [
+@Database(entities = [Section::class, Question::class, Option::class, Survey::class, Answer::class, User::class, SurveyUploadState::class, RecruitmentPaymentUploadState::class, SyncMetadata::class, SurveyConfig::class, SystemMessage::class, Coupon::class, FacilityConfig::class, SeedRecruitment::class, SubjectFingerprint::class, AppServerConfig::class, TestConfiguration::class, TestResult::class, LabTestConfiguration::class], version = 71, autoMigrations = [
     AutoMigration(from = 52, to = 53),
     AutoMigration(from = 65, to = 66),
     AutoMigration(from = 66, to = 67),
     AutoMigration(from = 67, to = 68),
     AutoMigration(from = 68, to = 69),
-    AutoMigration(from = 69, to = 70)
+    AutoMigration(from = 69, to = 70),
+    AutoMigration(from = 70, to = 71)
 ])
 abstract class SurveyDatabase : RoomDatabase() {
     abstract fun surveyDao(): SurveyDao

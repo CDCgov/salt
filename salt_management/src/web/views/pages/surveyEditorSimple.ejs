@@ -136,11 +136,19 @@ bodyHtml += '</div>\n';
 
 // Eligibility settings card
 bodyHtml += '<div class="card">\n';
-bodyHtml += '    <h3>Eligibility Settings</h3>\n';
+bodyHtml += '    <h3>Eligibility and Coupon Settings</h3>\n';
 bodyHtml += '    <div style="margin-bottom: 1rem;">\n';
 bodyHtml += '        <label><strong>Eligibility Script (JEXL Expression):</strong></label>\n';
 bodyHtml += '        <textarea id="eligibilityScript" style="width: 100%; min-height: 60px; padding: 0.5rem; font-family: monospace;">' + (survey.eligibility_script || '') + '</textarea>\n';
 bodyHtml += '        <small style="color: #666;">This script runs after the eligibility section. Example: consent == "1" && age >= 18 && age <= 65</small>\n';
+bodyHtml += '    </div>\n';
+bodyHtml += '    <div style="margin-bottom: 1rem;">\n';
+bodyHtml += '        <label><strong>Coupon Count Script (JEXL Expression, optional):</strong></label>\n';
+bodyHtml += '        <textarea id="couponCountScript" style="width: 100%; min-height: 60px; padding: 0.5rem; font-family: monospace;">' + (survey.coupon_count_script || '') + '</textarea>\n';
+bodyHtml += '        <small style="color: #666;">Runs at survey completion and can lower the number of coupons issued. The facility\'s coupon setting is always the ceiling; the script can never raise it. '
+bodyHtml += 'Leave blank to always issue the facility count. A number issues that many (floored, clamped to 0..ceiling). true issues the facility count, false issues none. '
+bodyHtml += 'Errors or a null result fall back to the facility count. Single-choice answers are the 0-based option index; numeric answers are numbers; <code>facility_coupons</code> holds the ceiling. '
+bodyHtml += 'Examples: <code>network</code> (network size as ceiling) &middot; <code>injects_drugs != 2</code> (no coupons for option 2) &middot; <code>injects_drugs == 2 ? 0 : network</code></small>\n';
 bodyHtml += '    </div>\n';
 bodyHtml += '    <p style="color: #666; font-style: italic;">ℹ️ To configure the ineligibility message, go to the System Messages tab and edit the "eligibility_not_eligible" message.</p>\n';
 bodyHtml += '    <button onclick="saveEligibilitySettings()" class="btn">Save Eligibility Settings</button>\n';
@@ -412,6 +420,7 @@ bodyHtml += '\n';
 bodyHtml += '// Save eligibility settings\n';
 bodyHtml += 'async function saveEligibilitySettings() {\n';
 bodyHtml += '    const eligibilityScript = document.getElementById("eligibilityScript").value;\n';
+bodyHtml += '    const couponCountScript = document.getElementById("couponCountScript").value;\n';
 bodyHtml += '    \n';
 bodyHtml += '    try {\n';
 bodyHtml += '        const response = await fetch("/api/admin/survey-config/" + surveyId, {\n';
@@ -419,12 +428,13 @@ bodyHtml += '            method: "PUT",\n';
 bodyHtml += '            headers: { "Content-Type": "application/json" },\n';
 bodyHtml += '            body: JSON.stringify({\n';
 bodyHtml += '                eligibility_script: eligibilityScript,\n';
+bodyHtml += '                coupon_count_script: couponCountScript,\n';
 bodyHtml += '                create_version: false  // Update the existing survey, don\'t create a new version\n';
 bodyHtml += '            })\n';
 bodyHtml += '        });\n';
 bodyHtml += '        \n';
 bodyHtml += '        if (response.ok) {\n';
-bodyHtml += '            alert("Eligibility settings saved successfully");\n';
+bodyHtml += '            alert("Eligibility and coupon settings saved successfully");\n';
 bodyHtml += '        } else {\n';
 bodyHtml += '            const result = await response.json();\n';
 bodyHtml += '            alert("Failed to save: " + result.error);\n';

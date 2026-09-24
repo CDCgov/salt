@@ -147,7 +147,10 @@ fun CouponIssuedScreen(
             val isWalkIn = survey?.referralCouponCode == null
             val isFingerprintDisabled = surveyConfig?.fingerprintEnabled == false
             val hasRecruitmentPayment = (facilityConfig?.recruitmentPaymentAmount ?: 0.0) > 0.0
-            val shouldShowWalkInInstructions = isWalkIn && isFingerprintDisabled && hasRecruitmentPayment
+            // With no coupons the participant can't recruit anyone, so the
+            // recruitment-payment instructions don't apply — skip that screen.
+            val hasCoupons = actualCoupons.isNotEmpty()
+            val shouldShowWalkInInstructions = isWalkIn && isFingerprintDisabled && hasRecruitmentPayment && hasCoupons
 
             if (shouldShowWalkInInstructions) {
                 navController.navigate("${AppDestinations.WALKIN_RECRUITMENT_PAYMENT}/$surveyId")

@@ -116,6 +116,7 @@ router.put('/:id', [
     body('description').optional().trim(),
     body('languages').optional(),
     body('eligibility_script').optional().trim(),
+    body('coupon_count_script').optional().trim(),
     body('eligibility_message_json').optional(),
     body('create_version').optional().isBoolean(),
     body('fingerprint_enabled').optional().isInt({ min: 0, max: 1 }),
@@ -132,7 +133,7 @@ router.put('/:id', [
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, description, languages, eligibility_script, eligibility_message_json, create_version = false, fingerprint_enabled, re_enrollment_days, staff_validation_message_json, contact_info_enabled, staff_eligibility_screening, rapid_test_samples_after_eligibility, payment_audit_phone_enabled } = req.body;
+    const { name, description, languages, eligibility_script, coupon_count_script, eligibility_message_json, create_version = false, fingerprint_enabled, re_enrollment_days, staff_validation_message_json, contact_info_enabled, staff_eligibility_screening, rapid_test_samples_after_eligibility, payment_audit_phone_enabled } = req.body;
     const surveyId = req.params.id;
     
     console.log('Update survey request:', {
@@ -166,13 +167,14 @@ router.put('/:id', [
             // Create new survey version
             const newSurveyResult = await runAsync(
                 `INSERT INTO surveys (version, base_survey_id, parent_survey_id, name, description, 
-                 languages, eligibility_script, eligibility_message_json, is_active, is_draft)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                 languages, eligibility_script, coupon_count_script, eligibility_message_json, is_active, is_draft)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [newVersion, baseId, surveyId, 
                  name || oldSurvey.name,
                  description !== undefined ? description : oldSurvey.description,
                  languages || oldSurvey.languages,
                  eligibility_script !== undefined ? eligibility_script : oldSurvey.eligibility_script,
+                 coupon_count_script !== undefined ? coupon_count_script : oldSurvey.coupon_count_script,
                  eligibility_message_json !== undefined ? 
                     (typeof eligibility_message_json === 'object' ? 
                         JSON.stringify(eligibility_message_json) : eligibility_message_json) 
@@ -257,6 +259,10 @@ router.put('/:id', [
                 updates.push('eligibility_script = ?');
                 params.push(eligibility_script);
             }
+            if (coupon_count_script !== undefined) {
+                updates.push('coupon_count_script = ?');
+                params.push(coupon_count_script);
+            }
             if (eligibility_message_json !== undefined) {
                 updates.push('eligibility_message_json = ?');
                 params.push(typeof eligibility_message_json === 'object' ? 
@@ -332,7 +338,10 @@ router.post('/:surveyId/questions', [
         .custom((v) => {
             // `value` is reserved — it is the JEXL variable bound to the
             // current answer in validation and skip-to scripts.
+            // `facility_coupons` is reserved — it is the facility's coupon
+            // ceiling, bound in the coupon_count_script context.
             if (v === 'value') throw new Error('"value" is a reserved name and cannot be used as a short name');
+            if (v === 'facility_coupons') throw new Error('"facility_coupons" is a reserved name and cannot be used as a short name');
             return true;
         }),
     body('question_text_json').isObject(),
@@ -440,7 +449,10 @@ router.put('/:surveyId/questions/:questionId', [
         .custom((v) => {
             // `value` is reserved — it is the JEXL variable bound to the
             // current answer in validation and skip-to scripts.
+            // `facility_coupons` is reserved — it is the facility's coupon
+            // ceiling, bound in the coupon_count_script context.
             if (v === 'value') throw new Error('"value" is a reserved name and cannot be used as a short name');
+            if (v === 'facility_coupons') throw new Error('"facility_coupons" is a reserved name and cannot be used as a short name');
             return true;
         }),
     body('question_text_json').optional({ nullable: true, checkFalsy: true }).isObject(),
@@ -680,10 +692,11 @@ router.post('/', [
         let reEnrollmentDays = 90;
         let staffValidationMessageJson = null;
         let hivRapidTestEnabled = 1;
+        let couponCountScript = null;
 
         if (basedOnSurveyId) {
             const baseSurvey = await getAsync(
-                `SELECT languages, eligibility_script, eligibility_message_json,
+                `SELECT languages, eligibility_script, coupon_count_script, eligibility_message_json,
                         fingerprint_enabled, re_enrollment_days, staff_validation_message_json,
                         hiv_rapid_test_enabled
                  FROM surveys WHERE id = ?`,
@@ -696,6 +709,9 @@ router.post('/', [
                 }
                 if (baseSurvey.eligibility_script) {
                     eligibilityScript = baseSurvey.eligibility_script;
+                }
+                if (baseSurvey.coupon_count_script) {
+                    couponCountScript = baseSurvey.coupon_count_script;
                 }
                 if (baseSurvey.eligibility_message_json) {
                     eligibilityMessageJson = baseSurvey.eligibility_message_json;
@@ -718,11 +734,11 @@ router.post('/', [
         // Create new survey with settings from base survey or defaults
         const result = await runAsync(
             `INSERT INTO surveys (version, base_survey_id, name, description, languages,
-                                  eligibility_script, eligibility_message_json, fingerprint_enabled,
+                                  eligibility_script, coupon_count_script, eligibility_message_json, fingerprint_enabled,
                                   re_enrollment_days, staff_validation_message_json, hiv_rapid_test_enabled,
                                   is_draft)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [newVersion, null, name, description, surveyLanguages, eligibilityScript,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [newVersion, null, name, description, surveyLanguages, eligibilityScript, couponCountScript,
              eligibilityMessageJson, fingerprintEnabled, reEnrollmentDays,
              staffValidationMessageJson, hivRapidTestEnabled, 0]
         );
