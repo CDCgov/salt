@@ -64,6 +64,13 @@ android {
         compose = true
         buildConfig = true
     }
+    lint {
+        // Calls to APIs newer than minSdk only fail at runtime (NoSuchMethodError) on
+        // older devices, so treat them as fatal: lintVital then blocks every release build.
+        fatal += "NewApi"
+        abortOnError = true
+        checkReleaseBuilds = true
+    }
 }
 
 dependencies {

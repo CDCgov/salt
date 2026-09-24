@@ -725,7 +725,10 @@ class SurveyViewModel(
         // This respects skip-to navigation - if user jumped from Q5 to Q20,
         // pressing back on Q20 should return to Q5, not Q19
         if (questionHistory.isNotEmpty()) {
-            currentQuestionIndex = questionHistory.removeLast()
+            // removeAt(lastIndex) rather than removeLast(): with compileSdk 35 the Kotlin
+            // compiler resolves MutableList.removeLast() to java.util.List.removeLast(),
+            // which only exists on Android 15+ and crashes with NoSuchMethodError on older devices.
+            currentQuestionIndex = questionHistory.removeAt(questionHistory.lastIndex)
             Log.d("SurveyViewModel", "Popped question $currentQuestionIndex from history. History size: ${questionHistory.size}")
             updateCurrentQuestion()
         } else if (currentQuestionIndex > 0) {
