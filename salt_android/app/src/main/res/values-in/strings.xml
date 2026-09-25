@@ -1,0 +1,895 @@
+<resources>
+    <!-- App-level strings -->
+    <string name="app_name">SALT</string>
+    <string name="app_title_welcome">Selamat Datang di SALT</string>
+
+    <!-- Template/Unused strings (required for build) -->
+    <string name="action_settings">Pengaturan</string>
+    <string name="first_fragment_label">Fragmen Pertama</string>
+    <string name="second_fragment_label">Fragmen Kedua</string>
+    <string name="next">Berikutnya</string>
+    <string name="previous">Sebelumnya</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet</string>
+
+    <!-- Common UI elements -->
+    <string name="common_ok">OK</string>
+    <string name="common_cancel">Batal</string>
+    <string name="common_continue">Lanjutkan</string>
+    <string name="common_back">Kembali</string>
+    <string name="common_next">Berikutnya</string>
+    <string name="common_previous">Sebelumnya</string>
+    <string name="common_save">Simpan</string>
+    <string name="common_delete">Hapus</string>
+    <string name="common_add">Tambah</string>
+    <string name="common_edit">Ubah</string>
+    <string name="common_refresh">Muat Ulang</string>
+    <string name="common_retry">Coba Lagi</string>
+    <string name="common_skip">Lewati</string>
+    <string name="common_confirm">Konfirmasi</string>
+    <string name="common_error">Kesalahan</string>
+    <string name="common_warning">Peringatan</string>
+    <string name="common_success">Berhasil</string>
+    <string name="common_loading">Memuat…</string>
+    <string name="common_logout">Keluar</string>
+    <string name="common_exit">Keluar</string>
+    <string name="common_replay">Putar Ulang</string>
+    <string name="common_return_to_menu">Kembali ke Menu Utama</string>
+
+    <!-- Exit app confirmation -->
+    <string name="exit_app_title">Keluar dari Aplikasi?</string>
+    <string name="exit_app_message">Apakah Anda yakin ingin keluar dari aplikasi?</string>
+    <string name="exit_app_confirm">Keluar</string>
+    <string name="exit_app_cancel">Batal</string>
+
+    <!-- Login/Authentication strings -->
+    <string name="login_title">Masuk</string>
+    <string name="login_subtitle">Silakan Masuk</string>
+    <string name="login_username">Nama Pengguna</string>
+    <string name="login_password">Kata Sandi</string>
+    <string name="login_button_login">Masuk</string>
+    <string name="login_button_biometric">Masuk dengan Biometrik</string>
+    <string name="login_failed_title">Gagal Masuk</string>
+    <string name="login_error_empty">Nama pengguna dan kata sandi tidak boleh kosong.</string>
+    <string name="login_error_invalid_password">Kata sandi tidak valid.</string>
+    <string name="login_error_invalid_username">Nama pengguna tidak valid.</string>
+    <string name="login_error_user_not_found">Pengguna tidak ditemukan</string>
+    <string name="login_error_invalid_credentials">Nama pengguna atau kata sandi tidak valid.</string>
+    <string name="login_error_unexpected">Terjadi kesalahan yang tidak terduga. Silakan coba lagi.</string>
+    <string name="login_error_biometric_failed">Autentikasi biometrik gagal</string>
+    <string name="login_error_biometric_unavailable">Autentikasi biometrik tidak tersedia</string>
+    <string name="login_error_authentication">Kesalahan autentikasi</string>
+
+    <!-- Sync Status Messages -->
+    <string name="sync_status_survey_updated">Survei diperbarui</string>
+    <string name="sync_status_survey_current">Survei sudah versi terbaru</string>
+    <string name="sync_status_no_connection">Catatan: Tidak ada koneksi ke server. Bekerja dalam mode offline.</string>
+    <string name="sync_status_error">Kesalahan: %1$s</string>
+    <string name="login_sync_facility">Memeriksa pembaruan fasilitas…</string>
+    <string name="login_sync_survey_check">Memeriksa pembaruan survei…</string>
+    <string name="login_sync_survey_download">Mengunduh survei yang diperbarui…</string>
+
+    <!-- Staff Validation strings -->
+    <string name="staff_validation_title">Validasi Petugas Diperlukan</string>
+    <string name="staff_validation_dialog_title">Login Petugas</string>
+    <string name="staff_validation_attempts_remaining">Sisa percobaan: %1$d</string>
+    <string name="staff_validation_cancelled">Autentikasi dibatalkan</string>
+    <string name="staff_validation_invalid">Nama pengguna atau kata sandi tidak valid</string>
+
+    <!-- Session Management strings -->
+    <string name="session_expiring_title">Sesi Akan Berakhir</string>
+    <string name="session_expiring_message">Sesi Anda akan berakhir dalam:</string>
+    <string name="session_expiring_prompt">Apakah Anda ingin memperpanjang sesi?</string>
+    <string name="session_extend_button">Perpanjang Sesi</string>
+    <string name="session_expired_title">Sesi Berakhir</string>
+    <string name="session_expired_message">Sesi Anda telah berakhir demi alasan keamanan. Silakan masuk kembali untuk melanjutkan.</string>
+    <string name="session_login_again">Masuk Kembali</string>
+
+    <!-- Main Menu strings -->
+    <string name="menu_welcome">Selamat Datang!</string>
+    <string name="menu_staff_title">Menu Petugas Survei</string>
+    <string name="menu_staff_area">Area Petugas Survei</string>
+    <string name="menu_admin_title">Dasbor Administrator</string>
+    <string name="menu_admin_area">Dasbor Admin</string>
+    <string name="menu_start_survey">Mulai Survei Baru</string>
+    <string name="menu_enrollment_progress">Terdaftar: %1$d dari %2$d</string>
+    <string name="quota_reached_title">Kuota pendaftaran tercapai</string>
+    <string name="quota_reached_message">Fasilitas ini telah mencapai kuota pendaftaran sebanyak %1$d survei. Tidak ada survei baru yang dapat dimulai. Hubungi koordinator studi Anda jika kuota perlu ditambah.</string>
+    <string name="menu_recruit_participant">Rekrut Peserta Sebelumnya</string>
+    <string name="menu_manage_users">Kelola Pengguna</string>
+    <string name="menu_server_settings">Pengaturan Server</string>
+    <string name="menu_upload_status">Status Survei</string>
+
+    <!-- Logout strings -->
+    <string name="logout_confirm_title">Konfirmasi Keluar</string>
+    <string name="logout_confirm_message">Apakah Anda yakin ingin keluar? Sesi Anda akan diakhiri dan Anda perlu masuk kembali.</string>
+    <string name="logout_button">Keluar</string>
+
+    <!-- Return to Menu strings -->
+    <string name="return_to_menu_button">Kembali ke Menu Utama</string>
+    <string name="cd_return_to_menu">Kembali ke Menu Utama</string>
+    <string name="return_to_menu_confirm_title">Kembali ke Menu Utama?</string>
+    <string name="return_to_menu_confirm_message">Apakah Anda yakin ingin menuju menu utama? Semua perubahan yang belum disimpan akan hilang.</string>
+    <string name="return_to_menu_confirm_button">Kembali ke Menu</string>
+
+    <!-- User Management strings -->
+    <string name="user_management_title">Manajemen Pengguna</string>
+    <string name="user_add_button">Tambah Pengguna</string>
+    <string name="user_delete_button">Hapus Pengguna</string>
+    <string name="user_role_label">Peran:</string>
+    <string name="user_username_display">@%1$s</string>
+    <string name="user_biometric_enrolled">Terdaftar: %1$s</string>
+    <string name="user_biometric_not_supported">Biometrik tidak didukung</string>
+    <string name="user_biometric_enable">Aktifkan</string>
+    <string name="user_biometric_disable">Nonaktifkan</string>
+    <string name="user_biometric_disable_title">Nonaktifkan Biometrik</string>
+
+    <!-- Add User Dialog -->
+    <string name="user_add_dialog_title">Tambah Pengguna Baru</string>
+    <string name="user_add_username">Nama Pengguna</string>
+    <string name="user_add_fullname">Nama Lengkap</string>
+    <string name="user_add_password">Kata Sandi</string>
+    <string name="user_add_role">Peran</string>
+    <string name="user_add_button_add">Tambah Pengguna</string>
+
+    <!-- Delete User Dialog -->
+    <string name="user_delete_dialog_title">Hapus Pengguna</string>
+    <string name="user_delete_button_delete">Hapus</string>
+
+    <!-- Coupon/Survey Registration strings -->
+    <string name="coupon_title">Pendaftaran Survei</string>
+    <string name="coupon_syncing">Menyinkronkan pengaturan fasilitas…</string>
+    <string name="coupon_question">Apakah orang ini memiliki kupon?</string>
+    <string name="coupon_no_coupon_message">Partisipasi memerlukan kode kupon yang valid. Silakan minta bantuan.</string>
+    <string name="coupon_enter_section">Masukkan Kode Kupon</string>
+    <string name="coupon_field_label">Kode Kupon</string>
+    <string name="coupon_field_hint">Masukkan kode 6 karakter</string>
+    <string name="coupon_error_required">Kupon diperlukan untuk berpartisipasi</string>
+    <string name="coupon_error_length">Kode kupon harus terdiri dari %1$d karakter</string>
+    <string name="coupon_error_invalid">Kode kupon tidak valid</string>
+    <string name="coupon_error_already_used">Kupon ini sudah pernah digunakan</string>
+    <string name="coupon_error_not_issued">Kupon ini belum diterbitkan</string>
+    <string name="coupon_error_validation">Terjadi kesalahan saat memvalidasi kupon. Silakan coba lagi.</string>
+
+    <!-- Language Selection strings -->
+    <string name="language_title">Pilih Bahasa</string>
+    <string name="language_instruction_english">Silakan pilih bahasa yang diinginkan peserta</string>
+    <string name="language_instruction_spanish">Por favor seleccione su idioma preferido para la encuesta</string>
+
+    <!-- Staff Instructions strings -->
+    <string name="staff_instructions_title">Petunjuk untuk Petugas</string>
+    <string name="staff_instructions_before">Sebelum Memulai Survei</string>
+    <string name="staff_instructions_important">Penting</string>
+    <string name="staff_instructions_message">Peserta akan mengisi survei secara mandiri. Pastikan privasi terjaga dan serahkan perangkat kepada peserta setelah layar ini.</string>
+
+    <!-- Survey Screen strings -->
+    <string name="survey_title">Survei SALT</string>
+    <string name="survey_error_not_found">Kesalahan: Survei tidak ditemukan</string>
+    <string name="survey_validation_error_default">Jawaban Tidak Valid</string>
+
+    <!-- Contact Information strings -->
+    <string name="contact_consent_title">Partisipasi di Masa Mendatang</string>
+    <string name="contact_consent_question">Apakah Anda bersedia dihubungi untuk berpartisipasi dalam survei ini di masa mendatang?</string>
+    <string name="contact_consent_privacy">Informasi kontak Anda akan dijaga kerahasiaannya dan hanya digunakan untuk undangan survei.</string>
+    <string name="contact_info_title">Informasi Kontak</string>
+    <string name="contact_info_instruction">Silakan berikan informasi kontak Anda</string>
+    <string name="contact_info_optional">Anda dapat memberikan nomor telepon atau alamat email</string>
+    <string name="contact_info_phone">Nomor Telepon</string>
+    <string name="contact_info_email">Alamat Email</string>
+    <string name="contact_info_phone_hint">Masukkan nomor telepon Anda</string>
+    <string name="contact_info_email_hint">Masukkan alamat email Anda</string>
+
+    <!-- Fingerprint Screening strings -->
+    <string name="fingerprint_title">Pemindaian Sidik Jari</string>
+    <string name="fingerprint_verification_required">Verifikasi Sidik Jari Diperlukan</string>
+    <string name="fingerprint_instruction">Silakan ikuti petunjuk di bawah ini untuk merekam sidik jari peserta</string>
+    <string name="fingerprint_skip_testing">Lewati (Hanya untuk Pengujian)</string>
+    <string name="fingerprint_return_menu">Kembali ke Menu</string>
+    <string name="fingerprint_error_init">Gagal menginisialisasi perangkat sidik jari</string>
+    <string name="fingerprint_error_capture">Gagal merekam sidik jari. Silakan coba lagi.</string>
+
+    <!-- Payment strings -->
+    <string name="payment_title">Konfirmasi Pembayaran</string>
+    <string name="payment_amount">%1$s%2$.2f</string>
+    <string name="payment_confirm">Konfirmasi Pembayaran Diterima</string>
+    <string name="payment_skip">Lanjutkan Tanpa Pembayaran</string>
+    <string name="payment_phone_label">Nomor Telepon</string>
+    <string name="payment_phone_placeholder">Masukkan nomor telepon</string>
+    <string name="payment_phone_required">Nomor telepon wajib diisi</string>
+    <string name="payment_phone_audit_note">Untuk keperluan audit pembayaran</string>
+
+    <!-- Lab Collection strings -->
+    <string name="lab_title">Pengambilan Sampel Biologis</string>
+    <string name="lab_subject_id">ID Subjek</string>
+    <string name="lab_instructions">Petunjuk</string>
+    <string name="lab_instructions_text">1. Ambil sampel biologis sesuai protokol\n2. Beri label pada setiap sampel dengan \"%1$s\"\n3. Simpan sampel sesuai pedoman\n4. Konfirmasi pengambilan atau tandai jika subjek menolak</string>
+    <string name="lab_step_1">Ambil sampel biologis sesuai protokol</string>
+    <string name="lab_step_2_label">Beri label pada setiap sampel dengan:</string>
+    <string name="lab_step_3">Simpan sampel sesuai pedoman</string>
+    <string name="lab_step_4">Konfirmasi pengambilan atau tandai jika subjek menolak</string>
+    <string name="lab_refused">Subjek Menolak</string>
+    <string name="lab_collected">Sampel Telah Diambil &amp; Diberi Label</string>
+
+    <!-- Survey Completion strings -->
+    <string name="completion_title">Survei Selesai</string>
+    <string name="completion_thank_you">Terima Kasih!</string>
+    <string name="completion_message">Survei telah berhasil diselesaikan.</string>
+    <string name="completion_coupons_title">Kupon Rujukan</string>
+    <string name="completion_coupons_instruction">Silakan berikan %1$d kupon ini kepada peserta:</string>
+    <string name="completion_coupon_label">Kupon %1$d</string>
+    <string name="completion_coupons_usage">Setiap kupon dapat digunakan satu kali untuk berpartisipasi dalam survei</string>
+    <string name="completion_continue_payment">Lanjutkan</string>
+
+    <!-- Server Settings strings -->
+    <string name="server_settings_title">Pengaturan Server</string>
+    <string name="server_settings_config_title">Konfigurasi Server Unggah</string>
+    <string name="server_settings_url">URL Server</string>
+    <string name="server_settings_url_hint">https://your-server.com/api/surveys</string>
+    <string name="server_settings_api_key">API Key (Opsional)</string>
+    <string name="server_settings_api_key_hint">Bearer token atau API key</string>
+    <string name="server_settings_test">Uji Koneksi</string>
+    <string name="server_settings_save">Simpan Pengaturan</string>
+    <string name="server_settings_help_title">Bantuan Konfigurasi</string>
+    <string name="server_settings_help_text">1. Hubungi administrator sistem Anda untuk mendapatkan URL server dan API key\n2. URL server harus mengarah ke server manajemen SALT Anda\n3. API key bersifat opsional tetapi disarankan demi keamanan\n4. Uji koneksi sebelum menyimpan\n5. Semua unggahan survei akan menggunakan pengaturan ini</string>
+
+    <!-- Seed Recruitment strings -->
+    <string name="recruitment_title">Rekrutmen Seed</string>
+    <string name="recruitment_back_menu">Kembali ke Menu</string>
+    <string name="recruitment_contact_info">Informasi Kontak</string>
+    <string name="recruitment_contact_type">Jenis: %1$s</string>
+    <string name="recruitment_contact_type_phone">Nomor Telepon</string>
+    <string name="recruitment_contact_type_email">Email</string>
+    <string name="recruitment_copy_message">Salin Pesan</string>
+    <string name="recruitment_message_copied">✓ Pesan disalin ke clipboard</string>
+    <string name="recruitment_coupon_code">Kode Kupon</string>
+    <string name="recruitment_send_question">Apakah Anda sudah mengirim pesan rekrutmen?</string>
+    <string name="recruitment_message_sent">Pesan Terkirim</string>
+    <string name="recruitment_confirm_dialog_title">Konfirmasi Pesan Terkirim</string>
+    <string name="recruitment_confirm_message">Harap konfirmasi bahwa Anda telah mengirim pesan rekrutmen ke %1$s</string>
+    <string name="recruitment_success">✓ Pesan rekrutmen telah dikirim</string>
+    <string name="recruitment_no_participants">Saat ini tidak ada peserta yang memenuhi syarat untuk rekrutmen.</string>
+    <string name="recruitment_error">Kesalahan saat memuat data rekrutmen: %1$s</string>
+
+    <!-- Content Descriptions (for accessibility) -->
+    <string name="cd_add_user">Tambah Pengguna</string>
+    <string name="cd_delete_user">Hapus Pengguna</string>
+    <string name="cd_dropdown">Dropdown</string>
+    <string name="cd_biometric">Biometrik</string>
+    <string name="cd_back">Kembali</string>
+    <string name="cd_refresh">Muat Ulang</string>
+    <string name="cd_exit">Keluar</string>
+    <string name="cd_warning">Peringatan</string>
+    <string name="cd_contact">Kontak</string>
+    <string name="cd_fingerprint">Sidik Jari</string>
+    <string name="cd_payment">Pembayaran</string>
+    <string name="cd_lab">Lab</string>
+    <string name="cd_success">Berhasil</string>
+    <string name="cd_logout">Keluar Akun</string>
+    <string name="cd_copy">Salin Pesan</string>
+    <string name="cd_retry">Coba Unggah Lagi</string>
+    <string name="cd_replay">Putar Ulang</string>
+    <string name="cd_security">Keamanan</string>
+    <string name="cd_tablet">Tablet</string>
+
+    <!-- Common buttons -->
+    <string name="common_yes">Ya</string>
+    <string name="common_no">Tidak</string>
+
+    <!-- Contact Consent Screen -->
+    <string name="contact_consent_yes">Ya, saya tertarik</string>
+    <string name="contact_consent_no">Tidak, terima kasih</string>
+
+    <!-- Coupon Screen -->
+    <string name="coupon_required_message">Partisipasi memerlukan kode kupon yang valid. Silakan minta bantuan.</string>
+    <string name="coupon_back_to_menu">Kembali ke Menu</string>
+    <string name="coupon_enter_code">Masukkan Kode Kupon</string>
+    <string name="coupon_code_label">Kode Kupon</string>
+    <string name="coupon_code_placeholder">Masukkan kode 6 karakter</string>
+
+    <!-- Coupon Issued Screen -->
+    <string name="coupon_issued_title">Survei Selesai</string>
+    <string name="coupon_issued_thank_you">Terima Kasih!</string>
+    <string name="coupon_issued_message">Survei telah berhasil diselesaikan.</string>
+    <string name="coupon_issued_referral_title">Kupon Rujukan</string>
+    <string name="coupon_issued_instructions">Harap berikan %1$d kupon ini kepada peserta:</string>
+    <string name="coupon_issued_number">Kupon %1$d</string>
+    <string name="coupon_issued_usage">Setiap kupon dapat digunakan satu kali untuk berpartisipasi dalam survei</string>
+    <string name="coupon_issued_continue_payment">Lanjut ke Pembayaran</string>
+    <!-- Referral Coupons screen (replaces old Survey Complete layout) -->
+    <string name="coupon_screen_section_title">Berikan Kupon Rekrutmen</string>
+    <string name="coupon_screen_step_1">Ambil %1$d kartu kupon rekrutmen kosong.</string>
+    <string name="coupon_screen_step_2">Tulis satu kode kupon pada setiap kartu menggunakan kode di bawah ini.</string>
+    <string name="coupon_screen_step_3">Berikan kupon-kupon tersebut kepada peserta.</string>
+    <string name="coupon_screen_step_4">Jika sudah siap, hadapkan tablet ke arah peserta dan tekan tombol di bawah. Peserta akan diberikan petunjuk cara menggunakan kupon.</string>
+    <string name="coupon_screen_instructions_button">Petunjuk Kupon</string>
+    <string name="coupon_screen_instructions_modal_title">Petunjuk Kupon</string>
+    <string name="coupon_screen_instructions_fallback">Petunjuk kupon belum dikonfigurasi — silakan hubungi administrator Anda.</string>
+    <string name="coupon_screen_instructions_done">Selesai</string>
+    <string name="coupon_screen_no_coupons">Tidak ada kupon untuk dibagikan kepada peserta ini.</string>
+    <string name="coupon_screen_continue_disabled_hint">Tekan \"Petunjuk Kupon\" terlebih dahulu agar peserta tahu cara menggunakannya.</string>
+
+    <!-- Walk-in Recruitment Payment Instructions -->
+    <string name="walkin_recruitment_title">Petunjuk Pembayaran Rekrutmen</string>
+    <string name="walkin_recruitment_your_code">Kode Rekrutmen Anda</string>
+    <string name="walkin_recruitment_instructions">Berikan \'Kupon Pembayaran\' kepada peserta. Jelaskan kepada peserta bahwa ini adalah ID mereka dan akan diperlukan saat mereka datang untuk menerima pembayaran atas perekrutan orang lain. Tidak ada pembayaran rekrutmen yang akan diberikan tanpa kode ini, jadi minta mereka agar tidak menghilangkannya.</string>
+    <string name="walkin_recruitment_continue">Lanjut ke Pembayaran</string>
+    <string name="cd_info">Informasi</string>
+
+    <!-- Fingerprint Screen -->
+    <string name="fingerprint_instructions">Harap ikuti petunjuk di bawah ini untuk merekam sidik jari peserta</string>
+    <string name="fingerprint_step1">Pastikan perangkat SecuGen terhubung dan lampu hijau menyala</string>
+    <string name="fingerprint_step2">Minta peserta meletakkan jari telunjuk kanan pada pemindai</string>
+    <string name="fingerprint_step3">Tekan perlahan dan tahan hingga pemindaian selesai</string>
+    <string name="fingerprint_step4">Perangkat akan berbunyi bip jika pemindaian berhasil</string>
+    <string name="fingerprint_device_init_failed">Gagal menginisialisasi perangkat sidik jari</string>
+    <string name="fingerprint_capture_failed">Gagal merekam sidik jari. Silakan coba lagi.</string>
+    <string name="fingerprint_capture_button">Rekam Sidik Jari</string>
+    <string name="fingerprint_duplicate_title">Pendaftaran Ganda Terdeteksi</string>
+    <string name="fingerprint_duplicate_message">Peserta ini baru-baru ini sudah terdaftar dalam survei.</string>
+    <string name="fingerprint_reenrollment_days">Peserta belum memenuhi syarat untuk mendaftar ulang selama %1$d hari lagi.</string>
+    <string name="fingerprint_return_to_menu">Kembali ke Menu</string>
+
+    <!-- Language Selection Screen -->
+    <string name="language_selection_title">Pilih Bahasa</string>
+    <string name="language_selection_prompt">Harap pilih bahasa yang diinginkan peserta</string>
+    <string name="language_selection_prompt_spanish">Por favor seleccione su idioma preferido para la encuesta</string>
+
+    <!-- Subject Payment Screen -->
+    <string name="payment_replay_audio">Putar Ulang Audio</string>
+    <string name="payment_uploading">Mengunggah survei...</string>
+    <string name="payment_upload_success">Survei berhasil diunggah</string>
+    <string name="payment_upload_failed">Unggahan gagal - akan dicoba lagi di latar belakang</string>
+    <string name="payment_upload_error">Kesalahan saat mengunggah - akan dicoba lagi di latar belakang</string>
+    <string name="payment_confirm_received">Konfirmasi Pembayaran Diterima</string>
+    <string name="payment_continue_without">Lanjutkan Tanpa Pembayaran</string>
+    <string name="payment_amount_label">Jumlah Pembayaran</string>
+    <string name="payment_confirmation_instruction">Harap konfirmasi dengan sidik jari Anda bahwa Anda telah menerima pembayaran</string>
+
+    <!-- Contact Info Screen -->
+    <string name="contact_info_phone_label">Nomor Telepon</string>
+    <string name="contact_info_email_label">Alamat Email</string>
+    <string name="contact_info_phone_placeholder">Masukkan nomor telepon Anda</string>
+    <string name="contact_info_email_placeholder">Masukkan alamat email Anda</string>
+    <string name="contact_info_skip">Lewati</string>
+
+    <!-- Language Settings Screen -->
+    <string name="language_settings_title">Pengaturan Bahasa</string>
+    <string name="language_settings_changed_title">Bahasa Diubah</string>
+    <string name="language_settings_restart_message">Aplikasi perlu dimulai ulang untuk menerapkan perubahan bahasa. Apakah Anda ingin memulai ulang sekarang?</string>
+    <string name="language_settings_restart_now">Mulai Ulang Sekarang</string>
+    <string name="language_settings_later">Nanti</string>
+
+    <!-- Server Settings Screen -->
+    <string name="server_settings_url_label">URL Server</string>
+    <string name="server_settings_api_key_label">API Key (Opsional)</string>
+    <string name="server_settings_api_key_placeholder">Bearer token atau API key</string>
+
+    <!-- Seed Recruitment Screen -->
+    <string name="seed_recruitment_title">Rekrutmen Seed</string>
+    <string name="seed_recruitment_back_to_menu">Kembali ke Menu</string>
+    <string name="seed_recruitment_cancel">Batal</string>
+    <string name="seed_recruitment_message_sent">Pesan Terkirim</string>
+    <string name="seed_recruitment_confirm_title">Konfirmasi Pesan Terkirim</string>
+    <string name="seed_recruitment_confirm_message">Harap konfirmasi bahwa Anda telah mengirim pesan rekrutmen ke %1$s</string>
+    <string name="seed_recruitment_confirm">Konfirmasi</string>
+
+    <!-- User Management Screen -->
+    <string name="user_management_error">Kesalahan</string>
+    <string name="user_management_ok">OK</string>
+    <string name="user_management_reenroll">Daftarkan Ulang</string>
+    <string name="user_management_disable">Nonaktifkan</string>
+    <string name="user_management_enable_biometric">Aktifkan Biometrik</string>
+    <string name="user_management_add_user_title">Tambah Pengguna Baru</string>
+    <string name="user_management_username_label">Nama Pengguna</string>
+    <string name="user_management_fullname_label">Nama Lengkap</string>
+    <string name="user_management_password_label">Kata Sandi</string>
+    <string name="user_management_role_label">Peran</string>
+    <string name="user_management_add_user">Tambah Pengguna</string>
+    <string name="user_management_cancel">Batal</string>
+    <string name="user_management_delete_title">Hapus Pengguna</string>
+    <string name="user_management_delete_message">Apakah Anda yakin ingin menghapus pengguna \"%1$s\" (@%2$s)? Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="user_management_delete">Hapus</string>
+    <string name="user_management_enable">Aktifkan</string>
+    <string name="user_management_disable_biometric">Nonaktifkan Biometrik</string>
+    <string name="user_management_fingerprint_enrolled">Sidik Jari Terdaftar</string>
+    <string name="user_management_no_fingerprint">Tidak Ada Sidik Jari</string>
+    <string name="user_management_enrolled_date">Terdaftar: %1$s</string>
+    <string name="user_management_biometric_not_supported">Biometrik tidak didukung</string>
+    <string name="user_management_biometric_cd">Biometrik</string>
+    <string name="user_management_reenroll_fingerprint">Daftarkan Ulang Sidik Jari</string>
+    <string name="user_management_enroll_fingerprint">Daftarkan Sidik Jari</string>
+    <string name="user_management_reenroll_message">Apakah Anda ingin mendaftarkan ulang sidik jari untuk \"%1$s\"? Tindakan ini akan mengganti data sidik jari saat ini.</string>
+    <string name="user_management_enroll_message">Apakah Anda ingin mendaftarkan sidik jari untuk \"%1$s\"? Ini akan memungkinkan pengguna tersebut masuk menggunakan sidik jari.</string>
+    <string name="user_management_proceed">Lanjutkan</string>
+    <string name="user_management_disable_biometric_title">Nonaktifkan Biometrik</string>
+    <string name="user_management_disable_biometric_message">Apakah Anda yakin ingin menonaktifkan autentikasi biometrik untuk \"%1$s\"? Pengguna tersebut tidak akan dapat lagi masuk menggunakan autentikasi biometrik.</string>
+
+    <!-- Logout Button -->
+    <string name="logout_button_text">Keluar</string>
+    <string name="logout_confirm_button">Keluar</string>
+    <string name="logout_cancel_button">Batal</string>
+
+    <!-- Staff Validation Screen -->
+    <string name="staff_validation_required">Validasi Petugas Diperlukan</string>
+    <string name="staff_validation_authenticate_fingerprint">Autentikasi dengan Sidik Jari</string>
+    <string name="staff_validation_use_password">Gunakan Nama Pengguna &amp; Kata Sandi</string>
+    <string name="staff_validation_cancel">Batal</string>
+    <string name="staff_validation_login">Login Petugas</string>
+    <string name="staff_validation_username">Nama Pengguna</string>
+    <string name="staff_validation_password">Kata Sandi</string>
+    <string name="staff_validation_invalid_credentials">Nama pengguna atau kata sandi salah</string>
+    <string name="staff_validation_max_attempts">Jumlah percobaan maksimum terlampaui. Silakan mulai ulang aplikasi.</string>
+    <string name="staff_validation_no_staff">Tidak ada pengguna petugas yang dikonfigurasi. Silakan gunakan nama pengguna dan kata sandi.</string>
+    <string name="staff_validation_auth_failed">Autentikasi gagal: %1$s</string>
+    <string name="staff_validation_auth_cancelled">Autentikasi dibatalkan</string>
+    <string name="staff_validation_replay_audio">Putar Ulang Audio</string>
+    <string name="staff_validation_title_auth">Autentikasi Petugas</string>
+    <string name="staff_validation_subtitle_auth">Verifikasi identitas Anda</string>
+    <string name="staff_validation_login_button">Masuk</string>
+
+    <!-- Staff Instructions Screen -->
+    <string name="staff_instructions_give_tablet">Serahkan Tablet</string>
+    <string name="staff_instructions_give_tablet_desc">Serahkan tablet kepada peserta beserta headphone</string>
+    <string name="staff_instructions_provide_privacy">Berikan Privasi</string>
+    <string name="staff_instructions_provide_privacy_desc">Antar peserta ke ruangan tertutup agar mereka dapat mengisi survei dengan nyaman dan terjaga kerahasiaannya</string>
+
+    <!-- Hand Tablet Back Screen -->
+    <string name="hand_tablet_title">Kembali ke Survei</string>
+    <string name="hand_tablet_instruction">Harap serahkan kembali tablet kepada peserta</string>
+    <string name="hand_tablet_description">Peserta sekarang akan melanjutkan survei mereka</string>
+    <string name="hand_tablet_continue_survey">Lanjutkan Survei</string>
+
+    <!-- Audio -->
+    <string name="replay_audio">Putar Ulang Audio</string>
+
+    <!-- Content Descriptions -->
+    <string name="cd_verified_user">Ikon pengguna terverifikasi</string>
+    <string name="cd_hide_password">Sembunyikan kata sandi</string>
+    <string name="cd_show_password">Tampilkan kata sandi</string>
+
+    <!-- Initial Setup Wizard - Server Configuration -->
+    <string name="setup_server_title">Penyiapan SALT - Konfigurasi Server</string>
+    <string name="setup_welcome_title">Selamat Datang di SALT</string>
+    <string name="setup_server_subtitle">Mari mulai dengan mengonfigurasi koneksi server Anda</string>
+    <string name="label_server_url">URL Server</string>
+    <string name="info_server_url_examples">• Untuk emulator: gunakan http://10.0.2.2:3000\n• Untuk perangkat fisik di jaringan lokal: gunakan http://192.168.x.x:3000\n• Untuk produksi: gunakan https://your-server.com</string>
+    <string name="status_server_connected">✓ Terhubung ke server SALT (v%1$s)</string>
+    <string name="status_validating">Memvalidasi...</string>
+    <string name="button_validate_connection">Validasi Koneksi</string>
+    <string name="button_next_create_admin">Berikutnya: Buat Akun Admin</string>
+
+    <!-- Initial Setup Wizard - Admin Account Creation -->
+    <string name="setup_admin_title">Penyiapan SALT - Buat Akun Admin</string>
+    <string name="setup_admin_header">Buat Akun Administrator</string>
+    <string name="setup_admin_description">Akun ini akan memiliki akses administratif penuh ke sistem SALT</string>
+    <string name="error_username_required">Nama pengguna wajib diisi</string>
+    <string name="error_username_too_short">Nama pengguna minimal 3 karakter</string>
+    <string name="error_fullname_required">Nama lengkap wajib diisi</string>
+    <string name="error_password_required">Kata sandi wajib diisi</string>
+    <string name="error_password_too_short">Kata sandi minimal 3 karakter</string>
+    <string name="error_confirm_password_required">Harap konfirmasi kata sandi</string>
+    <string name="error_passwords_no_match">Kata sandi tidak cocok</string>
+    <string name="label_username">Nama Pengguna</string>
+    <string name="label_full_name">Nama Lengkap</string>
+    <string name="label_password">Kata Sandi</string>
+    <string name="label_confirm_password">Konfirmasi Kata Sandi</string>
+    <string name="placeholder_admin_username">admin</string>
+    <string name="placeholder_administrator">Administrator</string>
+    <string name="info_admin_requirements">• Nama pengguna minimal 3 karakter\n• Kata sandi minimal 3 karakter\n• Pendaftaran sidik jari akan diperlukan pada langkah berikutnya</string>
+    <string name="button_next_fingerprint">Berikutnya: Pendaftaran Sidik Jari</string>
+
+    <!-- Initial Setup Wizard - Fingerprint Enrollment -->
+    <string name="setup_fingerprint_title">Penyiapan SALT - Pendaftaran Sidik Jari</string>
+    <string name="setup_fingerprint_header">Pendaftaran Sidik Jari</string>
+    <string name="setup_fingerprint_description">Daftarkan sidik jari Anda untuk autentikasi yang aman</string>
+    <string name="status_fingerprint_ready">Siap mengambil sidik jari</string>
+    <string name="status_fingerprint_capturing">Mengambil sidik jari...</string>
+    <string name="status_fingerprint_success">✓ Sidik jari berhasil diambil</string>
+    <string name="status_creating_account">Membuat Akun...</string>
+    <string name="error_scanner_not_connected">✗ Pemindai sidik jari tidak terhubung. Harap hubungkan perangkat dan coba lagi.</string>
+    <string name="error_usb_permission_required">✗ Harap berikan izin USB dan coba lagi.</string>
+    <string name="error_scanner_init_failed">✗ Gagal menginisialisasi pemindai sidik jari</string>
+    <string name="error_fingerprint_capture_failed_max">✗ Gagal mengambil sidik jari setelah 3 kali percobaan</string>
+    <string name="error_fingerprint_low_quality">✗ Kualitas pindaian rendah. Harap coba lagi (Percobaan %1$d dari 3)</string>
+    <string name="error_fingerprint_not_captured">✗ Harap ambil sidik jari terlebih dahulu</string>
+    <string name="error_password_hash_failed">✗ Gagal melakukan hash kata sandi</string>
+    <string name="error_user_creation_failed">✗ Gagal membuat pengguna: %1$s</string>
+    <string name="label_account_info">Informasi Akun</string>
+    <string name="label_username_display">Nama Pengguna: %1$s</string>
+    <string name="label_fullname_display">Nama Lengkap: %1$s</string>
+    <string name="label_role_administrator">Peran: Administrator</string>
+    <string name="label_fingerprint_scanner">Pemindai Sidik Jari</string>
+    <string name="button_capture_fingerprint">Ambil Sidik Jari</string>
+    <string name="button_recapture_fingerprint">Ambil Ulang Sidik Jari</string>
+    <string name="button_complete_setup">Selesaikan Penyiapan</string>
+    <string name="info_fingerprint_instructions">• Letakkan jari telunjuk Anda pada pemindai\n• Jaga agar jari Anda tetap diam selama pengambilan\n• Sidik jari diperlukan untuk pembuatan akun</string>
+
+    <!-- Server Validation Errors -->
+    <string name="error_url_invalid_protocol">URL harus diawali dengan http:// atau https://</string>
+    <string name="error_https_required">HTTPS diperlukan untuk server non-lokal</string>
+    <string name="error_server_http_code">Server mengembalikan HTTP %1$d</string>
+    <string name="error_not_salt_server">Bukan server SALT (system=%1$s)</string>
+    <string name="error_server_status">Status server: %1$s</string>
+    <string name="error_server_not_found">Server tidak ditemukan - periksa URL</string>
+    <string name="error_cannot_connect">Tidak dapat terhubung - periksa URL dan jaringan</string>
+    <string name="error_connection_timeout">Waktu koneksi habis - server mungkin tidak dapat dijangkau</string>
+    <string name="error_invalid_response">Respons server tidak valid</string>
+    <string name="error_validation_failed">Validasi gagal: %1$s</string>
+
+    <!-- Admin Dashboard -->
+    <string name="note_no_staff_users">Catatan: Hanya pengguna staf survei yang dapat melakukan survei, bukan administrator. Buat pengguna SURVEY_STAFF di area Kelola Pengguna.</string>
+
+    <!-- Facility Setup -->
+    <string name="facility_setup_title">Penyiapan Fasilitas</string>
+    <string name="facility_setup_instructions">Masukkan kode penyiapan yang diberikan oleh administrator Anda</string>
+    <string name="facility_setup_code_label">Kode Penyiapan</string>
+    <string name="facility_setup_code_placeholder">ABC123</string>
+    <string name="facility_setup_button">Siapkan Fasilitas</string>
+
+    <!-- Subject Payment Screen -->
+    <string name="payment_default_message">Terima kasih atas partisipasi Anda. Anda sekarang akan menerima pembayaran Anda.</string>
+    <string name="payment_error_no_fingerprint">Tidak ditemukan pendaftaran sidik jari untuk survei ini</string>
+    <string name="payment_error_scanner_not_connected">Pemindai sidik jari tidak terhubung</string>
+    <string name="payment_error_usb_permission">Harap berikan izin USB dan coba lagi</string>
+    <string name="payment_error_fingerprint_mismatch">Sidik jari tidak cocok. Harap coba lagi.</string>
+    <string name="payment_admin_override_button">Override Admin - Lanjutkan Tanpa Sidik Jari Peserta</string>
+    <string name="payment_admin_override_title">Override Admin Diperlukan</string>
+    <string name="payment_admin_override_message">Untuk mengonfirmasi pembayaran tanpa verifikasi sidik jari peserta, administrator harus mengotorisasi tindakan ini dengan sidik jarinya.</string>
+    <string name="payment_admin_override_scanning">Memindai sidik jari admin...</string>
+    <string name="payment_admin_override_scan_button">Pindai Sidik Jari Admin</string>
+    <string name="payment_admin_override_error_no_match">Sidik jari tidak cocok dengan administrator mana pun</string>
+    <string name="payment_admin_override_success">✓ Override admin dicatat. %1$s mengonfirmasi pembayaran telah diberikan.</string>
+    <string name="payment_admin_override_payment_type">%1$s (Override Admin: %2$s)</string>
+
+    <!-- Recruitment Payment -->
+    <string name="menu_recruitment_payment">Pembayaran Rekrutmen</string>
+    <string name="recruitment_lookup_title">Pembayaran Rekrutmen</string>
+    <string name="recruitment_lookup_instruction">Masukkan kode kupon Anda atau pindai sidik jari Anda untuk mencari pembayaran rekrutmen Anda.</string>
+    <string name="recruitment_lookup_instruction_no_fingerprint">Masukkan kode kupon untuk mencari pembayaran rekrutmen.</string>
+    <string name="recruitment_lookup_instruction_fingerprint">Pindai sidik jari peserta untuk mencari pembayaran rekrutmennya.</string>
+    <string name="recruitment_lookup_coupon_label">Kode Kupon Anda</string>
+    <string name="recruitment_lookup_button">Cari</string>
+    <string name="recruitment_lookup_fingerprint">Pindai Sidik Jari</string>
+    <string name="recruitment_lookup_or">ATAU</string>
+    <string name="recruitment_coupon_not_found">Kode kupon tidak ditemukan. Harap periksa dan coba lagi.</string>
+    <string name="recruitment_fingerprint_not_found">Sidik jari tidak ditemukan. Harap coba lagi atau gunakan kode kupon Anda.</string>
+    <string name="recruitment_payment_title">Pembayaran Rekrutmen</string>
+    <string name="recruitment_payment_welcome">Selamat datang kembali!</string>
+    <string name="recruitment_payment_your_coupons">Kupon Anda</string>
+    <string name="recruitment_payment_used">Sudah Digunakan</string>
+    <string name="recruitment_payment_not_used">Belum Digunakan</string>
+    <string name="recruitment_payment_ineligible">Tidak Memenuhi Syarat</string>
+    <string name="recruitment_payment_pending">Tersedia untuk pembayaran</string>
+    <string name="recruitment_payment_already_paid">Dibayar pada %1$s</string>
+    <string name="recruitment_payment_eligible">%1$d kode kupon telah digunakan dan memenuhi syarat untuk pembayaran.</string>
+    <string name="recruitment_payment_none_eligible">Saat ini tidak ada kode kupon yang memenuhi syarat untuk pembayaran.</string>
+    <string name="recruitment_payment_total">Jumlah total pembayaran: %1$s%2$.2f %3$s</string>
+    <string name="recruitment_payment_confirm_fingerprint">Konfirmasi dengan Sidik Jari</string>
+    <string name="recruitment_payment_confirm_signature">Tanda tangani di bawah untuk mengonfirmasi penerimaan</string>
+    <string name="recruitment_payment_confirm_button">Konfirmasi Pembayaran Diterima</string>
+    <string name="recruitment_payment_cancel">Batal</string>
+    <string name="recruitment_payment_success">Pembayaran berhasil dikonfirmasi!</string>
+
+    <!-- Admin Override for Coupon Lookup (when fingerprint enabled) -->
+    <string name="recruitment_admin_override_required">Verifikasi Administrator Diperlukan</string>
+    <string name="recruitment_admin_override_message">Pencarian berdasarkan kupon memerlukan verifikasi administrator saat sidik jari diaktifkan. Harap minta administrator memindai sidik jarinya.</string>
+    <string name="recruitment_admin_override_scan">Pindai Sidik Jari Admin</string>
+    <string name="recruitment_admin_override_success">Administrator terverifikasi: %1$s</string>
+    <string name="recruitment_admin_override_no_match">Tidak ditemukan sidik jari administrator yang cocok.</string>
+
+    <!-- Common/Shared strings -->
+    <string name="common_clear">Hapus</string>
+    <string name="common_done">Selesai</string>
+    <string name="common_login">Masuk</string>
+    <string name="common_none">(tidak ada)</string>
+    <string name="common_selected">Dipilih</string>
+    <string name="cd_search">Cari</string>
+    <string name="cd_usb_permission">Izin USB</string>
+    <string name="cd_device_not_connected">Perangkat Tidak Terhubung</string>
+    <string name="cd_quality_issue">Masalah Kualitas</string>
+    <string name="cd_biometric_login">Masuk Biometrik</string>
+
+    <!-- Consent Screen strings -->
+    <string name="consent_title">Persetujuan Partisipasi</string>
+    <string name="consent_go_back">Kembali</string>
+    <string name="consent_read_instruction">Harap baca persetujuan partisipasi di bawah ini:</string>
+    <string name="consent_replay_audio">Putar Ulang Audio</string>
+    <string name="consent_text_unavailable">Teks persetujuan tidak tersedia</string>
+    <string name="consent_sign_instruction">Harap tanda tangani di bawah untuk menyatakan persetujuan Anda:</string>
+    <string name="consent_i_agree">Saya Setuju</string>
+    <string name="consent_no_agreement_error">Persetujuan partisipasi belum dikonfigurasi. Harap hubungi administrator.</string>
+    <string name="consent_load_error">Kesalahan memuat persetujuan: %1$s</string>
+    <string name="cd_clear_signature">Hapus tanda tangan</string>
+    <string name="cd_replay_audio">Putar ulang audio</string>
+
+    <!-- Consent Instruction Screen strings -->
+    <string name="consent_instruction_title">Instruksi Staf</string>
+    <string name="consent_instruction_intro">Selanjutnya kita akan memperoleh persetujuan peserta untuk berpartisipasi dalam studi.</string>
+    <string name="consent_instruction_step1">Tunjukkan tablet kepada peserta dan biarkan mereka membaca ketentuan partisipasi.</string>
+    <string name="consent_instruction_step2">Mereka kemudian akan diminta untuk menandatangani dan menyetujui untuk melanjutkan.</string>
+    <string name="consent_instruction_step3">Harap pastikan bahwa mereka memahaminya.</string>
+
+    <!-- Eligibility Check Screen strings -->
+    <string name="eligibility_title">Terima Kasih</string>
+    <string name="eligibility_not_eligible_default">Terima kasih atas minat Anda. Sayangnya, Anda tidak memenuhi kriteria kelayakan untuk survei ini.</string>
+    <string name="eligibility_replay_audio">Putar Ulang Pesan Audio</string>
+    <string name="eligibility_attempts_remaining">Sisa percobaan: %1$d</string>
+    <string name="eligibility_hand_back">Harap serahkan kembali tablet kepada petugas</string>
+    <string name="eligibility_fingerprint_button">Autentikasi dengan Sidik Jari</string>
+    <string name="eligibility_password_button">Gunakan Kata Sandi</string>
+    <string name="eligibility_scanning">Memindai...</string>
+
+    <!-- Fingerprint Error strings -->
+    <string name="error_no_fingerprints_enrolled">Belum ada staf yang mendaftarkan sidik jari</string>
+    <string name="error_fingerprint_scanner_not_connected">Pemindai sidik jari tidak terhubung</string>
+    <string name="error_fingerprint_usb_permission">Harap berikan izin USB dan coba lagi</string>
+    <string name="error_fingerprint_init_failed">Gagal menginisialisasi pemindai sidik jari</string>
+    <string name="error_fingerprint_capture_failed">Gagal mengambil sidik jari</string>
+    <string name="error_fingerprint_max_attempts">Batas maksimum percobaan terlampaui</string>
+    <string name="error_fingerprint_not_recognized">Sidik jari tidak dikenali. Harap coba lagi.</string>
+    <string name="error_invalid_credentials">Kredensial tidak valid</string>
+
+    <!-- USB Permission Dialog strings -->
+    <string name="usb_permission_title">Izin USB Diperlukan</string>
+    <string name="usb_permission_message">Harap berikan izin USB untuk menggunakan pemindai sidik jari.</string>
+    <string name="usb_permission_message_full">Harap berikan izin USB untuk menggunakan pemindai sidik jari. Saat diminta, ketuk \'OK\' untuk mengizinkan akses ke perangkat.</string>
+
+    <!-- Scanner Not Connected Dialog strings -->
+    <string name="scanner_not_connected_title">Pemindai Tidak Terhubung</string>
+    <string name="scanner_not_connected_message">Pemindai sidik jari tidak terhubung. Harap:</string>
+    <string name="scanner_not_connected_step1">1. Hubungkan pemindai SecuGen ke port USB</string>
+    <string name="scanner_not_connected_step2">2. Gunakan adaptor USB OTG jika diperlukan</string>
+    <string name="scanner_not_connected_step3">3. Pastikan perangkat dalam keadaan menyala</string>
+    <string name="scanner_not_connected_step4">4. Coba lagi</string>
+
+    <!-- Low Quality Scan Dialog strings -->
+    <string name="low_quality_title">Kualitas Pindaian Rendah</string>
+    <string name="low_quality_message">Kualitas sidik jari terlalu rendah. Harap:</string>
+    <string name="low_quality_step1">Pastikan jari Anda bersih dan kering</string>
+    <string name="low_quality_step2">Letakkan jari Anda rata pada pemindai</string>
+    <string name="low_quality_step3">Tekan dengan mantap tetapi tidak terlalu keras</string>
+    <string name="low_quality_step4">Pastikan kaca pemindai bersih</string>
+    <string name="low_quality_try_again">Coba Lagi</string>
+
+    <!-- Lab Collection Screen strings -->
+    <string name="lab_toggle_debug">Alihkan Debug</string>
+    <string name="lab_required_tests">Tes Lab yang Diperlukan (%1$d)</string>
+    <string name="lab_no_tests_message">Tidak ada tes lab yang diperlukan untuk peserta ini.</string>
+    <string name="lab_test_code">Kode: %1$s</string>
+    <string name="lab_test_type_numeric">Jenis: Numerik%1$s</string>
+    <string name="lab_test_type_dropdown">Jenis: Dropdown</string>
+    <string name="lab_test_type_generic">Jenis: %1$s</string>
+    <string name="lab_debug_title">Informasi Debug JEXL</string>
+    <string name="lab_debug_survey_answers">Jawaban Survei:</string>
+    <string name="lab_debug_rapid_test_results">Hasil Tes Cepat:</string>
+    <string name="lab_debug_lab_test_evaluations">Evaluasi Tes Lab:</string>
+    <string name="lab_debug_condition">Kondisi: %1$s</string>
+    <string name="lab_debug_result">Hasil: %1$s =&gt; %2$s</string>
+    <string name="lab_debug_none">(tidak ada - selalu tampilkan)</string>
+    <string name="lab_debug_show">TAMPILKAN</string>
+    <string name="lab_debug_hide">SEMBUNYIKAN</string>
+    <string name="lab_debug_na">T/A</string>
+
+    <!-- Survey Screen strings -->
+    <string name="survey_error_icon">Kesalahan</string>
+    <string name="survey_error_default">Terjadi kesalahan.</string>
+    <string name="survey_multiselect_exact">Pilih tepat %1$d opsi</string>
+    <string name="survey_multiselect_range">Pilih %1$d hingga %2$d opsi</string>
+    <string name="survey_multiselect_min">Pilih minimal %1$d opsi</string>
+    <string name="survey_multiselect_max">Pilih maksimal %1$d opsi</string>
+    <string name="survey_completed">Survei selesai!</string>
+
+    <!-- Staff Validation Screen strings -->
+    <string name="staff_validation_default">Silakan kembalikan tablet kepada petugas yang memberikannya kepada Anda</string>
+
+    <!-- Rapid Test Result Screen strings -->
+    <string name="test_result_negative">Negatif</string>
+    <string name="test_result_positive">Positif</string>
+    <string name="test_result_indeterminate">Tidak Dapat Ditentukan</string>
+    <string name="test_result_not_performed">Tes Tidak Dilakukan</string>
+    <string name="test_result_save_error">Gagal menyimpan hasil tes: %1$s</string>
+    <string name="test_title_format">Hasil %1$s</string>
+    <string name="test_instruction_format">Silakan catat hasil %1$s</string>
+    <string name="test_indeterminate_description">Hasil tes tidak valid atau tidak jelas</string>
+    <string name="test_not_performed_description">Tes tidak dilakukan</string>
+    <string name="test_submit_result">Kirim Hasil</string>
+    <string name="cd_test_icon">Tes %1$s</string>
+
+    <!-- HIV Rapid Test Instruction Screen strings -->
+    <string name="hiv_test_replay_instructions">Putar Ulang Instruksi</string>
+    <string name="hiv_test_auth_fingerprint">Autentikasi dengan Sidik Jari</string>
+    <string name="hiv_test_use_password">Gunakan Kata Sandi</string>
+    <string name="hiv_test_password_label">Kata Sandi Petugas</string>
+    <string name="hiv_test_authenticate">Autentikasi</string>
+    <string name="hiv_test_use_fingerprint">Gunakan Sidik Jari</string>
+
+    <!-- Recruitment Lookup Screen strings -->
+    <string name="recruitment_lookup_placeholder">XXXXXX</string>
+    <string name="cd_fingerprint_instruction">Letakkan jari telunjuk kanan pada pemindai</string>
+
+    <!-- Recruitment Payment Screen strings -->
+    <string name="recruitment_payment_subject_id_label">ID Subjek</string>
+    <string name="recruitment_payment_no_coupons">Tidak ada kupon yang diberikan kepada peserta ini.</string>
+    <string name="recruitment_payment_error_no_fingerprint">Tidak ada sidik jari yang tersimpan untuk peserta ini.</string>
+
+    <!-- Biological Sample Collection Screen strings -->
+    <string name="sample_collection_title">Pengambilan Sampel Biologis</string>
+    <string name="sample_collection_instruction">Silakan ambil sampel biologis untuk melakukan setiap tes berikut. Centang setiap tes untuk mengonfirmasi bahwa tes tersebut akan dilakukan.</string>
+    <string name="sample_collection_no_tests">Tidak ada tes cepat yang dikonfigurasi</string>
+    <string name="sample_collection_continue">Lanjutkan ke Survei</string>
+    <string name="sample_collection_check_all">Silakan centang semua tes untuk melanjutkan</string>
+    <string name="cd_sample_collection">Pengambilan Sampel</string>
+
+    <!-- Contact Info Screen strings -->
+    <string name="contact_info_invalid_phone">Silakan masukkan nomor telepon yang valid</string>
+    <string name="contact_info_invalid_email">Silakan masukkan alamat email yang valid</string>
+
+    <!-- Language Settings Screen strings -->
+    <string name="language_settings_app_language">Bahasa Aplikasi</string>
+    <string name="language_settings_description">Pilih bahasa untuk antarmuka aplikasi. Pengaturan ini berlaku untuk semua pengguna dan petugas.</string>
+    <string name="language_settings_note">Catatan: Ini hanya memengaruhi antarmuka aplikasi. Bahasa konten survei dikelola secara terpisah.</string>
+
+    <!-- Fingerprint Enrollment Screen strings -->
+    <string name="fingerprint_enrollment_title">Pendaftaran Sidik Jari</string>
+    <string name="fingerprint_enrollment_header">Daftarkan Sidik Jari</string>
+    <string name="fingerprint_enrollment_instructions_label">Instruksi:</string>
+    <string name="fingerprint_enrollment_step1">Bersihkan jari TELUNJUK KANAN Anda</string>
+    <string name="fingerprint_enrollment_step2">Letakkan jari mendatar pada pemindai</string>
+    <string name="fingerprint_enrollment_step3">Tekan dengan lembut - jangan terlalu keras</string>
+    <string name="fingerprint_enrollment_step4">Tahan hingga pemindaian selesai</string>
+    <string name="fingerprint_enrollment_button">Daftarkan Sidik Jari</string>
+    <string name="fingerprint_enrollment_success">Sidik Jari Berhasil Didaftarkan!</string>
+    <string name="fingerprint_enrollment_ready">%1$s sekarang dapat login menggunakan sidik jarinya</string>
+    <string name="fingerprint_enrollment_skip_title">Lewati Pendaftaran Sidik Jari?</string>
+    <string name="fingerprint_enrollment_skip_message">Pengguna harus menggunakan kata sandinya untuk login. Anda dapat mendaftarkan sidik jarinya nanti melalui Manajemen Pengguna.</string>
+
+    <!-- Initial Fingerprint Setup Screen strings -->
+    <string name="fingerprint_setup_skip_info">Anda dapat melewati pengaturan sidik jari dan menggunakan autentikasi hanya dengan kata sandi. Sidik jari dapat diaktifkan nanti di pengaturan.</string>
+    <string name="cd_fingerprint_scanner_instruction">Instruksi pemindai sidik jari</string>
+
+    <!-- Tablet Handoff Screen strings -->
+    <string name="tablet_handoff_title">Serah Terima Tablet</string>
+    <string name="tablet_handoff_instruction">Serahkan tablet kepada peserta. Peserta akan mengisi survei secara mandiri dan akan diarahkan untuk mengembalikannya kepada Anda setelah selesai.</string>
+
+    <!-- Participant Check Screen strings -->
+    <string name="participant_check_title">Pemeriksaan Peserta</string>
+    <string name="participant_check_question">Apakah orang ini pernah berpartisipasi dalam survei ini dalam %1$d hari terakhir?</string>
+    <string name="participant_check_instruction">Jika Anda tidak yakin, tanyakan kepada petugas lain.</string>
+    <string name="participant_check_participated">Pernah Berpartisipasi atau Tidak Yakin</string>
+    <string name="participant_check_never">Belum Pernah Berpartisipasi</string>
+
+    <!-- Survey Instructions Screen strings -->
+    <string name="survey_instructions_title">Instruksi Survei</string>
+    <string name="survey_instructions_staff_screening">Di tempat yang privat, petugas akan mengajukan beberapa pertanyaan awal.</string>
+    <string name="survey_instructions_hand_tablet">Di tempat yang privat, serahkan tablet kepada peserta untuk memulai survei.</string>
+
+    <!-- Rapid Test Instruction Screen strings -->
+    <string name="rapid_test_replay_instructions">Putar Ulang Instruksi</string>
+    <string name="rapid_test_auth_fingerprint">Autentikasi dengan Sidik Jari</string>
+    <string name="rapid_test_use_password">Gunakan Kata Sandi</string>
+    <string name="rapid_test_password_label">Kata Sandi Petugas</string>
+    <string name="rapid_test_authenticate">Autentikasi</string>
+    <string name="rapid_test_use_fingerprint">Gunakan Sidik Jari</string>
+
+    <!-- Server Settings Screen strings -->
+    <string name="server_settings_api_key_configured">API Key Telah Dikonfigurasi</string>
+    <string name="server_settings_no_api_key">Tidak Ada API Key - Gunakan Kode Pengaturan</string>
+    <string name="server_settings_help_url">• URL server dapat diubah untuk mengarah ke server Anda</string>
+    <string name="server_settings_help_api_key">• API Key diperoleh dari kode pengaturan fasilitas</string>
+    <string name="server_settings_help_setup">• Gunakan kode pengaturan untuk mengonfigurasi fasilitas dan mendapatkan API key</string>
+    <string name="server_settings_help_test">• Uji Koneksi memverifikasi server dan API key</string>
+    <string name="server_settings_server_url_label">URL Server</string>
+    <string name="server_settings_test_connection">Uji Koneksi</string>
+    <string name="server_settings_save_url">Simpan URL</string>
+    <string name="server_settings_update_setup_code">Perbarui Kode Pengaturan</string>
+    <string name="server_settings_enter_setup_code">Masukkan Kode Pengaturan</string>
+    <string name="server_settings_url_saved">URL server berhasil disimpan</string>
+    <string name="server_settings_connection_successful">Koneksi berhasil</string>
+    <string name="server_settings_invalid_url">Format URL tidak valid</string>
+    <string name="server_settings_no_api_key_setup">Tidak ada API key - masukkan kode pengaturan</string>
+    <string name="server_settings_invalid_api_key">API key tidak valid - masukkan kode pengaturan baru</string>
+    <string name="server_settings_endpoint_not_found">Endpoint server tidak ditemukan</string>
+    <string name="server_settings_client_error">Kesalahan klien (HTTP %1$d)</string>
+    <string name="server_settings_server_error">Kesalahan server (HTTP %1$d)</string>
+    <string name="server_settings_unexpected_response">Respons tidak terduga (HTTP %1$d)</string>
+    <string name="server_settings_not_found">Server tidak ditemukan - periksa URL</string>
+    <string name="server_settings_cannot_connect">Tidak dapat terhubung ke server - periksa URL dan port</string>
+    <string name="server_settings_timeout">Waktu koneksi habis - server mungkin tidak dapat dijangkau</string>
+    <string name="server_settings_network_error">Kesalahan jaringan: %1$s</string>
+    <string name="server_settings_connection_failed">Koneksi gagal: %1$s</string>
+
+    <!-- Upload Status Screen strings -->
+    <string name="upload_status_title">Status Survei</string>
+    <string name="upload_status_refresh">Muat Ulang</string>
+    <string name="upload_status_retry_all">Coba Lagi Semua</string>
+    <string name="upload_status_retrying">Mencoba lagi...</string>
+    <string name="upload_status_success">Berhasil mengunggah %1$d survei</string>
+    <string name="upload_status_no_success">Tidak ada survei yang berhasil diunggah</string>
+    <string name="upload_status_retry_failed">Percobaan ulang gagal: %1$s</string>
+    <string name="upload_status_statistics_title">Statistik Unggahan</string>
+    <string name="upload_status_total">Total</string>
+    <string name="upload_status_completed">Selesai</string>
+    <string name="upload_status_pending">Tertunda</string>
+    <string name="upload_status_failed">Gagal</string>
+    <string name="upload_status_details_title">Detail Survei</string>
+    <string name="upload_status_no_surveys">Tidak ada survei untuk diunggah</string>
+    <string name="upload_status_upload_success">Survei berhasil diunggah</string>
+    <string name="upload_status_upload_failed">Unggahan gagal</string>
+    <string name="upload_status_survey">Survei: %1$s...</string>
+    <string name="upload_status_status">Status: %1$s</string>
+    <string name="upload_status_last_attempt">Percobaan terakhir: %1$s</string>
+    <string name="upload_status_attempts">Jumlah percobaan: %1$d</string>
+    <string name="upload_status_error">Kesalahan: %1$s</string>
+    <string name="upload_status_retry_upload">Coba Unggah Lagi</string>
+
+    <!-- Survey Status Screen - New strings for enhanced display -->
+    <string name="survey_status_completed">Survei Selesai</string>
+    <string name="survey_status_incomplete">Survei Belum Selesai</string>
+    <string name="survey_status_upload_completed">Terunggah</string>
+    <string name="survey_status_upload_failed">Unggahan Gagal</string>
+    <string name="survey_status_upload_pending">Menunggu Unggahan</string>
+    <string name="survey_status_upload_incomplete">Survei Belum Selesai</string>
+    <string name="survey_status_upload_uploading">Mengunggah...</string>
+    <string name="survey_status_tests">Tes: %1$d</string>
+    <string name="survey_status_coupons">Kupon: %1$d</string>
+    <string name="survey_status_payment">Pembayaran: %1$s</string>
+    <string name="survey_status_payment_none">Tidak Ada Pembayaran</string>
+    <string name="survey_status_payment_declined">Pembayaran Ditolak</string>
+    <string name="survey_status_started">Dimulai: %1$s</string>
+    <string name="survey_status_ended">Berakhir: %1$s</string>
+    <string name="survey_status_upload_label">Unggahan: %1$s</string>
+    <string name="survey_status_upload">Unggahan: %1$s</string>
+    <string name="survey_status_last_attempt">Percobaan terakhir: %1$s</string>
+    <string name="survey_status_upload_datetime">Diunggah: %1$s</string>
+    <string name="survey_status_error">Kesalahan: %1$s</string>
+
+    <!-- Session Timeout Dialog strings -->
+    <string name="session_timeout_expired">Sesi Berakhir</string>
+    <string name="session_timeout_login_again">Login Lagi</string>
+
+    <!-- Additional fingerprint strings -->
+    <string name="fingerprint_instruction_step2">Letakkan jari TELUNJUK KANAN Anda mendatar pada pemindai</string>
+    <string name="fingerprint_attempt_of">Percobaan %1$d dari %2$d</string>
+
+    <!-- Additional label strings (label_username, label_password, staff_validation_login already exist) -->
+
+    <!-- Coupon Logging Screen -->
+    <string name="coupon_log_title">Pencatatan Kupon</string>
+    <string name="coupon_log_search_hint">Cari berdasarkan kode kupon atau ID subjek</string>
+    <string name="coupon_log_no_data">Data kupon tidak ditemukan</string>
+    <string name="coupon_log_col_recruit_id">ID Rekrutan</string>
+    <string name="coupon_log_col_status">Status</string>
+    <string name="coupon_log_col_start">Mulai</string>
+    <string name="coupon_log_col_issued">Kupon yang Diberikan</string>
+    <string name="coupon_log_seed_prefix">Seed: %1$s</string>
+    <string name="coupon_log_na">T/A</string>
+    <string name="coupon_log_none">Tidak ada</string>
+
+    <!-- Developer Settings Screen -->
+    <string name="dev_settings_title">Pengaturan Pengembang</string>
+    <string name="dev_settings_warning_title">Khusus Pengembangan</string>
+    <string name="dev_settings_warning_body">Pengaturan ini untuk pengujian dan pengembangan. Jangan diaktifkan selama pengumpulan data produksi.</string>
+    <string name="dev_settings_jexl_title">Debug Pernyataan Kondisional</string>
+    <string name="dev_settings_jexl_desc">Tampilkan dialog debug interaktif sebelum setiap ekspresi JEXL dievaluasi. Memungkinkan pengujian logika lompatan, skrip validasi, dan kondisi kelayakan.</string>
+    <string name="dev_settings_jexl_info_header">Jika diaktifkan, dialog debug akan menampilkan:</string>
+    <string name="dev_settings_jexl_info_context">• Konteks: Semua variabel dan nilainya saat ini</string>
+    <string name="dev_settings_jexl_info_statement">• Pernyataan: Ekspresi JEXL (dapat diedit untuk pengujian)</string>
+    <string name="dev_settings_jexl_info_result">• Hasil: Hasil evaluasi langsung atau pesan kesalahan</string>
+    <string name="dev_settings_jexl_info_note">Catatan: Perubahan di dialog hanya untuk pengujian dan tidak akan disimpan ke survei.</string>
+    <string name="dev_settings_logs_section">Log Pengembangan</string>
+    <string name="dev_settings_logs_default_note">Bawaan: aktif pada build debug, nonaktif pada produksi. Mengubah pengaturan di sini akan menggantikan bawaan untuk perangkat ini.</string>
+    <string name="dev_settings_file_logging">Pencatatan Log ke File</string>
+    <string name="dev_settings_file_logging_desc">Tulis log ke file untuk diunggah dan debugging</string>
+    <string name="dev_settings_logcat">Pencatatan Logcat</string>
+    <string name="dev_settings_logcat_desc">Tulis log ke logcat Android untuk debugging secara real-time</string>
+    <string name="dev_settings_log_status">Status Pengumpulan Log</string>
+    <string name="dev_settings_log_size">Ukuran file log saat ini: %1$s</string>
+    <string name="dev_settings_log_auto_note">Log dikumpulkan secara otomatis untuk debugging</string>
+    <string name="dev_settings_uploading">Mengunggah Log…</string>
+    <string name="dev_settings_upload_button">Unggah Log Pengembangan</string>
+    <string name="dev_settings_clear_button">Hapus Semua Log</string>
+    <string name="dev_settings_upload_success_title">Unggahan Berhasil</string>
+    <string name="dev_settings_upload_failed_title">Unggahan Gagal</string>
+    <string name="dev_settings_upload_success_msg">Log pengembangan berhasil diunggah</string>
+    <string name="dev_settings_server_error">Kesalahan server %1$d: %2$s</string>
+    <string name="dev_settings_unknown_error">Kesalahan tidak diketahui</string>
+</resources>

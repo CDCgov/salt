@@ -41,6 +41,9 @@ object LanguageManager {
             Triple("es", "Spanish", "Espa\u00F1ol"),
             Triple("hy", "Armenian", "\u0540\u0561\u0575\u0565\u0580\u0565\u0576"),
             Triple("fr", "French", "Fran\u00E7ais"),
+            // Indonesian: Java/Android map "id" to the legacy code "in", so the
+            // resources live in values-in/.
+            Triple("id", "Indonesian", "Bahasa Indonesia"),
             Triple("ru", "Russian", "\u0420\u0443\u0441\u0441\u043A\u0438\u0439"),
             Triple("pt", "Portuguese", "Portugu\u00EAs"),
             Triple("zh", "Chinese", "\u4E2D\u6587"),
