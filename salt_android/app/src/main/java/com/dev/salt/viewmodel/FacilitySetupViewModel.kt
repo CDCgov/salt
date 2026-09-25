@@ -112,6 +112,21 @@ class FacilitySetupViewModel(
                             recruitmentPaymentAmount = data.optDouble("recruitment_payment_amount", 0.0),
                             paymentCurrency = data.optString("payment_currency", "USD"),
                             paymentCurrencySymbol = data.optString("payment_currency_symbol", "$"),
+                            enrollmentQuota = if (data.has("enrollment_quota") && !data.isNull("enrollment_quota")) {
+                                data.getInt("enrollment_quota")
+                            } else {
+                                null
+                            },
+                            serverEnrollmentCount = if (data.has("enrollment_count") && !data.isNull("enrollment_count")) {
+                                data.getInt("enrollment_count")
+                            } else {
+                                null
+                            },
+                            serverEnrollmentCountTime = if (data.has("enrollment_count") && !data.isNull("enrollment_count")) {
+                                System.currentTimeMillis()
+                            } else {
+                                null
+                            },
                             lastSyncTime = System.currentTimeMillis(),
                             syncStatus = "COMPLETED"
                         )

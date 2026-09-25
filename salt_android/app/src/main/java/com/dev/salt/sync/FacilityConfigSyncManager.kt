@@ -140,6 +140,19 @@ class FacilityConfigSyncManager(
                             val paymentCurrency = data.optString("payment_currency", "USD")
                             val paymentCurrencySymbol = data.optString("payment_currency_symbol", "$")
 
+                            // Enrollment quota: absent or null = no limit
+                            val enrollmentQuota = if (data.has("enrollment_quota") && !data.isNull("enrollment_quota")) {
+                                data.getInt("enrollment_quota")
+                            } else {
+                                null
+                            }
+                            // Server's live enrolled count for this facility (absent on older servers)
+                            val serverEnrollmentCount = if (data.has("enrollment_count") && !data.isNull("enrollment_count")) {
+                                data.getInt("enrollment_count")
+                            } else {
+                                null
+                            }
+
                             // Save to database
                             val config = FacilityConfig(
                                 id = 1,
@@ -156,6 +169,9 @@ class FacilityConfigSyncManager(
                                 recruitmentPaymentAmount = recruitmentPaymentAmount,
                                 paymentCurrency = paymentCurrency,
                                 paymentCurrencySymbol = paymentCurrencySymbol,
+                                enrollmentQuota = enrollmentQuota,
+                                serverEnrollmentCount = serverEnrollmentCount,
+                                serverEnrollmentCountTime = serverEnrollmentCount?.let { System.currentTimeMillis() },
                                 lastSyncTime = System.currentTimeMillis(),
                                 syncStatus = "SUCCESS"
                             )

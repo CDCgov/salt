@@ -111,7 +111,12 @@ data class Survey(
     // skeleton records. The tablet has the id + participant + chain info but
     // not the full questionnaire data, so callers that need real responses
     // should filter these out.
-    @ColumnInfo(name = "is_stub", defaultValue = "0") var isStub: Boolean = false
+    @ColumnInfo(name = "is_stub", defaultValue = "0") var isStub: Boolean = false,
+    // When this survey was successfully uploaded (device clock); null = not yet.
+    // Used by the enrollment quota to add surveys the server count doesn't
+    // include yet. Surveys completed before this column existed are backfilled
+    // as uploaded (see SurveyDatabase.Migration72To73).
+    @ColumnInfo(name = "uploaded_at") var uploadedAt: Long? = null
 ) {
     @Ignore
     var questions: MutableList<Question> = mutableListOf()
@@ -273,6 +278,12 @@ data class FacilityConfig(
     @ColumnInfo(name = "recruitment_payment_amount") val recruitmentPaymentAmount: Double = 0.0,
     @ColumnInfo(name = "payment_currency") val paymentCurrency: String = "USD",
     @ColumnInfo(name = "payment_currency_symbol") val paymentCurrencySymbol: String = "$",
+    // Optional enrollment quota; null = no limit. See util/EnrollmentQuota.
+    @ColumnInfo(name = "enrollment_quota") val enrollmentQuota: Int? = null,
+    // Facility-wide enrolled count reported by the server at the last config sync,
+    // and when (device clock) it was received. null = never received.
+    @ColumnInfo(name = "server_enrollment_count") val serverEnrollmentCount: Int? = null,
+    @ColumnInfo(name = "server_enrollment_count_time") val serverEnrollmentCountTime: Long? = null,
     @ColumnInfo(name = "last_sync_time") val lastSyncTime: Long? = null,
     @ColumnInfo(name = "sync_status") val syncStatus: String = "PENDING"
 )
@@ -416,6 +427,21 @@ interface SurveyDao {
 
     @Query("SELECT COUNT(*) FROM surveys WHERE subject_id = :subjectId")
     fun countSurveysWithSubjectId(subjectId: String): Int
+
+    // Enrolled = eligible completions (always paymentConfirmed, even with no
+    // payment) plus restore stubs (uploaded surveys). Ineligible surveys are
+    // completed but never paymentConfirmed. Used for the enrollment quota.
+    @Query("SELECT COUNT(*) FROM surveys WHERE is_completed = 1 AND (payment_confirmed = 1 OR is_stub = 1)")
+    fun countEnrolledSurveys(): Int
+
+    // Enrolled surveys on this tablet that the server's count (received at
+    // :serverCountTime) does not include yet: not uploaded, or uploaded after
+    // that count was taken. Stubs came from the server, so they never count here.
+    @Query("SELECT COUNT(*) FROM surveys WHERE is_completed = 1 AND payment_confirmed = 1 AND is_stub = 0 AND (uploaded_at IS NULL OR uploaded_at > :serverCountTime)")
+    fun countEnrolledNotInServerCount(serverCountTime: Long): Int
+
+    @Query("UPDATE surveys SET uploaded_at = :uploadedAt WHERE id = :surveyId")
+    fun markSurveyUploaded(surveyId: String, uploadedAt: Long)
 
     @Query("DELETE FROM surveys WHERE is_completed = 0 AND start_datetime < :cutoffTime")
     fun deleteIncompleteSurveys(cutoffTime: Long): Int
@@ -789,16 +815,32 @@ interface AppServerConfigDao {
     fun hasServerConfig(): Boolean
 }
 
-@Database(entities = [Section::class, Question::class, Option::class, Survey::class, Answer::class, User::class, SurveyUploadState::class, RecruitmentPaymentUploadState::class, SyncMetadata::class, SurveyConfig::class, SystemMessage::class, Coupon::class, FacilityConfig::class, SeedRecruitment::class, SubjectFingerprint::class, AppServerConfig::class, TestConfiguration::class, TestResult::class, LabTestConfiguration::class], version = 71, autoMigrations = [
+@Database(entities = [Section::class, Question::class, Option::class, Survey::class, Answer::class, User::class, SurveyUploadState::class, RecruitmentPaymentUploadState::class, SyncMetadata::class, SurveyConfig::class, SystemMessage::class, Coupon::class, FacilityConfig::class, SeedRecruitment::class, SubjectFingerprint::class, AppServerConfig::class, TestConfiguration::class, TestResult::class, LabTestConfiguration::class], version = 73, autoMigrations = [
     AutoMigration(from = 52, to = 53),
     AutoMigration(from = 65, to = 66),
     AutoMigration(from = 66, to = 67),
     AutoMigration(from = 67, to = 68),
     AutoMigration(from = 68, to = 69),
     AutoMigration(from = 69, to = 70),
-    AutoMigration(from = 70, to = 71)
+    AutoMigration(from = 70, to = 71),
+    AutoMigration(from = 71, to = 72),
+    AutoMigration(from = 72, to = 73, spec = SurveyDatabase.Migration72To73::class)
 ])
 abstract class SurveyDatabase : RoomDatabase() {
+    /**
+     * Adds surveys.uploaded_at (plus the facility_config server count columns).
+     * Existing completed surveys are marked as already uploaded: the auto-upload
+     * worker has normally sent them long ago, and surveys left over from other
+     * servers/facilities must not inflate the enrollment quota count. A genuinely
+     * pending legacy survey is just missing from the count until the next config
+     * sync after it uploads.
+     */
+    class Migration72To73 : androidx.room.migration.AutoMigrationSpec {
+        override fun onPostMigrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+            db.execSQL("UPDATE surveys SET uploaded_at = CAST(strftime('%s','now') AS INTEGER) * 1000 WHERE is_completed = 1")
+        }
+    }
+
     abstract fun surveyDao(): SurveyDao
     abstract fun userDao(): UserDao
     abstract fun uploadStateDao(): UploadStateDao

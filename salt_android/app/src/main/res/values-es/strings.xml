@@ -91,6 +91,9 @@
     <string name="menu_admin_title">Panel de administración</string>
     <string name="menu_admin_area">Panel de administración</string>
     <string name="menu_start_survey">Iniciar nueva encuesta</string>
+    <string name="menu_enrollment_progress">Inscritos: %1$d de %2$d</string>
+    <string name="quota_reached_title">Cuota de inscripción alcanzada</string>
+    <string name="quota_reached_message">Este centro ha alcanzado su cuota de inscripción de %1$d encuestas. No se pueden iniciar nuevas encuestas. Contacte a su coordinador del estudio si la cuota debe aumentarse.</string>
     <string name="menu_recruit_participant">Reclutar participante anterior</string>
     <string name="menu_manage_users">Administrar usuarios</string>
     <string name="menu_server_settings">Configuración del servidor</string>

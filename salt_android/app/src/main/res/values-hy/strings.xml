@@ -88,6 +88,9 @@
     <string name="menu_admin_title">Ադմինիստրատորի վահանակ</string>
     <string name="menu_admin_area">Ադմինիստրատորի վահանակ</string>
     <string name="menu_start_survey">Սկսել նոր հարցում</string>
+    <string name="menu_enrollment_progress">Գրանցված՝ %1$d / %2$d</string>
+    <string name="quota_reached_title">Գրանցման քվոտան լրացված է</string>
+    <string name="quota_reached_message">Այս հաստատությունը լրացրել է իր %1$d հարցումների գրանցման քվոտան։ Նոր հարցումներ սկսել հնարավոր չէ։ Եթե քվոտան պետք է ավելացվի, դիմեք ուսումնասիրության համակարգողին։</string>
     <string name="menu_recruit_participant">Ներգրավել նախկին մասնակից</string>
     <string name="menu_manage_users">Կառավարել օգտատերերին</string>
     <string name="menu_server_settings">Սերվերի կարգավորումներ</string>

@@ -28,7 +28,8 @@ router.get('/facility/config', requireFacilityApiKey, async (req, res) => {
                 participation_payment_amount,
                 recruitment_payment_amount,
                 payment_currency,
-                payment_currency_symbol
+                payment_currency_symbol,
+                enrollment_quota
              FROM facilities
              WHERE id = ?`,
             [facilityId]
@@ -40,6 +41,13 @@ router.get('/facility/config', requireFacilityApiKey, async (req, res) => {
                 message: 'Facility configuration not found'
             });
         }
+
+        // Live enrolled count for the quota: completed (eligible) surveys the
+        // server holds for this facility, excluding admin-deleted ones.
+        const enrollment = await getAsync(
+            'SELECT COUNT(*) AS n FROM completed_surveys WHERE facility_id = ? AND deleted_at IS NULL',
+            [facilityId]
+        );
         
         // Return facility configuration
         res.json({
@@ -58,6 +66,9 @@ router.get('/facility/config', requireFacilityApiKey, async (req, res) => {
                 recruitment_payment_amount: facility.recruitment_payment_amount || 0,
                 payment_currency: facility.payment_currency || 'USD',
                 payment_currency_symbol: facility.payment_currency_symbol || '$',
+                // null = no quota
+                enrollment_quota: facility.enrollment_quota ?? null,
+                enrollment_count: enrollment ? enrollment.n : 0,
                 sync_time: new Date().toISOString()
             }
         });
@@ -106,7 +117,8 @@ router.post('/facility-setup', async (req, res) => {
                 f.participation_payment_amount,
                 f.recruitment_payment_amount,
                 f.payment_currency,
-                f.payment_currency_symbol
+                f.payment_currency_symbol,
+                f.enrollment_quota
              FROM facility_short_codes sc
              JOIN facilities f ON sc.facility_id = f.id
              WHERE sc.short_code = ? AND datetime('now') <= sc.expires_at`,
@@ -147,6 +159,12 @@ router.post('/facility-setup', async (req, res) => {
             [clientIp, codeRecord.id]
         );
 
+        // Live enrolled count for the quota (see GET /facility/config)
+        const enrollment = await getAsync(
+            'SELECT COUNT(*) AS n FROM completed_surveys WHERE facility_id = ? AND deleted_at IS NULL',
+            [codeRecord.facility_id]
+        );
+
         // Return facility configuration with API key
         res.json({
             status: 'success',
@@ -165,6 +183,8 @@ router.post('/facility-setup', async (req, res) => {
                 recruitment_payment_amount: codeRecord.recruitment_payment_amount || 0,
                 payment_currency: codeRecord.payment_currency || 'USD',
                 payment_currency_symbol: codeRecord.payment_currency_symbol || '$',
+                enrollment_quota: codeRecord.enrollment_quota ?? null,
+                enrollment_count: enrollment ? enrollment.n : 0,
                 configured_at: new Date().toISOString()
             }
         });

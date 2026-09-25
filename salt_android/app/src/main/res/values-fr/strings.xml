@@ -91,6 +91,9 @@
     <string name="menu_admin_title">Tableau de bord administrateur</string>
     <string name="menu_admin_area">Tableau de bord administrateur</string>
     <string name="menu_start_survey">Démarrer une nouvelle enquête</string>
+    <string name="menu_enrollment_progress">Inscrits : %1$d sur %2$d</string>
+    <string name="quota_reached_title">Quota d\'inscription atteint</string>
+    <string name="quota_reached_message">Cet établissement a atteint son quota d\'inscription de %1$d enquêtes. Aucune nouvelle enquête ne peut être commencée. Contactez votre coordinateur d\'étude si le quota doit être augmenté.</string>
     <string name="menu_recruit_participant">Recruter un participant précédent</string>
     <string name="menu_manage_users">Gérer les utilisateurs</string>
     <string name="menu_server_settings">Paramètres du serveur</string>

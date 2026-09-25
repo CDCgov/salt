@@ -132,7 +132,10 @@ class SurveyUploadManager(
                 when (uploadResult) {
                     is UploadResult.Success -> {
                         Log.i(TAG, "Successfully uploaded survey: $surveyId")
-                        uploadStateDao.markUploadCompleted(surveyId, UploadStatus.COMPLETED.name, System.currentTimeMillis())
+                        val uploadedAt = System.currentTimeMillis()
+                        uploadStateDao.markUploadCompleted(surveyId, UploadStatus.COMPLETED.name, uploadedAt)
+                        // Survey-level marker for the enrollment quota (upload-state rows get cleaned up)
+                        database.surveyDao().markSurveyUploaded(surveyId, uploadedAt)
                     }
                     else -> {
                         Log.w(TAG, "Upload failed for survey: $surveyId, result: $uploadResult")

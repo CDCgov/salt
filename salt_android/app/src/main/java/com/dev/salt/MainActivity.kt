@@ -1566,6 +1566,7 @@ fun MenuScreen(
     val scope = rememberCoroutineScope()
     var showSeedRecruitment by remember { mutableStateOf(false) }
     var showRecruitmentPayment by remember { mutableStateOf(false) }
+    var quotaStatus by remember { mutableStateOf<com.dev.salt.util.EnrollmentQuota.Status?>(null) }
 
     // Disable hardware back button on menu screen
     BackHandler(enabled = true) {
@@ -1596,6 +1597,10 @@ fun MenuScreen(
         val facilityConfig = database.facilityConfigDao().getFacilityConfig()
         showRecruitmentPayment = (facilityConfig?.recruitmentPaymentAmount ?: 0.0) > 0
         Log.d("MenuScreen", "Show recruitment payment button: $showRecruitmentPayment (amount=${facilityConfig?.recruitmentPaymentAmount})")
+
+        // Enrollment quota: blocks new surveys (walk-ins and coupon holders) once reached
+        quotaStatus = com.dev.salt.util.EnrollmentQuota.load(database)
+        Log.d("MenuScreen", "Enrollment quota status: $quotaStatus")
     }
 
     Scaffold(
@@ -1632,10 +1637,38 @@ fun MenuScreen(
         ) {
             Text(stringResource(R.string.menu_staff_area), style = MaterialTheme.typography.headlineMedium)
             Spacer(modifier = Modifier.height(16.dp))
+
+            val quota = quotaStatus
+            if (quota != null && quota.isLimited) {
+                Text(
+                    text = stringResource(R.string.menu_enrollment_progress, quota.enrolled, quota.quota ?: 0),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+            if (quota != null && quota.isReached) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.quota_reached_message, quota.quota ?: 0),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
             Button(
                 onClick = {
                     navController.navigate(AppDestinations.COUPON_SCREEN)
                 },
+                // Disabled until the quota is known, and once it is reached
+                enabled = quota != null && !quota.isReached,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(R.string.menu_start_survey))

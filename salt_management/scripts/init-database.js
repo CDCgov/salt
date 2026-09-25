@@ -50,7 +50,8 @@ CREATE TABLE IF NOT EXISTS facilities (
     participation_payment_amount REAL DEFAULT 0,
     recruitment_payment_amount REAL DEFAULT 0,
     payment_currency TEXT DEFAULT 'USD',
-    payment_currency_symbol TEXT DEFAULT '$'
+    payment_currency_symbol TEXT DEFAULT '$',
+    enrollment_quota INTEGER DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS facility_short_codes (

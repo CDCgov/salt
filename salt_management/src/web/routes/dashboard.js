@@ -99,7 +99,8 @@ router.get('/facilities', requireAdmin, async (req, res) => {
     try {
         const facilities = await allAsync(`
             SELECT f.*,
-                   COUNT(u.id) as upload_count,
+                   (SELECT COUNT(*) FROM completed_surveys cs
+                     WHERE cs.facility_id = f.id AND cs.deleted_at IS NULL) as completed_count,
                    CASE
                        WHEN (
                            SELECT used_at FROM facility_short_codes fsc
@@ -110,8 +111,6 @@ router.get('/facilities', requireAdmin, async (req, res) => {
                        ELSE 0
                    END as has_active_tablet
             FROM facilities f
-            LEFT JOIN uploads u ON f.id = u.facility_id
-            GROUP BY f.id
             ORDER BY f.name
         `);
 

@@ -30,7 +30,7 @@
                 <th>Non-Coupon Allowed</th>
                 <th>Coupons to Issue</th>
                 <th>Seed Recruitment</th>
-                <th>Uploads</th>
+                <th>Enrolled / Quota</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -57,9 +57,9 @@
                             ${facility.seed_recruitment_active ? 'Active' : 'Inactive'}
                         </span>
                     </td>
-                    <td>${facility.upload_count}</td>
+                    <td style="text-align: center;">${facility.completed_count} / ${facility.enrollment_quota ?? '&infin;'}</td>
                     <td>
-                        <button onclick="editFacility(${facility.id}, '${facility.name}', '${facility.location || ''}', ${facility.allow_non_coupon_participants ? 'true' : 'false'}, ${facility.coupons_to_issue}, ${facility.seed_recruitment_active ? 'true' : 'false'}, ${facility.seed_contact_rate_days || 7}, ${facility.seed_recruitment_window_min_days || 0}, ${facility.seed_recruitment_window_max_days || 730}, '${facility.subject_payment_type || 'None'}', ${facility.participation_payment_amount || 0}, ${facility.recruitment_payment_amount || 0}, '${facility.payment_currency || 'USD'}', '${facility.payment_currency_symbol || '$'}')" class="btn" style="padding: 0.25rem 0.5rem;">Edit</button>
+                        <button onclick="editFacility(${facility.id}, '${facility.name}', '${facility.location || ''}', ${facility.allow_non_coupon_participants ? 'true' : 'false'}, ${facility.coupons_to_issue}, ${facility.seed_recruitment_active ? 'true' : 'false'}, ${facility.seed_contact_rate_days || 7}, ${facility.seed_recruitment_window_min_days || 0}, ${facility.seed_recruitment_window_max_days || 730}, '${facility.subject_payment_type || 'None'}', ${facility.participation_payment_amount || 0}, ${facility.recruitment_payment_amount || 0}, '${facility.payment_currency || 'USD'}', '${facility.payment_currency_symbol || '$'}', ${facility.enrollment_quota ?? 'null'})" class="btn" style="padding: 0.25rem 0.5rem;">Edit</button>
                         <button onclick="confirmGenerateSetupCode(${facility.id}, '${facility.name}', ${facility.has_active_tablet ? 'true' : 'false'})" class="btn" style="padding: 0.25rem 0.5rem; background: #4CAF50; color: white;">Setup Code</button>
                     </td>
                 </tr>
@@ -86,6 +86,12 @@
             <div style="margin: 1rem 0;">
                 <label style="display: block; margin-bottom: 0.5rem;">Number of coupons to issue:</label>
                 <input type="number" name="coupons_to_issue" value="3" min="0" max="10" required style="width: 100%; padding: 0.5rem;">
+            </div>
+            
+            <div style="margin: 1rem 0;">
+                <label style="display: block; margin-bottom: 0.5rem;">Enrollment quota (leave blank for no limit):</label>
+                <input type="number" name="enrollment_quota" min="0" step="1" placeholder="No limit" style="width: 100%; padding: 0.5rem;">
+                <small style="color: #666;">Tablets stop starting new surveys, including for coupon holders, once this many surveys have been completed.</small>
             </div>
             
             <hr style="margin: 1.5rem 0;">
@@ -183,6 +189,12 @@
                 <input type="number" name="coupons_to_issue" value="3" min="0" max="10" required style="width: 100%; padding: 0.5rem;">
             </div>
             
+            <div style="margin: 1rem 0;">
+                <label style="display: block; margin-bottom: 0.5rem;">Enrollment quota (leave blank for no limit):</label>
+                <input type="number" name="enrollment_quota" min="0" step="1" placeholder="No limit" style="width: 100%; padding: 0.5rem;">
+                <small style="color: #666;">Tablets stop starting new surveys, including for coupon holders, once this many surveys have been completed.</small>
+            </div>
+            
             <hr style="margin: 1.5rem 0;">
             <h4>Continuous Recruitment Settings</h4>
             
@@ -254,7 +266,7 @@ function hideAddFacilityForm() {
     document.getElementById('addFacilityModal').style.display = 'none';
 }
 
-function editFacility(id, name, location, allowNonCoupon, couponsToIssue, seedRecruitmentActive, seedContactRateDays, seedRecruitmentWindowMinDays, seedRecruitmentWindowMaxDays, subjectPaymentType, participationPaymentAmount, recruitmentPaymentAmount, paymentCurrency, paymentCurrencySymbol) {
+function editFacility(id, name, location, allowNonCoupon, couponsToIssue, seedRecruitmentActive, seedContactRateDays, seedRecruitmentWindowMinDays, seedRecruitmentWindowMaxDays, subjectPaymentType, participationPaymentAmount, recruitmentPaymentAmount, paymentCurrency, paymentCurrencySymbol, enrollmentQuota) {
     const form = document.getElementById('editFacilityForm');
     form.id.value = id;
     form.name.value = name;
@@ -270,6 +282,7 @@ function editFacility(id, name, location, allowNonCoupon, couponsToIssue, seedRe
     form.recruitment_payment_amount.value = recruitmentPaymentAmount || 0;
     form.payment_currency.value = paymentCurrency || 'USD';
     form.payment_currency_symbol.value = paymentCurrencySymbol || '$';
+    form.enrollment_quota.value = (enrollmentQuota === null || enrollmentQuota === undefined) ? '' : enrollmentQuota;
     document.getElementById('editFacilityModal').style.display = 'block';
 }
 
@@ -340,6 +353,8 @@ document.getElementById('addFacilityForm').addEventListener('submit', async (e) 
     data.seed_contact_rate_days = parseInt(data.seed_contact_rate_days, 10) || 7;
     data.seed_recruitment_window_min_days = parseInt(data.seed_recruitment_window_min_days, 10) || 0;
     data.seed_recruitment_window_max_days = parseInt(data.seed_recruitment_window_max_days, 10) || 730;
+    // Blank quota = no limit (null); sent explicitly so clearing it takes effect
+    const quotaRaw = (data.enrollment_quota ?? '').toString().trim();
     
     // Remove NaN values
     Object.keys(data).forEach(key => {
@@ -347,6 +362,7 @@ document.getElementById('addFacilityForm').addEventListener('submit', async (e) 
             delete data[key];
         }
     });
+    data.enrollment_quota = quotaRaw === '' ? null : parseInt(quotaRaw, 10);
     
     try {
         const response = await fetch('/api/admin/facilities', {
@@ -384,6 +400,8 @@ document.getElementById('editFacilityForm').addEventListener('submit', async (e)
     data.seed_contact_rate_days = parseInt(data.seed_contact_rate_days, 10) || 7;
     data.seed_recruitment_window_min_days = parseInt(data.seed_recruitment_window_min_days, 10) || 0;
     data.seed_recruitment_window_max_days = parseInt(data.seed_recruitment_window_max_days, 10) || 730;
+    // Blank quota = no limit (null); sent explicitly so clearing it takes effect
+    const quotaRaw = (data.enrollment_quota ?? '').toString().trim();
     
     // Remove NaN values
     Object.keys(data).forEach(key => {
@@ -391,6 +409,7 @@ document.getElementById('editFacilityForm').addEventListener('submit', async (e)
             delete data[key];
         }
     });
+    data.enrollment_quota = quotaRaw === '' ? null : parseInt(quotaRaw, 10);
     
     console.log('Sending update:', data);  // Debug log
     

@@ -47,12 +47,15 @@ fun CouponScreen(
     // State for facility configuration
     var facilityConfig by remember { mutableStateOf<com.dev.salt.data.FacilityConfig?>(null) }
     var isSyncing by remember { mutableStateOf(true) }
+    var quotaStatus by remember { mutableStateOf<com.dev.salt.util.EnrollmentQuota.Status?>(null) }
     
     // Sync facility configuration when the screen loads
     LaunchedEffect(Unit) {
         // Facility config is now synced at login, just load from database
         facilityConfig = database.facilityConfigDao().getFacilityConfig() 
             ?: com.dev.salt.data.FacilityConfig()
+        // Backstop for the menu's quota gate: no new survey once the quota is reached
+        quotaStatus = com.dev.salt.util.EnrollmentQuota.load(database)
         isSyncing = false
     }
     
@@ -92,6 +95,26 @@ fun CouponScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
+            } else if (quotaStatus?.isReached == true) {
+                Text(
+                    text = stringResource(R.string.quota_reached_title),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+                Text(
+                    text = stringResource(R.string.quota_reached_message, quotaStatus?.quota ?: 0),
+                    style = MaterialTheme.typography.bodyLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(bottom = 32.dp)
+                )
+                Button(
+                    onClick = { navController.navigate(AppDestinations.MENU_SCREEN) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.coupon_back_to_menu))
+                }
             } else {
                 // Coupon question
                 Text(

@@ -91,6 +91,9 @@
     <string name="menu_admin_title">Administrator Dashboard</string>
     <string name="menu_admin_area">Admin Dashboard</string>
     <string name="menu_start_survey">Start New Survey</string>
+    <string name="menu_enrollment_progress">Enrolled: %1$d of %2$d</string>
+    <string name="quota_reached_title">Enrollment quota reached</string>
+    <string name="quota_reached_message">This facility has reached its enrollment quota of %1$d surveys. No new surveys can be started. Contact your study coordinator if the quota should be increased.</string>
     <string name="menu_recruit_participant">Recruit Previous Participant</string>
     <string name="menu_manage_users">Manage Users</string>
     <string name="menu_server_settings">Server Settings</string>

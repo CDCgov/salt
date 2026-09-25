@@ -10,6 +10,12 @@ const router = express.Router();
 // All routes require admin authentication
 router.use(requireAdmin);
 
+// Blank / null / undefined -> null (no quota); otherwise a non-negative integer.
+function normalizeQuota(v) {
+    if (v === undefined || v === null || v === '') return null;
+    return parseInt(v, 10);
+}
+
 // List all facilities
 router.get('/', async (req, res) => {
     try {
@@ -21,6 +27,7 @@ router.get('/', async (req, res) => {
                     seed_contact_rate_days,
                     seed_recruitment_window_min_days,
                     seed_recruitment_window_max_days,
+                    enrollment_quota,
                     created_at, updated_at 
              FROM facilities ORDER BY name`
         );
@@ -42,6 +49,7 @@ router.get('/:id', async (req, res) => {
                     seed_contact_rate_days,
                     seed_recruitment_window_min_days,
                     seed_recruitment_window_max_days,
+                    enrollment_quota,
                     created_at, updated_at 
              FROM facilities WHERE id = ?`,
             [req.params.id]
@@ -82,7 +90,10 @@ router.post('/', [
     body('participation_payment_amount').optional().isFloat({ min: 0 }),
     body('recruitment_payment_amount').optional().isFloat({ min: 0 }),
     body('payment_currency').optional().trim(),
-    body('payment_currency_symbol').optional().trim()
+    body('payment_currency_symbol').optional().trim(),
+    body('enrollment_quota').optional({ nullable: true })
+        .custom(v => v === '' || (Number.isInteger(Number(v)) && Number(v) >= 0))
+        .withMessage('Enrollment quota must be blank or a non-negative whole number')
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -102,7 +113,8 @@ router.post('/', [
         participation_payment_amount = 0,
         recruitment_payment_amount = 0,
         payment_currency = 'USD',
-        payment_currency_symbol = '$'
+        payment_currency_symbol = '$',
+        enrollment_quota
     } = req.body;
     const apiKey = `salt_${uuidv4()}`;
 
@@ -112,14 +124,14 @@ router.post('/', [
                                    seed_recruitment_active, seed_contact_rate_days,
                                    seed_recruitment_window_min_days, seed_recruitment_window_max_days,
                                    subject_payment_type, participation_payment_amount, recruitment_payment_amount,
-                                   payment_currency, payment_currency_symbol)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                                   payment_currency, payment_currency_symbol, enrollment_quota)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [name, location, apiKey,
              allow_non_coupon_participants ? 1 : 0, coupons_to_issue,
              seed_recruitment_active ? 1 : 0, seed_contact_rate_days,
              seed_recruitment_window_min_days, seed_recruitment_window_max_days,
              subject_payment_type, participation_payment_amount, recruitment_payment_amount,
-             payment_currency, payment_currency_symbol]
+             payment_currency, payment_currency_symbol, normalizeQuota(enrollment_quota)]
         );
 
         await logAudit(
@@ -158,7 +170,10 @@ router.put('/:id', [
     body('participation_payment_amount').optional().isFloat({ min: 0 }),
     body('recruitment_payment_amount').optional().isFloat({ min: 0 }),
     body('payment_currency').optional().trim(),
-    body('payment_currency_symbol').optional().trim()
+    body('payment_currency_symbol').optional().trim(),
+    body('enrollment_quota').optional({ nullable: true })
+        .custom(v => v === '' || (Number.isInteger(Number(v)) && Number(v) >= 0))
+        .withMessage('Enrollment quota must be blank or a non-negative whole number')
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -171,7 +186,8 @@ router.put('/:id', [
         seed_recruitment_active, seed_contact_rate_days,
         seed_recruitment_window_min_days, seed_recruitment_window_max_days,
         subject_payment_type, participation_payment_amount,
-        recruitment_payment_amount, payment_currency, payment_currency_symbol
+        recruitment_payment_amount, payment_currency, payment_currency_symbol,
+        enrollment_quota
     } = req.body;
     const facilityId = req.params.id;
     
@@ -254,6 +270,10 @@ router.put('/:id', [
         if (payment_currency_symbol !== undefined) {
             updates.push('payment_currency_symbol = ?');
             values.push(payment_currency_symbol);
+        }
+        if (enrollment_quota !== undefined) {
+            updates.push('enrollment_quota = ?');
+            values.push(normalizeQuota(enrollment_quota));
         }
 
         if (updates.length > 0) {
