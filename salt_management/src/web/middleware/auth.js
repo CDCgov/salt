@@ -1,26 +1,8 @@
 const { db, getAsync } = require('../../models/database');
 
-// Middleware to check if user is logged in via session
-function requireLogin(req, res, next) {
-    if (!req.session || !req.session.userId) {
-        return res.status(401).json({ 
-            status: 'error', 
-            message: 'Authentication required' 
-        });
-    }
-    next();
-}
-
-// Middleware to check if user is admin via session
-function requireAdmin(req, res, next) {
-    if (!req.session || !req.session.userId || req.session.role !== 'admin') {
-        return res.status(403).json({ 
-            status: 'error', 
-            message: 'Admin access required' 
-        });
-    }
-    next();
-}
+// Staff/admin checks live in src/middleware/auth.js (requireAuth, requireAdmin,
+// requireStaffOrAdmin), which verify role and is_active from the database.
+// This file only provides the tablet (facility API key) check.
 
 // Middleware to check API key for facility tablet access
 async function requireFacilityApiKey(req, res, next) {
@@ -67,52 +49,6 @@ async function requireFacilityApiKey(req, res, next) {
     }
 }
 
-// Combined middleware: allow either session login OR facility API key
-async function requireAuthOrFacilityApiKey(req, res, next) {
-    // Check for API key first
-    const apiKey = req.headers['x-api-key'] || req.headers['authorization']?.replace('Bearer ', '');
-    
-    if (apiKey) {
-        try {
-            // Try facility API key authentication
-            const facility = await getAsync(
-                'SELECT id, name, location FROM facilities WHERE api_key = ?',
-                [apiKey]
-            );
-            
-            if (facility) {
-                // Log API access
-                db.run(
-                    `INSERT INTO audit_log (user_id, action, entity_type, entity_id, timestamp)
-                     VALUES (?, ?, ?, ?, datetime('now'))`,
-                    [`facility_${facility.id}`, 'api_access', 'endpoint', req.path]
-                );
-                
-                req.facility = facility;
-                req.authMethod = 'facility_api_key';
-                return next();
-            }
-        } catch (error) {
-            console.error('Error validating API key:', error);
-        }
-    }
-    
-    // Fall back to session authentication
-    if (req.session && req.session.userId) {
-        req.authMethod = 'session';
-        return next();
-    }
-    
-    // Neither authentication method succeeded
-    return res.status(401).json({ 
-        status: 'error', 
-        message: 'Authentication required (session or API key)' 
-    });
-}
-
 module.exports = {
-    requireLogin,
-    requireAdmin,
-    requireFacilityApiKey,
-    requireAuthOrFacilityApiKey
+    requireFacilityApiKey
 };

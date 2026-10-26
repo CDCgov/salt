@@ -29,19 +29,9 @@ async function validateApiKey(req, res, next) {
     }
 }
 
-// Middleware to check if admin is logged in (for web routes)
-function requireAdmin(req, res, next) {
-    if (!req.session.userId) {
-        if (req.path.startsWith('/api')) {
-            return res.status(401).json({ error: 'Authentication required' });
-        } else {
-            return res.redirect('/login');
-        }
-    }
-    next();
-}
+// Admin/staff checks live in src/middleware/auth.js (requireAdmin,
+// requireStaffOrAdmin), which verify role and is_active from the database.
 
 module.exports = {
-    validateApiKey,
-    requireAdmin
+    validateApiKey
 };

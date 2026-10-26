@@ -84,6 +84,7 @@ app.use(session({
     cookie: {
         secure: process.env.NODE_ENV === 'production',
         httpOnly: true,
+        sameSite: 'lax', // not sent on cross-site POSTs or subresource requests
         maxAge: 1000 * 60 * 60 * 24 // 24 hours
     }
 }));

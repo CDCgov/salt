@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAdmin } = require('../middleware/auth');
+const { requireAdmin } = require('../../middleware/auth');
 const { getAsync, runAsync, allAsync } = require('../../models/database');
 const { logAudit } = require('../../services/auditService');
 

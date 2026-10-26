@@ -1,13 +1,13 @@
 const express = require('express');
 const { getAsync, allAsync, runAsync } = require('../../models/database');
-const { requireLogin } = require('../../web/middleware/auth');
+const { requireAdmin } = require('../../middleware/auth');
 const router = express.Router();
 
 /**
  * Get all test configurations for a survey
  * GET /api/admin/survey-config/:surveyId/tests
  */
-router.get('/survey-config/:surveyId/tests', requireLogin, async (req, res) => {
+router.get('/survey-config/:surveyId/tests', requireAdmin, async (req, res) => {
     try {
         const { surveyId } = req.params;
 
@@ -55,7 +55,7 @@ router.get('/survey-config/:surveyId/tests', requireLogin, async (req, res) => {
  * Update a test configuration (enable/disable or update properties)
  * PUT /api/admin/survey-config/:surveyId/tests/:testId
  */
-router.put('/survey-config/:surveyId/tests/:testId', requireLogin, async (req, res) => {
+router.put('/survey-config/:surveyId/tests/:testId', requireAdmin, async (req, res) => {
     try {
         const { surveyId, testId } = req.params;
         const { enabled, display_order, test_name } = req.body;
@@ -148,7 +148,7 @@ router.put('/survey-config/:surveyId/tests/:testId', requireLogin, async (req, r
  * Update display order for multiple tests
  * PUT /api/admin/survey-config/:surveyId/tests/order
  */
-router.put('/survey-config/:surveyId/tests-order', requireLogin, async (req, res) => {
+router.put('/survey-config/:surveyId/tests-order', requireAdmin, async (req, res) => {
     try {
         const { surveyId } = req.params;
         const { test_order } = req.body; // Array of {test_id, display_order}
@@ -210,7 +210,7 @@ router.put('/survey-config/:surveyId/tests-order', requireLogin, async (req, res
  * Create a new test configuration
  * POST /api/admin/survey-config/:surveyId/tests
  */
-router.post('/survey-config/:surveyId/tests', requireLogin, async (req, res) => {
+router.post('/survey-config/:surveyId/tests', requireAdmin, async (req, res) => {
     try {
         const { surveyId } = req.params;
         const { test_id, test_name, enabled, display_order } = req.body;
@@ -291,7 +291,7 @@ router.post('/survey-config/:surveyId/tests', requireLogin, async (req, res) => 
  * Delete a test configuration
  * DELETE /api/admin/survey-config/:surveyId/tests/:testId
  */
-router.delete('/survey-config/:surveyId/tests/:testId', requireLogin, async (req, res) => {
+router.delete('/survey-config/:surveyId/tests/:testId', requireAdmin, async (req, res) => {
     try {
         const { surveyId, testId } = req.params;
 

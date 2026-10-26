@@ -30,6 +30,13 @@ function past(iso) {
     return !iso || Date.now() > new Date(iso).getTime();
 }
 
+// Tokens are only valid while their user is an active administrator, so
+// deactivating or demoting a user cuts off MCP access on the next request.
+async function userStillAllowed(userId) {
+    const u = await getAsync('SELECT role, is_active FROM admin_users WHERE id = ?', [userId]);
+    return !!(u && u.is_active && u.role === 'administrator');
+}
+
 /**
  * Create a new session for a user. Returns clear tokens (only time they exist).
  * @param {{userId:number, clientId?:string, scope?:string}} opts
@@ -71,6 +78,7 @@ async function verifyAccessToken(token) {
     if (row.revoked) return null;
     if (past(row.access_expires_at)) return null;
     if (past(row.absolute_expires_at)) return null;   // absolute 6h cap
+    if (!(await userStillAllowed(row.user_id))) return null;
 
     await runAsync('UPDATE mcp_sessions SET last_used_at = datetime(\'now\') WHERE id = ?', [row.id]);
 
@@ -95,6 +103,7 @@ async function refreshSession(refreshToken, clientId = null) {
     );
     if (!row || row.revoked) return null;
     if (past(row.absolute_expires_at)) return null;   // hard cap → must re-authenticate
+    if (!(await userStillAllowed(row.user_id))) return null;
 
     const newAccess = randomToken();
     const newRefresh = randomToken();

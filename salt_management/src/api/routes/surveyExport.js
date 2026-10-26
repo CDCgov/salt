@@ -21,7 +21,7 @@
 
 const express = require('express');
 const { getAsync, allAsync, runAsync } = require('../../models/database');
-const { requireAdmin } = require('../middleware/auth');
+const { requireAdmin } = require('../../middleware/auth');
 const { logAudit } = require('../../services/auditService');
 const { importSurveyBundle, SCHEMA_VERSION } = require('../../services/surveyImport');
 const router = express.Router();

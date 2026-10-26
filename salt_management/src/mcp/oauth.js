@@ -12,8 +12,20 @@
 
 const { runAsync, getAsync } = require('../models/database');
 const sessionStore = require('./sessionStore');
+const { ROLES } = require('../constants/roles');
 
 const AUTH_CODE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const PENDING_TTL_MS = 10 * 60 * 1000;   // how long a consent screen stays valid
+
+// Only active administrators may connect the report builder.
+async function activeAdmin(userId) {
+    if (!userId) return null;
+    const u = await getAsync(
+        'SELECT id, username, role, is_active FROM admin_users WHERE id = ?',
+        [userId]
+    );
+    return (u && u.is_active && u.role === ROLES.ADMINISTRATOR) ? u : null;
+}
 
 // SDK OAuth error classes (ESM). Loaded once in mountOAuth(); used so the SDK's
 // token handler maps our failures to proper 400 invalid_grant / 401 responses
@@ -63,9 +75,36 @@ const clientsStore = {
 
 // ---- provider -------------------------------------------------------------
 
-function localPath(url) {
-    // Only allow same-origin relative paths through the consent round-trip.
-    return typeof url === 'string' && url.startsWith('/') && !url.startsWith('//');
+// The consent page's post-login return target must be this server's own
+// /authorize endpoint. Rejects absolute URLs, '//' and backslash forms.
+function isLocalAuthorizePath(url) {
+    if (typeof url !== 'string' || !url.startsWith('/') || url.includes('\\')) return false;
+    try {
+        const u = new URL(url, 'http://salt.invalid');
+        return u.origin === 'http://salt.invalid' && u.pathname === '/authorize';
+    } catch {
+        return false;
+    }
+}
+
+async function issueAuthorizationCode(pending) {
+    const code = sessionStore.randomToken();
+    const expiresAt = new Date(Date.now() + AUTH_CODE_TTL_MS).toISOString();
+    await runAsync(
+        `INSERT INTO oauth_auth_codes (code, client_id, user_id, redirect_uri, code_challenge, code_challenge_method, scope, expires_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [code, pending.clientId, pending.userId, pending.redirectUri,
+         pending.codeChallenge, 'S256', pending.scopes.join(' '), expiresAt]
+    );
+    return code;
+}
+
+function redirectWith(redirectUri, params) {
+    const url = new URL(redirectUri);
+    for (const [k, v] of Object.entries(params)) {
+        if (v !== undefined && v !== null) url.searchParams.set(k, v);
+    }
+    return url.toString();
 }
 
 const provider = {
@@ -77,32 +116,32 @@ const provider = {
      * explicit consent, then redirect back to the client's redirect_uri with a
      * one-time code.
      */
+    // Nothing in the authorize URL can grant access. We park the validated
+    // request in the user's session under a random id and send the browser to
+    // the consent page; a code is issued only when that page POSTs an explicit
+    // approval carrying the id (see POST /mcp-consent).
     async authorize(client, params, res) {
         const req = res.req;
-        const approved = req.query && req.query.mcp_approved === '1';
+        const admin = req.session ? await activeAdmin(req.session.userId) : null;
 
-        if (!req.session || !req.session.userId || !approved) {
-            // Bounce to the MCP consent page, preserving the full authorize URL.
+        if (!admin) {
+            // Not signed in, or not an administrator: show sign-in, then return here.
             const back = encodeURIComponent(req.originalUrl);
             return res.redirect(`/mcp-consent?return=${back}`);
         }
 
-        const code = sessionStore.randomToken();
-        const expiresAt = new Date(Date.now() + AUTH_CODE_TTL_MS).toISOString();
-        await runAsync(
-            `INSERT INTO oauth_auth_codes (code, client_id, user_id, redirect_uri, code_challenge, code_challenge_method, scope, expires_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-            [
-                code, client.client_id, req.session.userId, params.redirectUri,
-                params.codeChallenge || null, 'S256',
-                (params.scopes || ['mcp']).join(' '), expiresAt,
-            ]
-        );
-
-        const url = new URL(params.redirectUri);
-        url.searchParams.set('code', code);
-        if (params.state) url.searchParams.set('state', params.state);
-        res.redirect(url.toString());
+        req.session.mcpPending = {
+            id: sessionStore.randomToken(),
+            userId: admin.id,
+            clientId: client.client_id,
+            clientName: client.client_name || null,
+            redirectUri: params.redirectUri,
+            codeChallenge: params.codeChallenge || null,
+            state: params.state || null,
+            scopes: params.scopes && params.scopes.length ? params.scopes : ['mcp'],
+            createdAt: Date.now(),
+        };
+        req.session.save(() => res.redirect('/mcp-consent'));
     },
 
     async challengeForAuthorizationCode(client, authorizationCode) {
@@ -125,6 +164,9 @@ const provider = {
         }
         if (redirectUri && redirectUri !== row.redirect_uri) {
             throw grantError('invalid_grant: redirect_uri mismatch');
+        }
+        if (!(await activeAdmin(row.user_id))) {
+            throw grantError('invalid_grant: user is no longer an active administrator');
         }
 
         const session = await sessionStore.createSession({
@@ -167,19 +209,45 @@ const provider = {
 
 // ---- consent page (self-contained; reuses POST /api/auth/login) -----------
 
-function consentPage({ loggedIn, username, returnUrl }) {
-    const safeReturn = localPath(returnUrl) ? returnUrl : '/';
-    const allowUrl = safeReturn + (safeReturn.includes('?') ? '&' : '?') + 'mcp_approved=1';
-    const body = loggedIn
-        ? `<p>Signed in as <strong>${escapeHtml(username)}</strong>.</p>
-           <p>Allow this application to build and render SALT reports on your behalf?
-              It can read survey data dictionaries and aggregate summaries, and create/render
-              reports — it never receives individual participant records.</p>
+// view: 'login' | 'not_admin' | 'consent' | 'none'
+function consentPage({ view, username, returnUrl, pending }) {
+    let body;
+    if (view === 'consent') {
+        const name = pending.clientName || 'An application';
+        let host = pending.redirectUri;
+        try { host = new URL(pending.redirectUri).host; } catch { /* keep raw */ }
+        body = `<p>Signed in as <strong>${escapeHtml(username)}</strong>.</p>
+           <p><strong>${escapeHtml(name)}</strong> is asking to use the SALT report builder as you.</p>
+           <p>If you allow it, it can read the survey data dictionary and summaries, and create
+              and run reports. Reports run R code against the survey data, so the application
+              can access individual participant records, though the AI is instructed to avoid
+              any access to individual level data. Only allow tools that your study's data
+              agreements permit to process this data.</p>
+           <p>You will be returned to <strong>${escapeHtml(host)}</strong>.</p>
            <div class="row">
-             <a class="btn allow" href="${escapeHtml(allowUrl)}">Allow</a>
-             <a class="btn deny" href="/">Deny</a>
-           </div>`
-        : `<p>Sign in to your SALT administrator account to connect.</p>
+             <button class="btn allow" id="allow" type="button">Allow</button>
+             <button class="btn deny" id="deny" type="button">Deny</button>
+           </div>
+           <div id="err" class="err"></div>
+           <script>
+             async function decide(decision) {
+               const r = await fetch('/mcp-consent', {
+                 method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin',
+                 body: JSON.stringify({ id: ${JSON.stringify(pending.id)}, decision })
+               });
+               const d = await r.json().catch(() => ({}));
+               if (r.ok && d.redirect) { location.href = d.redirect; }
+               else { document.getElementById('err').textContent = d.error || 'Request failed. Start the connection again.'; }
+             }
+             document.getElementById('allow').addEventListener('click', () => decide('allow'));
+             document.getElementById('deny').addEventListener('click', () => decide('deny'));
+           </script>`;
+    } else if (view === 'not_admin') {
+        body = `<p>Signed in as <strong>${escapeHtml(username)}</strong>.</p>
+           <p>Connecting the report builder requires an active administrator account.</p>`;
+    } else if (view === 'login') {
+        const next = isLocalAuthorizePath(returnUrl) ? returnUrl : null;
+        body = `<p>Sign in to your SALT administrator account to connect.</p>
            <form id="f">
              <input id="u" placeholder="Username" autocomplete="username" />
              <input id="p" type="password" placeholder="Password" autocomplete="current-password" />
@@ -187,16 +255,20 @@ function consentPage({ loggedIn, username, returnUrl }) {
              <div id="err" class="err"></div>
            </form>
            <script>
+             const next = ${JSON.stringify(next).replace(/</g, '\\u003c')};
              document.getElementById('f').addEventListener('submit', async (e) => {
                e.preventDefault();
                const r = await fetch('/api/auth/login', {
                  method:'POST', headers:{'Content-Type':'application/json'}, credentials:'same-origin',
                  body: JSON.stringify({ username: document.getElementById('u').value, password: document.getElementById('p').value })
                });
-               if (r.ok) { location.reload(); }
+               if (r.ok) { if (next) { location.href = next; } else { location.reload(); } }
                else { const d = await r.json().catch(()=>({})); document.getElementById('err').textContent = d.error || 'Login failed'; }
              });
            </script>`;
+    } else {
+        body = `<p>There is no pending connection request. Start the connection again from your AI tool.</p>`;
+    }
 
     return `<!doctype html><html><head><meta charset="utf-8"><title>Connect to SALT</title>
       <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -230,14 +302,49 @@ async function mountOAuth(app, { baseUrl }) {
 
     // Consent page (MCP-owned; reuses the existing login API for credentials).
     app.get('/mcp-consent', async (req, res) => {
-        const returnUrl = req.query.return ? decodeURIComponent(String(req.query.return)) : '/';
-        let username = '';
-        const loggedIn = !!(req.session && req.session.userId);
-        if (loggedIn) {
-            const u = await getAsync('SELECT username FROM admin_users WHERE id = ?', [req.session.userId]);
-            username = u ? u.username : '';
+        const returnUrl = req.query.return ? String(req.query.return) : null;
+        const userId = req.session && req.session.userId;
+        res.set('Content-Type', 'text/html');
+        if (!userId) {
+            return res.send(consentPage({ view: 'login', returnUrl }));
         }
-        res.set('Content-Type', 'text/html').send(consentPage({ loggedIn, username, returnUrl }));
+        const u = await getAsync('SELECT username FROM admin_users WHERE id = ?', [userId]);
+        const username = u ? u.username : '';
+        const admin = await activeAdmin(userId);
+        if (!admin) {
+            return res.send(consentPage({ view: 'not_admin', username }));
+        }
+        const pending = req.session.mcpPending;
+        if (pending && pending.userId === admin.id && Date.now() - pending.createdAt < PENDING_TTL_MS) {
+            return res.send(consentPage({ view: 'consent', username, pending }));
+        }
+        // Signed in but no pending request (e.g. arrived from the login step).
+        if (returnUrl && isLocalAuthorizePath(returnUrl)) return res.redirect(returnUrl);
+        return res.send(consentPage({ view: 'none', username }));
+    });
+
+    // Explicit decision from the consent page (same-origin fetch). Requires the
+    // pending request's random id from this session, so a link or cross-site
+    // request cannot approve anything.
+    app.post('/mcp-consent', async (req, res) => {
+        const pending = req.session && req.session.mcpPending;
+        const body = req.body || {};
+        if (!pending || typeof body.id !== 'string' || body.id !== pending.id) {
+            return res.status(403).json({ error: 'No matching connection request. Start the connection again.' });
+        }
+        delete req.session.mcpPending; // one decision per request
+        if (Date.now() - pending.createdAt >= PENDING_TTL_MS) {
+            return res.status(403).json({ error: 'This connection request expired. Start the connection again.' });
+        }
+        const admin = await activeAdmin(req.session.userId);
+        if (!admin || admin.id !== pending.userId) {
+            return res.status(403).json({ error: 'An active administrator account is required.' });
+        }
+        if (body.decision !== 'allow') {
+            return res.json({ redirect: redirectWith(pending.redirectUri, { error: 'access_denied', state: pending.state }) });
+        }
+        const code = await issueAuthorizationCode(pending);
+        return res.json({ redirect: redirectWith(pending.redirectUri, { code, state: pending.state }) });
     });
 
     app.use(mcpAuthRouter({

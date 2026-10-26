@@ -3,7 +3,7 @@ const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto');
 const { body, validationResult } = require('express-validator');
 const { getAsync, runAsync, allAsync } = require('../../models/database');
-const { requireAdmin } = require('../middleware/auth');
+const { requireAdmin } = require('../../middleware/auth');
 const { logAudit } = require('../../services/auditService');
 const router = express.Router();
 

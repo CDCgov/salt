@@ -5,6 +5,7 @@ const { body, validationResult } = require('express-validator');
 const { getAsync, allAsync, runAsync } = require('../../models/database');
 const { requireAdmin, requireAuth } = require('../../middleware/auth');
 const { ROLES, isValidRole, getRoleDisplayName } = require('../../constants/roles');
+const { revokeAllForUser } = require('../../mcp/sessionStore');
 
 // Get all users (admin only)
 router.get('/', requireAdmin, async (req, res) => {
@@ -307,6 +308,13 @@ router.put('/:id',
                 params
             );
 
+            // Deactivated or no longer an administrator: end any report-builder
+            // (MCP) connections immediately.
+            if (isAdmin && ((is_active !== undefined && !is_active) ||
+                            (role !== undefined && role !== ROLES.ADMINISTRATOR))) {
+                await revokeAllForUser(userId);
+            }
+
             // Log the action
             await runAsync(
                 `INSERT INTO audit_log (user_id, action, entity_type, entity_id, new_value)
@@ -364,6 +372,7 @@ router.delete('/:id', requireAdmin, async (req, res) => {
             'UPDATE admin_users SET is_active = 0 WHERE id = ?',
             [userId]
         );
+        await revokeAllForUser(userId); // end any report-builder (MCP) connections
 
         // Log the action
         await runAsync(
