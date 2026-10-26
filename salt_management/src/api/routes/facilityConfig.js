@@ -2,7 +2,36 @@ const express = require('express');
 const { db, getAsync, runAsync } = require('../../models/database');
 const { requireFacilityApiKey } = require('../../web/middleware/auth');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
+
+// Setup-code guessing protection. Codes are 6 characters (the tablet's input
+// is fixed at 6), so guessing is bounded by rate limits rather than length.
+// Only failed attempts count; limits are generous because staff mistype codes.
+const SETUP_LIMIT_MESSAGE = {
+    status: 'error',
+    message: 'Too many incorrect setup codes. Please wait a few minutes and try again.'
+};
+// Per device/IP: 50 failed attempts per 15 minutes.
+const setupCodeIpLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 50,
+    skipSuccessfulRequests: true,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: SETUP_LIMIT_MESSAGE
+});
+// Across all callers: 500 failed attempts per hour. Caps guessing from many
+// IPs at ~12,000 tries/day against 36^6 (~2.2 billion) possible codes.
+const setupCodeGlobalLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 500,
+    skipSuccessfulRequests: true,
+    keyGenerator: () => 'facility-setup-global',
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: SETUP_LIMIT_MESSAGE
+});
 
 /**
  * Get facility configuration
@@ -90,7 +119,7 @@ router.get('/facility/config', requireFacilityApiKey, async (req, res) => {
  * POST /api/sync/facility-setup
  * Body: { shortCode: "SALT-XXXX" }
  */
-router.post('/facility-setup', async (req, res) => {
+router.post('/facility-setup', setupCodeGlobalLimiter, setupCodeIpLimiter, async (req, res) => {
     try {
         const { shortCode } = req.body;
         const clientIp = req.ip || req.connection.remoteAddress;
@@ -118,7 +147,8 @@ router.post('/facility-setup', async (req, res) => {
                 f.recruitment_payment_amount,
                 f.payment_currency,
                 f.payment_currency_symbol,
-                f.enrollment_quota
+                f.enrollment_quota,
+                f.api_key AS current_api_key
              FROM facility_short_codes sc
              JOIN facilities f ON sc.facility_id = f.id
              WHERE sc.short_code = ? AND datetime('now') <= sc.expires_at`,
@@ -153,11 +183,26 @@ router.post('/facility-setup', async (req, res) => {
             });
         }
 
-        // Mark code as used
-        await runAsync(
-            'UPDATE facility_short_codes SET used_at = datetime("now"), used_by_ip = ? WHERE id = ?',
+        // A newer code was generated for this facility (which rotated its API
+        // key), so this code's key no longer works.
+        if (codeRecord.api_key !== codeRecord.current_api_key) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'This setup code is no longer valid. Please request a new one.'
+            });
+        }
+
+        // Claim the code in one step so two tablets can't both use it.
+        const claim = await runAsync(
+            'UPDATE facility_short_codes SET used_at = datetime("now"), used_by_ip = ? WHERE id = ? AND used_at IS NULL',
             [clientIp, codeRecord.id]
         );
+        if (claim.changes !== 1) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'This setup code has already been used. Please request a new one.'
+            });
+        }
 
         // Live enrolled count for the quota (see GET /facility/config)
         const enrollment = await getAsync(

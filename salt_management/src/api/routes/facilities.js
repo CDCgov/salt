@@ -392,7 +392,11 @@ router.delete('/:id', async (req, res) => {
 router.post('/:id/generate-code', async (req, res) => {
     try {
         const { id } = req.params;
-        const { expirationHours = 24 } = req.body;
+        // Codes are valid 1 to 72 hours (default 24).
+        const requestedHours = Number(req.body && req.body.expirationHours);
+        const expirationHours = Number.isFinite(requestedHours)
+            ? Math.min(Math.max(Math.round(requestedHours), 1), 72)
+            : 24;
 
         // Get facility details
         const facility = await getAsync(
@@ -405,11 +409,12 @@ router.post('/:id/generate-code', async (req, res) => {
         }
 
         // Generate unique short code
+        // Cryptographically secure; 6 characters to match the tablet's input.
         const generateShortCode = () => {
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
             for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
+                code += chars.charAt(crypto.randomInt(chars.length));
             }
             return code;
         };
@@ -444,6 +449,13 @@ router.post('/:id/generate-code', async (req, res) => {
         await runAsync(
             'UPDATE facilities SET api_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [newApiKey, facility.id]
+        );
+
+        // Older unused codes for this facility carry the previous API key; expire them.
+        await runAsync(
+            `UPDATE facility_short_codes SET expires_at = datetime('now')
+             WHERE facility_id = ? AND used_at IS NULL AND expires_at > datetime('now')`,
+            [facility.id]
         );
 
         // Insert short code record with new API key
