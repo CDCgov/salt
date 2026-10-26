@@ -1,8 +1,12 @@
 const { runAsync } = require('../models/database');
 const fs = require('fs').promises;
 const path = require('path');
+const { redactSecrets } = require('./redact');
 
 async function logAudit(userId, action, entityType, entityId, oldValue, newValue) {
+    // Never store passwords, API keys or other secrets in the audit trail.
+    oldValue = redactSecrets(oldValue);
+    newValue = redactSecrets(newValue);
     try {
         // Log to database
         await runAsync(

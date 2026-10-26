@@ -180,8 +180,17 @@ router.get('/api/uploads/:surveyId', requireAdmin, async (req, res) => {
     }
 });
 
-// Logout
+// Logout is a POST so other sites can't sign users out with a link or image.
+// GET /logout (old bookmarks) shows a button that submits the POST.
 router.get('/logout', (req, res) => {
+    res.set('Content-Type', 'text/html').send(`<!doctype html><html><head><meta charset="utf-8">
+<title>Log out - SALT Management</title></head>
+<body style="font-family:system-ui,Arial,sans-serif;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0">
+<form method="post" action="/logout"><button type="submit" style="padding:.6rem 1.2rem;font-size:1rem;cursor:pointer">Log out</button></form>
+</body></html>`);
+});
+
+router.post('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
             console.error('Session destroy error:', err);

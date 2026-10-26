@@ -60,8 +60,8 @@
                            id="password"
                            name="password"
                            required
-                           minlength="6">
-                    <small>Minimum 6 characters</small>
+                           minlength="12">
+                    <small>Minimum 12 characters</small>
                 </div>
 
                 <div class="form-group">
@@ -70,16 +70,26 @@
                            id="confirm_password"
                            name="confirm_password"
                            required
-                           minlength="6">
+                           minlength="12">
                 </div>
             <% } else { %>
+                <% if (editUser.id === user.id) { %>
+                <div class="form-group">
+                    <label for="current_password">Current Password (required to change your password)</label>
+                    <input type="password"
+                           id="current_password"
+                           name="current_password"
+                           autocomplete="current-password">
+                </div>
+                <% } %>
+
                 <div class="form-group">
                     <label for="password">New Password (leave blank to keep current)</label>
                     <input type="password"
                            id="password"
                            name="password"
-                           minlength="6">
-                    <small>Minimum 6 characters</small>
+                           minlength="12">
+                    <small>Minimum 12 characters</small>
                 </div>
 
                 <div class="form-group">
@@ -87,7 +97,7 @@
                     <input type="password"
                            id="confirm_password"
                            name="confirm_password"
-                           minlength="6">
+                           minlength="12">
                 </div>
 
                 <% if (editUser.is_active === 0) { %>
@@ -179,6 +189,10 @@ document.getElementById('userForm').addEventListener('submit', async function(e)
 
     if (password) {
         formData.password = password;
+        const currentPasswordInput = document.getElementById('current_password');
+        if (currentPasswordInput) {
+            formData.current_password = currentPasswordInput.value;
+        }
     }
 
     if (isEdit) {

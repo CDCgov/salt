@@ -6,6 +6,9 @@ const { getAsync, allAsync, runAsync } = require('../../models/database');
 const { requireAdmin, requireAuth } = require('../../middleware/auth');
 const { ROLES, isValidRole, getRoleDisplayName } = require('../../constants/roles');
 const { revokeAllForUser } = require('../../mcp/sessionStore');
+const { redactSecrets } = require('../../services/redact');
+
+const MIN_PASSWORD_LENGTH = 12;
 
 // Get all users (admin only)
 router.get('/', requireAdmin, async (req, res) => {
@@ -98,8 +101,8 @@ router.post('/',
             .matches(/^[a-zA-Z0-9_]+$/)
             .withMessage('Username must be 3-50 characters and contain only letters, numbers, and underscores'),
         body('password')
-            .isLength({ min: 6 })
-            .withMessage('Password must be at least 6 characters'),
+            .isLength({ min: MIN_PASSWORD_LENGTH })
+            .withMessage(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`),
         body('email')
             .optional()
             .isEmail()
@@ -204,8 +207,8 @@ router.put('/:id',
             .withMessage('Active status must be a boolean'),
         body('password')
             .optional()
-            .isLength({ min: 6 })
-            .withMessage('Password must be at least 6 characters')
+            .isLength({ min: MIN_PASSWORD_LENGTH })
+            .withMessage(`Password must be at least ${MIN_PASSWORD_LENGTH} characters`)
     ],
     async (req, res) => {
         // Check validation errors
@@ -290,6 +293,15 @@ router.put('/:id',
             }
 
             if (password !== undefined) {
+                // Changing your own password requires your current password.
+                if (isSelf) {
+                    const current = await getAsync('SELECT password_hash FROM admin_users WHERE id = ?', [userId]);
+                    const ok = current && typeof req.body.current_password === 'string' &&
+                        await bcrypt.compare(req.body.current_password, current.password_hash);
+                    if (!ok) {
+                        return res.status(400).json({ error: 'Current password is incorrect' });
+                    }
+                }
                 const hashedPassword = await bcrypt.hash(password, 10);
                 updates.push('password_hash = ?');
                 params.push(hashedPassword);
@@ -319,7 +331,7 @@ router.put('/:id',
             await runAsync(
                 `INSERT INTO audit_log (user_id, action, entity_type, entity_id, new_value)
                  VALUES (?, ?, ?, ?, ?)`,
-                [req.user.id, 'UPDATE_USER', 'user', userId, JSON.stringify(req.body)]
+                [req.user.id, 'UPDATE_USER', 'user', userId, JSON.stringify(redactSecrets(req.body))]
             );
 
             res.json({

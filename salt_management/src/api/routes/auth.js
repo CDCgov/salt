@@ -55,6 +55,11 @@ router.post('/login', loginLimiter, [
             [user.id]
         );
 
+        // Start a fresh session on login so a session ID planted before login
+        // can't be reused afterwards (session fixation).
+        await new Promise((resolve, reject) =>
+            req.session.regenerate(err => (err ? reject(err) : resolve())));
+
         // Set session with role information
         req.session.userId = user.id;
         req.session.username = user.username;

@@ -134,7 +134,7 @@
         <h1>SALT Management System</h1>
         <div>
             Welcome, <%= user.username || user.full_name || 'User' %> |
-            <a href="/logout" style="color: white;">Logout</a>
+            <form method="post" action="/logout" style="display: inline; margin: 0;"><button type="submit" style="background: none; border: 0; padding: 0; color: white; font: inherit; cursor: pointer; text-decoration: underline;">Logout</button></form>
         </div>
     </div>
     <% } %>
