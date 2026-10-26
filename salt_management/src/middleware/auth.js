@@ -19,31 +19,10 @@ const requireAuth = async (req, res, next) => {
         }
     }
 
-    // Check Bearer token for API calls
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.substring(7);
-        try {
-            // For now, we're using facility API keys as tokens
-            // In the future, this could be JWT or other token system
-            const facility = await getAsync(
-                'SELECT * FROM facilities WHERE api_key = ?',
-                [token]
-            );
-            if (facility) {
-                // API calls from facilities get administrator access by default
-                req.user = {
-                    id: 0,
-                    username: `facility_${facility.id}`,
-                    role: ROLES.ADMINISTRATOR,
-                    facilityId: facility.id
-                };
-                return next();
-            }
-        } catch (error) {
-            console.error('Bearer auth error:', error);
-        }
-    }
+    // Facility API keys are deliberately NOT accepted here. They identify a
+    // tablet, not a staff member, and are only valid on the tablet sync
+    // endpoints via requireFacilityApiKey (src/web/middleware/auth.js).
+    // Accepting them here previously granted administrator access.
 
     // Not authenticated
     if (req.path.startsWith('/api')) {
