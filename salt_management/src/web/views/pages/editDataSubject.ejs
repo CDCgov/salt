@@ -25,9 +25,9 @@
         </div>
         <div style="margin-top: 1rem;">
             <% if (subject.deleted_at) { %>
-                <button onclick="restoreSubject(<%= subject.id %>)" class="btn">Restore Subject</button>
+                <button data-id="<%= subject.id %>" onclick="restoreSubject(this.dataset.id)" class="btn">Restore Subject</button>
             <% } else { %>
-                <button onclick="deleteSubject(<%= subject.id %>)" class="btn" style="background: #c00; color: white;">Delete Subject</button>
+                <button data-id="<%= subject.id %>" onclick="deleteSubject(this.dataset.id)" class="btn" style="background: #c00; color: white;">Delete Subject</button>
             <% } %>
         </div>
     </div>
@@ -68,7 +68,7 @@
                         </td>
                         <td>
                             <button class="btn" style="padding: 0.25rem 0.5rem;"
-                                onclick='openEditor(<%- JSON.stringify(it) %>)'>Edit</button>
+                                data-item="<%= JSON.stringify(it) %>" onclick="openEditor(JSON.parse(this.dataset.item))">Edit</button>
                         </td>
                     </tr>
                 <% }); %>
@@ -100,7 +100,7 @@
                         <td><%= rt.recorded_at ? new Date(rt.recorded_at).toLocaleString() : '-' %></td>
                         <td>
                             <button class="btn" style="padding: 0.25rem 0.5rem;"
-                                onclick='openRapidEditor(<%- JSON.stringify(rt) %>)'>Edit</button>
+                                data-item="<%= JSON.stringify(rt) %>" onclick="openRapidEditor(JSON.parse(this.dataset.item))">Edit</button>
                         </td>
                     </tr>
                 <% }); %>
@@ -138,7 +138,7 @@
                         <td><%= lb.createdAt ? new Date(lb.createdAt).toLocaleString() : '-' %></td>
                         <td>
                             <button class="btn" style="padding: 0.25rem 0.5rem;"
-                                onclick='openLabEditor(<%- JSON.stringify(lb) %>)'>Edit</button>
+                                data-item="<%= JSON.stringify(lb) %>" onclick="openLabEditor(JSON.parse(this.dataset.item))">Edit</button>
                         </td>
                     </tr>
                 <% }); %>
@@ -171,7 +171,7 @@
 </div>
 
 <script>
-const SUBJECT_ID = <%= subject.id %>;
+const SUBJECT_ID = <%- jsonForScript(subject.id) %>;
 // currentItem carries a `kind` so save/clear handlers know which API to call:
 //   'response' — survey_responses (legacy default)
 //   'rapid'    — rapid_test_results
@@ -208,9 +208,9 @@ function openEditor(item) {
         item.options.forEach(o => {
             const id = 'opt_' + o.index;
             const wrap = document.createElement('div');
-            wrap.innerHTML = `<label><input type="radio" name="mcOption" value="${o.index}" id="${id}"
+            wrap.innerHTML = `<label><input type="radio" name="mcOption" value="${escapeHtml(o.index)}" id="${escapeHtml(id)}"
                 ${o.index === item.responseOptionIndex ? 'checked' : ''}>
-                ${o.index}: ${escapeHtml(o.text)}</label>`;
+                ${escapeHtml(o.index)}: ${escapeHtml(o.text)}</label>`;
             body.appendChild(wrap);
         });
     } else if (item.answerType === 'multi_select') {
@@ -218,9 +218,9 @@ function openEditor(item) {
         item.options.forEach(o => {
             const id = 'opt_' + o.index;
             const wrap = document.createElement('div');
-            wrap.innerHTML = `<label><input type="checkbox" value="${o.index}" id="${id}"
+            wrap.innerHTML = `<label><input type="checkbox" value="${escapeHtml(o.index)}" id="${escapeHtml(id)}"
                 ${selected.has(o.index) ? 'checked' : ''}>
-                ${o.index}: ${escapeHtml(o.text)}</label>`;
+                ${escapeHtml(o.index)}: ${escapeHtml(o.text)}</label>`;
             body.appendChild(wrap);
         });
         if (item.minSelections !== null || item.maxSelections !== null) {
@@ -319,7 +319,7 @@ document.getElementById('editMissing').addEventListener('click', async () => {
         url = `/api/admin/subjects/${SUBJECT_ID}/responses/${encodeURIComponent(currentItem.shortName)}/clear`;
     } else if (currentItem.kind === 'lab') {
         confirmMsg = 'Remove lab result "' + currentItem.testName + '"? This deletes the record entirely.';
-        url = `/api/admin/lab-results/${currentItem.id}/clear`;
+        url = `/api/admin/lab-results/${encodeURIComponent(currentItem.id)}/clear`;
     } else {
         return;
     }
@@ -363,7 +363,7 @@ document.getElementById('editSave').addEventListener('click', async () => {
         url = `/api/admin/subjects/${SUBJECT_ID}/rapid-tests/${encodeURIComponent(currentItem.testId)}`;
     } else if (currentItem.kind === 'lab') {
         body = { value: document.getElementById('editValueInput').value };
-        url = `/api/admin/lab-results/${currentItem.id}`;
+        url = `/api/admin/lab-results/${encodeURIComponent(currentItem.id)}`;
     } else {
         return;
     }
@@ -385,14 +385,14 @@ document.getElementById('editSave').addEventListener('click', async () => {
 
 async function deleteSubject(id) {
     if (!confirm('Delete this subject? Their data will be excluded from exports.')) return;
-    const r = await fetch(`/api/admin/subjects/${id}/delete`, { method: 'POST' });
+    const r = await fetch(`/api/admin/subjects/${encodeURIComponent(id)}/delete`, { method: 'POST' });
     const data = await r.json();
     if (data.status === 'success') location.reload();
     else alert('Delete failed: ' + (data.message || ''));
 }
 
 async function restoreSubject(id) {
-    const r = await fetch(`/api/admin/subjects/${id}/restore`, { method: 'POST' });
+    const r = await fetch(`/api/admin/subjects/${encodeURIComponent(id)}/restore`, { method: 'POST' });
     const data = await r.json();
     if (data.status === 'success') location.reload();
     else alert('Restore failed: ' + (data.message || ''));

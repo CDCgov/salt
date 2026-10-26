@@ -69,7 +69,7 @@
                         <td>
                             <a href="/admin/users/<%= u.id %>/edit" class="btn btn-sm">Edit</a>
                             <% if (u.id !== user.id) { %>
-                                <button onclick="deleteUser(<%= u.id %>, '<%= u.username %>', <%= u.is_active ? 'true' : 'false' %>)"
+                                <button data-id="<%= u.id %>" data-username="<%= u.username %>" onclick="deleteUser(Number(this.dataset.id), this.dataset.username, <%= u.is_active ? 'true' : 'false' %>)"
                                         class="btn btn-sm btn-danger"
                                         <%= u.role === 'administrator' ? 'data-admin="true"' : '' %>>
                                     <%= u.is_active ? 'Deactivate' : 'Activate' %>

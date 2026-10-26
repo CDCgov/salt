@@ -23,6 +23,7 @@
 
 const express = require('express');
 const path = require('path');
+const { isSafeId, safeJoin } = require('../../utils/safeIds');
 const fs = require('fs').promises;
 const { runAsync } = require('../../models/database');
 const { requireFacilityApiKey } = require('../../web/middleware/auth');
@@ -52,6 +53,13 @@ router.post('/logs/upload', requireFacilityApiKey, async (req, res) => {
             return res.status(400).json({
                 status: 'error',
                 message: 'Invalid log data: missing logId'
+            });
+        }
+        // The log ID becomes part of a file name; tablets send "LOG_<uuid>".
+        if (!isSafeId(logId)) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Invalid log data: malformed logId'
             });
         }
 
@@ -114,7 +122,7 @@ router.post('/logs/upload', requireFacilityApiKey, async (req, res) => {
         ].join('\n');
 
         // Save to file system
-        const filepath = path.join(uploadsDir, filename);
+        const filepath = safeJoin(uploadsDir, filename);
         await fs.writeFile(filepath, fileContent, 'utf8');
 
         // Add to memory cache

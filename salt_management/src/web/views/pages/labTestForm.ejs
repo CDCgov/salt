@@ -266,7 +266,7 @@ document.getElementById('testForm').addEventListener('submit', async function(e)
 
     try {
         const url = isEdit
-            ? `/api/admin/lab-tests/<%= editTest ? editTest.id : '' %>`
+            ? '/api/admin/lab-tests/' + <%- jsonForScript(editTest ? editTest.id : '') %>
             : '/api/admin/lab-tests';
 
         const method = isEdit ? 'PUT' : 'POST';

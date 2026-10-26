@@ -136,6 +136,15 @@
 </style>
 
 <script>
+// Escape a value before inserting it into HTML (this page does not use the main layout,
+// so window.escapeHtml is not defined here). Mirrors h() in web/viewHelpers.js.
+function escapeHtml(v) {
+    if (v === null || v === undefined) return '';
+    return String(v).replace(/[&<>"'`]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c];
+    });
+}
+
 let currentSubjectId = null;
 let availableTests = [];
 
@@ -160,7 +169,7 @@ async function validateSubject() {
             // Show survey completion info
             if (data.surveyCompleted) {
                 const completedDate = new Date(data.surveyCompleted).toLocaleString();
-                resultDiv.innerHTML = `<div class="alert alert-success">✓ Subject found. Survey completed: ${completedDate}</div>`;
+                resultDiv.innerHTML = `<div class="alert alert-success">✓ Subject found. Survey completed: ${escapeHtml(completedDate)}</div>`;
             }
 
             if (data.existingResults && data.existingResults.length > 0) {
@@ -175,7 +184,7 @@ async function validateSubject() {
             document.getElementById('step2').style.display = 'block';
         } else {
             // Subject not found in completed_surveys
-            resultDiv.innerHTML = `<div class="alert alert-error">${data.error || 'Subject ID not found. Please ensure the participant has completed a survey first.'}</div>`;
+            resultDiv.innerHTML = `<div class="alert alert-error">${escapeHtml(data.error || 'Subject ID not found. Please ensure the participant has completed a survey first.')}</div>`;
             document.getElementById('subject_id').value = '';
             document.getElementById('subject_id').focus();
         }
@@ -214,14 +223,15 @@ function displayTests() {
                 <div class="test-toggle">
                     <label>
                         <input type="checkbox"
-                               id="test_enabled_${test.id}"
-                               onchange="toggleTest(${test.id})">
-                        <strong>${test.test_name}</strong>
-                        ${test.test_code ? `(${test.test_code})` : ''}
-                        ${test.description ? `<br><small>${test.description}</small>` : ''}
+                               id="test_enabled_${escapeHtml(test.id)}"
+                               data-test-id="${escapeHtml(test.id)}"
+                               onchange="toggleTest(Number(this.dataset.testId))">
+                        <strong>${escapeHtml(test.test_name)}</strong>
+                        ${test.test_code ? `(${escapeHtml(test.test_code)})` : ''}
+                        ${test.description ? `<br><small>${escapeHtml(test.description)}</small>` : ''}
                     </label>
                 </div>
-                <div id="test_entry_${test.id}" style="display: none; margin-top: 1rem;">
+                <div id="test_entry_${escapeHtml(test.id)}" style="display: none; margin-top: 1rem;">
         `;
 
         if (test.test_type === 'numeric') {
@@ -229,36 +239,38 @@ function displayTests() {
             html += `
                 <div class="double-entry">
                     <div class="entry-field">
-                        <label>First Entry ${test.unit ? `(${test.unit})` : ''}</label>
+                        <label>First Entry ${test.unit ? `(${escapeHtml(test.unit)})` : ''}</label>
                         <input type="number"
-                               id="test_${test.id}_entry1"
+                               id="test_${escapeHtml(test.id)}_entry1"
                                step="any"
-                               onkeyup="checkMatch(${test.id})"
-                               ${test.min_value !== null ? `min="${test.min_value}"` : ''}
-                               ${test.max_value !== null ? `max="${test.max_value}"` : ''}
+                               data-test-id="${escapeHtml(test.id)}"
+                               onkeyup="checkMatch(Number(this.dataset.testId))"
+                               ${test.min_value !== null ? `min="${escapeHtml(test.min_value)}"` : ''}
+                               ${test.max_value !== null ? `max="${escapeHtml(test.max_value)}"` : ''}
                                placeholder="${test.min_value !== null && test.max_value !== null ?
-                                           `${test.min_value} - ${test.max_value}` :
+                                           `${escapeHtml(test.min_value)} - ${escapeHtml(test.max_value)}` :
                                            'Enter value'}">
                     </div>
                     <div class="entry-field">
                         <label>Second Entry (Confirmation)</label>
                         <input type="number"
-                               id="test_${test.id}_entry2"
+                               id="test_${escapeHtml(test.id)}_entry2"
                                step="any"
-                               onkeyup="checkMatch(${test.id})"
-                               ${test.min_value !== null ? `min="${test.min_value}"` : ''}
-                               ${test.max_value !== null ? `max="${test.max_value}"` : ''}
+                               data-test-id="${escapeHtml(test.id)}"
+                               onkeyup="checkMatch(Number(this.dataset.testId))"
+                               ${test.min_value !== null ? `min="${escapeHtml(test.min_value)}"` : ''}
+                               ${test.max_value !== null ? `max="${escapeHtml(test.max_value)}"` : ''}
                                placeholder="Re-enter value">
                     </div>
                 </div>
-                <div id="match_status_${test.id}"></div>
+                <div id="match_status_${escapeHtml(test.id)}"></div>
             `;
         } else if (test.test_type === 'dropdown') {
             // Single selection for dropdown tests
             html += `
-                <select id="test_${test.id}_value" class="dropdown-select">
+                <select id="test_${escapeHtml(test.id)}_value" class="dropdown-select">
                     <option value="">Select result...</option>
-                    ${test.options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
+                    ${test.options.map(opt => `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`).join('')}
                 </select>
             `;
         }

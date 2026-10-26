@@ -3,23 +3,23 @@
 
 <div class="stats">
     <div class="stat-card">
-        <div class="stat-value">${stats.total_facilities}</div>
+        <div class="stat-value">${h(stats.total_facilities)}</div>
         <div class="stat-label">Total Facilities</div>
     </div>
     <div class="stat-card">
-        <div class="stat-value">${stats.total_uploads}</div>
+        <div class="stat-value">${h(stats.total_uploads)}</div>
         <div class="stat-label">Total Uploads</div>
     </div>
     <div class="stat-card">
-        <div class="stat-value">${stats.completed_uploads}</div>
+        <div class="stat-value">${h(stats.completed_uploads)}</div>
         <div class="stat-label">Completed</div>
     </div>
     <div class="stat-card">
-        <div class="stat-value">${stats.failed_uploads}</div>
+        <div class="stat-value">${h(stats.failed_uploads)}</div>
         <div class="stat-label">Failed</div>
     </div>
     <div class="stat-card">
-        <div class="stat-value">${stats.today_uploads}</div>
+        <div class="stat-value">${h(stats.today_uploads)}</div>
         <div class="stat-label">Today's Uploads</div>
     </div>
 </div>
@@ -38,14 +38,14 @@
         <tbody>
             ${recentUploads.map(upload => `
                 <tr>
-                    <td>${upload.survey_response_id}</td>
-                    <td>${upload.facility_name || 'Unknown'}</td>
+                    <td>${h(upload.survey_response_id)}</td>
+                    <td>${h(upload.facility_name || 'Unknown')}</td>
                     <td>
                         <span style="color: ${upload.status === 'completed' ? 'green' : 'red'}">
-                            ${upload.status}
+                            ${h(upload.status)}
                         </span>
                     </td>
-                    <td>${new Date(upload.upload_time).toLocaleString()}</td>
+                    <td>${h(new Date(upload.upload_time).toLocaleString())}</td>
                 </tr>
             `).join('')}
             ${recentUploads.length === 0 ? '<tr><td colspan="4" style="text-align: center;">No uploads yet</td></tr>' : ''}

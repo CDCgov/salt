@@ -1,9 +1,8 @@
 <%
 var pageTitle = typeof title !== 'undefined' ? title : 'Data Export';
 var dictSurveys = typeof surveys !== 'undefined' && Array.isArray(surveys) ? surveys : [];
-var esc = function(t){ return String(t == null ? '' : t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); };
 var dictSurveyOptions = dictSurveys.length
-    ? dictSurveys.map(function(s){ return '<option value="'+s.id+'">'+esc(s.name)+(s.is_active?' (active)':'')+' (v'+s.version+')</option>'; }).join('')
+    ? dictSurveys.map(function(s){ return '<option value="'+h(s.id)+'">'+h(s.name)+(s.is_active?' (active)':'')+' (v'+h(s.version)+')</option>'; }).join('')
     : '<option value="">(no surveys)</option>';
 var body = `
 <h2>Data Export</h2>

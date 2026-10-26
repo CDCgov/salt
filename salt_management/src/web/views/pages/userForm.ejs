@@ -190,7 +190,7 @@ document.getElementById('userForm').addEventListener('submit', async function(e)
 
     try {
         const url = isEdit
-            ? `/api/admin/users/<%= editUser ? editUser.id : '' %>`
+            ? '/api/admin/users/' + <%- jsonForScript(editUser ? editUser.id : '') %>
             : '/api/admin/users';
 
         const method = isEdit ? 'PUT' : 'POST';

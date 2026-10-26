@@ -5,6 +5,7 @@ const { getAsync, allAsync, runAsync } = require('../../models/database');
 const { requireStaffOrAdmin } = require('../../middleware/auth');
 const fs = require('fs').promises;
 const path = require('path');
+const { isSafeId, safeJoin } = require('../../utils/safeIds');
 
 // Validate subject ID exists in completed surveys
 router.get('/lab-results/validate-subject/:subjectId', requireStaffOrAdmin, async (req, res) => {
@@ -56,7 +57,9 @@ router.post('/lab-results',
         body('subject_id')
             .trim()
             .notEmpty()
-            .withMessage('Subject ID is required'),
+            .withMessage('Subject ID is required')
+            .custom(isSafeId)
+            .withMessage('Subject ID may only contain letters, numbers, "-" and "_"'),
         body('results')
             .isArray({ min: 1 })
             .withMessage('At least one test result is required'),
@@ -146,7 +149,7 @@ router.post('/lab-results',
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const fileName = `${subject_id}_${timestamp}.json`;
             const dirPath = path.join(__dirname, '../../..', 'data', 'uploads', 'labs');
-            const filePath = path.join(dirPath, fileName);
+            const filePath = safeJoin(dirPath, fileName);
 
             // Ensure directory exists
             await fs.mkdir(dirPath, { recursive: true });

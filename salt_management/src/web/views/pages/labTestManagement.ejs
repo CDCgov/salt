@@ -87,12 +87,12 @@
                         </td>
                         <td>
                             <a href="/admin/lab-tests/<%= test.id %>/edit" class="btn btn-sm">Edit</a>
-                            <button onclick="toggleTest(<%= test.id %>, <%= test.is_active %>)"
+                            <button data-id="<%= test.id %>" data-active="<%= test.is_active ? 1 : 0 %>" onclick="toggleTest(Number(this.dataset.id), Number(this.dataset.active))"
                                     class="btn btn-sm <%= test.is_active ? 'btn-warning' : 'btn-success' %>">
                                 <%= test.is_active ? 'Deactivate' : 'Activate' %>
                             </button>
                             <% if (test.result_count === 0) { %>
-                                <button onclick="deleteTest(<%= test.id %>, '<%= test.test_name %>')"
+                                <button data-id="<%= test.id %>" data-name="<%= test.test_name %>" onclick="deleteTest(Number(this.dataset.id), this.dataset.name)"
                                         class="btn btn-sm btn-danger">
                                     Delete
                                 </button>

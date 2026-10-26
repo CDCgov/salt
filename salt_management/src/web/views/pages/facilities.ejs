@@ -37,8 +37,8 @@
         <tbody>
             ${facilities.map(facility => `
                 <tr>
-                    <td>${facility.name}</td>
-                    <td>${facility.location || '-'}</td>
+                    <td>${h(facility.name)}</td>
+                    <td>${h(facility.location || '-')}</td>
                     <td>
                         <span style="color: ${facility.has_active_tablet ? 'green' : 'gray'}; font-weight: bold;">
                             ${facility.has_active_tablet ? '✓ Connected' : '— Not Setup'}
@@ -50,17 +50,33 @@
                         </span>
                     </td>
                     <td style="text-align: center;">
-                        <strong>${facility.coupons_to_issue}</strong>
+                        <strong>${h(facility.coupons_to_issue)}</strong>
                     </td>
                     <td>
                         <span style="color: ${facility.seed_recruitment_active ? 'green' : 'gray'}; font-weight: bold;">
                             ${facility.seed_recruitment_active ? 'Active' : 'Inactive'}
                         </span>
                     </td>
-                    <td style="text-align: center;">${facility.completed_count} / ${facility.enrollment_quota ?? '&infin;'}</td>
+                    <td style="text-align: center;">${h(facility.completed_count)} / ${facility.enrollment_quota != null ? h(facility.enrollment_quota) : '&infin;'}</td>
                     <td>
-                        <button onclick="editFacility(${facility.id}, '${facility.name}', '${facility.location || ''}', ${facility.allow_non_coupon_participants ? 'true' : 'false'}, ${facility.coupons_to_issue}, ${facility.seed_recruitment_active ? 'true' : 'false'}, ${facility.seed_contact_rate_days || 7}, ${facility.seed_recruitment_window_min_days || 0}, ${facility.seed_recruitment_window_max_days || 730}, '${facility.subject_payment_type || 'None'}', ${facility.participation_payment_amount || 0}, ${facility.recruitment_payment_amount || 0}, '${facility.payment_currency || 'USD'}', '${facility.payment_currency_symbol || '$'}', ${facility.enrollment_quota ?? 'null'})" class="btn" style="padding: 0.25rem 0.5rem;">Edit</button>
-                        <button onclick="confirmGenerateSetupCode(${facility.id}, '${facility.name}', ${facility.has_active_tablet ? 'true' : 'false'})" class="btn" style="padding: 0.25rem 0.5rem; background: #4CAF50; color: white;">Setup Code</button>
+                        <button data-facility="${h(JSON.stringify({
+                            id: facility.id,
+                            name: facility.name,
+                            location: facility.location || '',
+                            allow_non_coupon_participants: !!facility.allow_non_coupon_participants,
+                            coupons_to_issue: facility.coupons_to_issue,
+                            seed_recruitment_active: !!facility.seed_recruitment_active,
+                            seed_contact_rate_days: facility.seed_contact_rate_days || 7,
+                            seed_recruitment_window_min_days: facility.seed_recruitment_window_min_days || 0,
+                            seed_recruitment_window_max_days: facility.seed_recruitment_window_max_days || 730,
+                            subject_payment_type: facility.subject_payment_type || 'None',
+                            participation_payment_amount: facility.participation_payment_amount || 0,
+                            recruitment_payment_amount: facility.recruitment_payment_amount || 0,
+                            payment_currency: facility.payment_currency || 'USD',
+                            payment_currency_symbol: facility.payment_currency_symbol || '$',
+                            enrollment_quota: facility.enrollment_quota ?? null
+                        }))}" onclick="editFacility(JSON.parse(this.dataset.facility))" class="btn" style="padding: 0.25rem 0.5rem;">Edit</button>
+                        <button data-facility-id="${h(facility.id)}" data-facility-name="${h(facility.name)}" data-has-active-tablet="${facility.has_active_tablet ? 'true' : 'false'}" onclick="confirmGenerateSetupCode(this.dataset.facilityId, this.dataset.facilityName, this.dataset.hasActiveTablet === 'true')" class="btn" style="padding: 0.25rem 0.5rem; background: #4CAF50; color: white;">Setup Code</button>
                     </td>
                 </tr>
             `).join('')}
@@ -266,23 +282,23 @@ function hideAddFacilityForm() {
     document.getElementById('addFacilityModal').style.display = 'none';
 }
 
-function editFacility(id, name, location, allowNonCoupon, couponsToIssue, seedRecruitmentActive, seedContactRateDays, seedRecruitmentWindowMinDays, seedRecruitmentWindowMaxDays, subjectPaymentType, participationPaymentAmount, recruitmentPaymentAmount, paymentCurrency, paymentCurrencySymbol, enrollmentQuota) {
+function editFacility(facility) {
     const form = document.getElementById('editFacilityForm');
-    form.id.value = id;
-    form.name.value = name;
-    form.location.value = location;
-    form.allow_non_coupon_participants.checked = allowNonCoupon;
-    form.coupons_to_issue.value = couponsToIssue;
-    form.seed_recruitment_active.checked = seedRecruitmentActive;
-    form.seed_contact_rate_days.value = seedContactRateDays || 7;
-    form.seed_recruitment_window_min_days.value = seedRecruitmentWindowMinDays || 0;
-    form.seed_recruitment_window_max_days.value = seedRecruitmentWindowMaxDays || 730;
-    form.subject_payment_type.value = subjectPaymentType || 'None';
-    form.participation_payment_amount.value = participationPaymentAmount || 0;
-    form.recruitment_payment_amount.value = recruitmentPaymentAmount || 0;
-    form.payment_currency.value = paymentCurrency || 'USD';
-    form.payment_currency_symbol.value = paymentCurrencySymbol || '$';
-    form.enrollment_quota.value = (enrollmentQuota === null || enrollmentQuota === undefined) ? '' : enrollmentQuota;
+    form.id.value = facility.id;
+    form.name.value = facility.name;
+    form.location.value = facility.location || '';
+    form.allow_non_coupon_participants.checked = !!facility.allow_non_coupon_participants;
+    form.coupons_to_issue.value = facility.coupons_to_issue;
+    form.seed_recruitment_active.checked = !!facility.seed_recruitment_active;
+    form.seed_contact_rate_days.value = facility.seed_contact_rate_days || 7;
+    form.seed_recruitment_window_min_days.value = facility.seed_recruitment_window_min_days || 0;
+    form.seed_recruitment_window_max_days.value = facility.seed_recruitment_window_max_days || 730;
+    form.subject_payment_type.value = facility.subject_payment_type || 'None';
+    form.participation_payment_amount.value = facility.participation_payment_amount || 0;
+    form.recruitment_payment_amount.value = facility.recruitment_payment_amount || 0;
+    form.payment_currency.value = facility.payment_currency || 'USD';
+    form.payment_currency_symbol.value = facility.payment_currency_symbol || '$';
+    form.enrollment_quota.value = (facility.enrollment_quota === null || facility.enrollment_quota === undefined) ? '' : facility.enrollment_quota;
     document.getElementById('editFacilityModal').style.display = 'block';
 }
 

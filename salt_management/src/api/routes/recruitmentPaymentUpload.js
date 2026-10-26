@@ -35,6 +35,7 @@
 
 const express = require('express');
 const path = require('path');
+const { isSafeId, safeJoin } = require('../../utils/safeIds');
 const fs = require('fs').promises;
 const { runAsync, getAsync } = require('../../models/database');
 const { requireFacilityApiKey } = require('../../web/middleware/auth');
@@ -71,6 +72,13 @@ router.post('/recruitment-payment/upload', requireFacilityApiKey, async (req, re
             return res.status(400).json({
                 status: 'error',
                 message: 'Invalid payment data: missing paymentId'
+            });
+        }
+        // The payment ID becomes part of a file name; tablets send UUIDs.
+        if (!isSafeId(paymentData.paymentId)) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Invalid payment data: malformed paymentId'
             });
         }
 
@@ -144,7 +152,7 @@ router.post('/recruitment-payment/upload', requireFacilityApiKey, async (req, re
         };
 
         // Save to file system
-        const filepath = path.join(uploadsDir, filename);
+        const filepath = safeJoin(uploadsDir, filename);
         await fs.writeFile(filepath, JSON.stringify(uploadData, null, 2));
 
         // Add to memory cache

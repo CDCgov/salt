@@ -130,7 +130,7 @@
     </div>
 
 <script>
-const reportId = <%= typeof id !== 'undefined' && id ? id : 'null' %>;
+const reportId = <%- jsonForScript(typeof id !== 'undefined' && id ? id : null) %>;
 let originalContent = '';
 
 // Templates are loaded from the server (the same files MCP/list_templates use).

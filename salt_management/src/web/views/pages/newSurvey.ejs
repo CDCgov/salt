@@ -27,7 +27,7 @@
             <select id="basedOnSurveyId" style="width: 100%; padding: 0.5rem;">
                 <option value="">-- Start from scratch --</option>
                 ${existingSurveys.map(survey => `
-                    <option value="${survey.id}">v${survey.version}: ${survey.name}</option>
+                    <option value="${h(survey.id)}">v${h(survey.version)}: ${h(survey.name)}</option>
                 `).join('')}
             </select>
             <p style="color: #666; font-size: 0.9rem; margin-top: 0.5rem;">

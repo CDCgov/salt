@@ -26,11 +26,11 @@
         <tbody>
             ${surveys.map(survey => `
                 <tr>
-                    <td>v${survey.version}</td>
-                    <td>${survey.name}</td>
-                    <td>${survey.description || '-'}</td>
-                    <td>${survey.languages ? (typeof survey.languages === 'string' ? JSON.parse(survey.languages).join(', ') : survey.languages.join(', ')) : 'en'}</td>
-                    <td>${survey.question_count}</td>
+                    <td>v${h(survey.version)}</td>
+                    <td>${h(survey.name)}</td>
+                    <td>${h(survey.description || '-')}</td>
+                    <td>${h(survey.languages ? (typeof survey.languages === 'string' ? JSON.parse(survey.languages).join(', ') : survey.languages.join(', ')) : 'en')}</td>
+                    <td>${h(survey.question_count)}</td>
                     <td>
                         ${survey.is_active ? 
                             '<span style="color: green; font-weight: bold;">Active</span>' : 
@@ -38,14 +38,14 @@
                         }
                     </td>
                     <td>
-                        <a href="/surveys/${survey.id}/edit" class="btn" style="padding: 0.25rem 0.5rem;">Edit</a>
+                        <a href="/surveys/${h(survey.id)}/edit" class="btn" style="padding: 0.25rem 0.5rem;">Edit</a>
                         ${!survey.is_active ? 
-                            `<button onclick="activateSurvey(${survey.id})" class="btn" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;">Activate</button>` : 
+                            `<button data-survey-id="${h(survey.id)}" onclick="activateSurvey(this.dataset.surveyId)" class="btn" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;">Activate</button>` : 
                             ''
                         }
-                        <button onclick="cloneSurvey(${survey.id})" class="btn" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;">Clone</button>
+                        <button data-survey-id="${h(survey.id)}" onclick="cloneSurvey(Number(this.dataset.surveyId))" class="btn" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;">Clone</button>
                         ${!survey.is_active ? 
-                            `<button onclick="deleteSurvey(${survey.id}, '${survey.name.replace(/'/g, "\\'")}')" class="btn btn-danger" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;">Delete</button>` : 
+                            `<button data-survey-id="${h(survey.id)}" data-survey-name="${h(survey.name)}" onclick="deleteSurvey(this.dataset.surveyId, this.dataset.surveyName)" class="btn btn-danger" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;">Delete</button>` : 
                             ''
                         }
                     </td>

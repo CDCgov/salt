@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const { isSafeId, safeJoin } = require('../../utils/safeIds');
 const fs = require('fs').promises;
 const { body, validationResult } = require('express-validator');
 const { getAsync, runAsync, allAsync } = require('../../models/database');
@@ -18,7 +19,7 @@ async function ensureDir(dirPath) {
 
 // Upload survey from tablet (requires API key)
 router.post('/', validateApiKey, [
-    body('surveyId').notEmpty(),
+    body('surveyId').notEmpty().custom(isSafeId),
     body('surveyVersion').isInt(),
     body('participantId').optional(),
     body('responses').isArray(),
@@ -41,7 +42,7 @@ router.post('/', validateApiKey, [
 
         const timestamp = date.toISOString().replace(/[:.]/g, '-');
         const filename = `${surveyId}_${timestamp}.json`;
-        const filePath = path.join(dirPath, filename);
+        const filePath = safeJoin(dirPath, filename);
 
         // Prepare survey data
         const surveyData = {

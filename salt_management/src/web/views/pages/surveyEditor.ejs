@@ -1,11 +1,11 @@
 <% var body = ` 
-<h2>Edit Survey: ${survey.name}</h2>
+<h2>Edit Survey: ${h(survey.name)}</h2>
 
 <div class="card">
     <h3>Survey Details</h3>
     <form id="surveyForm" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-        <input type="text" id="surveyName" value="${survey.name}" placeholder="Survey Name" style="flex: 1; padding: 0.5rem;">
-        <input type="text" id="surveyDescription" value="${survey.description || ''}" placeholder="Description" style="flex: 2; padding: 0.5rem;">
+        <input type="text" id="surveyName" value="${h(survey.name)}" placeholder="Survey Name" style="flex: 1; padding: 0.5rem;">
+        <input type="text" id="surveyDescription" value="${h(survey.description || '')}" placeholder="Description" style="flex: 2; padding: 0.5rem;">
         <button type="submit" class="btn">Update Details</button>
     </form>
 </div>
@@ -18,23 +18,23 @@
     
     <div id="questionsList">
         ${questions.map((q, idx) => `
-            <div class="question-item" style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;" data-question-id="${q.id}">
+            <div class="question-item" style="border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem; border-radius: 4px;" data-question-id="${h(q.id)}">
                 <div style="display: flex; justify-content: space-between; align-items: start;">
                     <div style="flex: 1;">
-                        <strong>Q${idx + 1}: ${q.short_name}</strong>
-                        <p>${q.question_text}</p>
-                        <p style="color: #666; font-size: 0.9rem;">Type: ${q.question_type}</p>
+                        <strong>Q${idx + 1}: ${h(q.short_name)}</strong>
+                        <p>${h(q.question_text)}</p>
+                        <p style="color: #666; font-size: 0.9rem;">Type: ${h(q.question_type)}</p>
                         ${q.question_type === 'multiple_choice' && q.options.length > 0 ? `
                             <ul style="margin-top: 0.5rem;">
-                                ${q.options.map(opt => `<li>${opt.option_text}</li>`).join('')}
+                                ${q.options.map(opt => `<li>${h(opt.option_text)}</li>`).join('')}
                             </ul>
                         ` : ''}
-                        ${q.pre_script ? `<p style="color: #666; font-size: 0.9rem;">Skip Logic: ${q.pre_script}</p>` : ''}
-                        ${q.validation_script ? `<p style="color: #666; font-size: 0.9rem;">Validation: ${q.validation_script}</p>` : ''}
+                        ${q.pre_script ? `<p style="color: #666; font-size: 0.9rem;">Skip Logic: ${h(q.pre_script)}</p>` : ''}
+                        ${q.validation_script ? `<p style="color: #666; font-size: 0.9rem;">Validation: ${h(q.validation_script)}</p>` : ''}
                     </div>
                     <div>
-                        <button onclick="editQuestion(${q.id})" class="btn" style="padding: 0.25rem 0.5rem;">Edit</button>
-                        <button onclick="deleteQuestion(${q.id})" class="btn btn-danger" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;">Delete</button>
+                        <button data-question-id="${h(q.id)}" onclick="editQuestion(Number(this.dataset.questionId))" class="btn" style="padding: 0.25rem 0.5rem;">Edit</button>
+                        <button data-question-id="${h(q.id)}" onclick="deleteQuestion(this.dataset.questionId)" class="btn btn-danger" style="padding: 0.25rem 0.5rem; margin-left: 0.5rem;">Delete</button>
                     </div>
                 </div>
             </div>
@@ -99,7 +99,7 @@
 </div>
 
 <script>
-const surveyId = ${survey.id};
+const surveyId = ${jsonForScript(survey.id)};
 
 // Update survey details
 document.getElementById('surveyForm').addEventListener('submit', async (e) => {
@@ -138,7 +138,7 @@ function showAddQuestion() {
 
 function editQuestion(questionId) {
     // Find question data
-    const questions = ${JSON.stringify(questions)};
+    const questions = ${jsonForScript(questions)};
     const question = questions.find(q => q.id === questionId);
     
     if (!question) return;
@@ -162,7 +162,7 @@ function editQuestion(questionId) {
             div.className = 'option-item';
             div.style = 'display: flex; gap: 0.5rem; margin-bottom: 0.5rem;';
             div.innerHTML = \`
-                <input type="text" value="\${opt.option_text}" placeholder="Option text" style="flex: 1; padding: 0.5rem;">
+                <input type="text" value="\${escapeHtml(opt.option_text)}" placeholder="Option text" style="flex: 1; padding: 0.5rem;">
                 <button type="button" onclick="\${idx === 0 ? 'addOption()' : 'removeOption(this)'}" class="btn \${idx === 0 ? '' : 'btn-danger'}" style="padding: 0.5rem;">\${idx === 0 ? '+' : '-'}</button>
             \`;
             optionsList.appendChild(div);

@@ -91,6 +91,11 @@ app.use(session({
 
 // View engine setup
 app.set('view engine', 'ejs');
+
+// Output-escaping helpers available in every view (see web/viewHelpers.js).
+const viewHelpers = require('./web/viewHelpers');
+app.locals.h = viewHelpers.h;
+app.locals.jsonForScript = viewHelpers.jsonForScript;
 app.set('views', path.join(__dirname, 'web', 'views'));
 
 // Import routes

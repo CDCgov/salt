@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>
+        // Escape a value before inserting it into HTML from page scripts
+        // (innerHTML, template strings). Mirrors h() in web/viewHelpers.js.
+        window.escapeHtml = function (v) {
+            if (v === null || v === undefined) return '';
+            return String(v).replace(/[&<>"'`]/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;', '`': '&#96;' }[c];
+            });
+        };
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %> - SALT Management</title>

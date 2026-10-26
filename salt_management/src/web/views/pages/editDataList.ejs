@@ -61,9 +61,9 @@
                         <td>
                             <a href="/edit-data/<%= s.id %>" class="btn" style="padding: 0.25rem 0.5rem;">View / Edit</a>
                             <% if (s.deleted_at) { %>
-                                <button onclick="restoreSubject(<%= s.id %>)" class="btn" style="padding: 0.25rem 0.5rem;">Restore</button>
+                                <button data-id="<%= s.id %>" onclick="restoreSubject(this.dataset.id)" class="btn" style="padding: 0.25rem 0.5rem;">Restore</button>
                             <% } else { %>
-                                <button onclick="deleteSubject(<%= s.id %>, '<%= s.participant_id %>')" class="btn" style="padding: 0.25rem 0.5rem; background: #c00; color: white;">Delete</button>
+                                <button data-id="<%= s.id %>" data-participant-id="<%= s.participant_id %>" onclick="deleteSubject(this.dataset.id, this.dataset.participantId)" class="btn" style="padding: 0.25rem 0.5rem; background: #c00; color: white;">Delete</button>
                             <% } %>
                         </td>
                     </tr>
@@ -85,7 +85,7 @@ async function deleteSubject(id, participantId) {
         return;
     }
     try {
-        const r = await fetch(`/api/admin/subjects/${id}/delete`, { method: 'POST' });
+        const r = await fetch(`/api/admin/subjects/${encodeURIComponent(id)}/delete`, { method: 'POST' });
         const data = await r.json();
         if (data.status !== 'success') throw new Error(data.message || 'Delete failed');
         location.reload();
@@ -96,7 +96,7 @@ async function deleteSubject(id, participantId) {
 
 async function restoreSubject(id) {
     try {
-        const r = await fetch(`/api/admin/subjects/${id}/restore`, { method: 'POST' });
+        const r = await fetch(`/api/admin/subjects/${encodeURIComponent(id)}/restore`, { method: 'POST' });
         const data = await r.json();
         if (data.status !== 'success') throw new Error(data.message || 'Restore failed');
         location.reload();

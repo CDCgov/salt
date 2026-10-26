@@ -3,7 +3,7 @@ var pageTitle = typeof title !== 'undefined' ? title : 'Report History';
 var reportId = typeof id !== 'undefined' ? id : null;
 var reportName = typeof name !== 'undefined' ? name : 'Report';
 var body = `
-<h2>Report History: ${reportName}</h2>
+<h2>Report History: ${h(reportName)}</h2>
 
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -157,7 +157,7 @@ var body = `
 </style>
 
 <script>
-const reportId = ${reportId ? reportId : 'null'};
+const reportId = ${jsonForScript(reportId ? reportId : null)};
 let runs = [];
 let refreshInterval = null;
 
@@ -244,27 +244,27 @@ function renderHistory(runs) {
             <div class="history-row">
                 <div class="run-header">
                     <div class="run-info">
-                        <div class="run-date">\${startTime.toLocaleString()}</div>
+                        <div class="run-date">\${escapeHtml(startTime.toLocaleString())}</div>
                         <div class="run-meta">
-                            <span class="run-status status-\${run.status}">\${run.status}</span>
-                            Type: \${run.run_type} | Duration: \${formatDuration(duration)}
-                            \${run.error_message ? \` | Error: \${run.error_message}\` : ''}
+                            <span class="run-status status-\${escapeHtml(run.status)}">\${escapeHtml(run.status)}</span>
+                            Type: \${escapeHtml(run.run_type)} | Duration: \${escapeHtml(formatDuration(duration))}
+                            \${run.error_message ? \` | Error: \${escapeHtml(run.error_message)}\` : ''}
                         </div>
                     </div>
                 </div>
                 <div class="run-actions">
                     \${run.status === 'completed' ? \`
-                        <a href="/api/admin/reports/runs/\${run.run_id}/download/pdf" class="download-btn pdf">
+                        <a href="/api/admin/reports/runs/\${encodeURIComponent(run.run_id)}/download/pdf" class="download-btn pdf">
                             <i class="fas fa-file-pdf"></i> PDF
                         </a>
-                        <a href="/api/admin/reports/runs/\${run.run_id}/download/html" class="download-btn html">
+                        <a href="/api/admin/reports/runs/\${encodeURIComponent(run.run_id)}/download/html" class="download-btn html">
                             <i class="fas fa-file-code"></i> HTML
                         </a>
-                        <a href="/api/admin/reports/runs/\${run.run_id}/download/docx" class="download-btn docx">
+                        <a href="/api/admin/reports/runs/\${encodeURIComponent(run.run_id)}/download/docx" class="download-btn docx">
                             <i class="fas fa-file-word"></i> DOCX
                         </a>
                     \` : ''}
-                    <button class="logs-btn" onclick="viewLogs('\${run.run_id}')">
+                    <button class="logs-btn" data-run-id="\${escapeHtml(run.run_id)}" onclick="viewLogs(this.dataset.runId)">
                         <i class="fas fa-terminal"></i> View Logs
                     </button>
                 </div>
@@ -327,7 +327,7 @@ function showError(message) {
     document.getElementById('historyList').innerHTML = \`
         <div style="padding: 2rem; text-align: center; color: #dc3545;">
             <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
-            <p>\${message}</p>
+            <p>\${escapeHtml(message)}</p>
         </div>
     \`;
 }

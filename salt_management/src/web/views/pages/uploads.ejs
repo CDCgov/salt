@@ -32,7 +32,7 @@
                         <td><%= new Date(upload.upload_time).toLocaleString() %></td>
                         <td>
                             <% if (upload.file_path) { %>
-                                <button onclick="viewData('<%= upload.survey_response_id %>')" class="btn" style="padding: 0.25rem 0.5rem;">View</button>
+                                <button data-id="<%= upload.survey_response_id %>" onclick="viewData(this.dataset.id)" class="btn" style="padding: 0.25rem 0.5rem;">View</button>
                             <% } else { %>
                                 -
                             <% } %>
@@ -61,7 +61,7 @@
 <script>
 async function viewData(surveyId) {
     try {
-        const response = await fetch('/api/uploads/' + surveyId);
+        const response = await fetch('/api/uploads/' + encodeURIComponent(surveyId));
         if (!response.ok) {
             throw new Error('Failed to fetch upload data');
         }

@@ -66,6 +66,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const { db, runAsync, getAsync } = require('../../models/database');
 const { requireFacilityApiKey } = require('../../web/middleware/auth');
+const { isSafeId, safeJoin } = require('../../utils/safeIds');
 const router = express.Router();
 
 /**
@@ -91,6 +92,13 @@ router.post('/survey/upload', requireFacilityApiKey, async (req, res) => {
             return res.status(400).json({
                 status: 'error',
                 message: 'Invalid survey data: missing survey ID'
+            });
+        }
+        // The survey ID becomes part of a file name; tablets send UUIDs.
+        if (!isSafeId(surveyData.surveyId)) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Invalid survey data: malformed survey ID'
             });
         }
         
@@ -137,7 +145,7 @@ router.post('/survey/upload', requireFacilityApiKey, async (req, res) => {
         // Save to file system
         const uploadsDir = path.join(__dirname, '..', '..', '..', 'data', 'uploads', 'surveys');
         await fs.mkdir(uploadsDir, { recursive: true });
-        const filepath = path.join(uploadsDir, filename);
+        const filepath = safeJoin(uploadsDir, filename);
         await fs.writeFile(filepath, JSON.stringify(uploadData, null, 2));
 
         // Begin transaction for database insertion

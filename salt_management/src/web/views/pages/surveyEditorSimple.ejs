@@ -38,18 +38,18 @@ bodyHtml += '<script src="/js/lamejs/lame.min.js"></script>\n';
 bodyHtml += '<script src="/js/marked/marked.min.js"></script>\n';
 bodyHtml += '<script src="/js/dompurify/purify.min.js"></script>\n';
 bodyHtml += '<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">\n';
-bodyHtml += '  <h2 style="margin: 0;">Survey Editor: ' + survey.name + ' (v' + survey.version + ')</h2>\n';
-bodyHtml += '  <a href="/api/admin/surveys/' + survey.id + '/export" class="btn">Export Survey</a>\n';
+bodyHtml += '  <h2 style="margin: 0;">Survey Editor: ' + h(survey.name) + ' (v' + h(survey.version) + ')</h2>\n';
+bodyHtml += '  <a href="/api/admin/surveys/' + h(survey.id) + '/export" class="btn">Export Survey</a>\n';
 bodyHtml += '</div>\n';
 
 // Survey info card
 bodyHtml += '<div class="card">\n';
 bodyHtml += '    <h3>Survey Information</h3>\n';
-bodyHtml += '    <p><strong>Name:</strong> ' + survey.name + '</p>\n';
-bodyHtml += '    <p><strong>Version:</strong> ' + survey.version + '</p>\n';
-bodyHtml += '    <p><strong>Description:</strong> ' + (survey.description || 'No description') + '</p>\n';
+bodyHtml += '    <p><strong>Name:</strong> ' + h(survey.name) + '</p>\n';
+bodyHtml += '    <p><strong>Version:</strong> ' + h(survey.version) + '</p>\n';
+bodyHtml += '    <p><strong>Description:</strong> ' + h(survey.description || 'No description') + '</p>\n';
 bodyHtml += '    <p><strong>Status:</strong> ' + (survey.is_active ? 'Active' : 'Inactive') + '</p>\n';
-bodyHtml += '    <p><strong>Languages:</strong> ' + surveyLanguages.join(', ') + '</p>\n';
+bodyHtml += '    <p><strong>Languages:</strong> ' + h(surveyLanguages.join(', ')) + '</p>\n';
 bodyHtml += '</div>\n';
 
 // General Settings card
@@ -64,7 +64,7 @@ bodyHtml += '        <small style="color: #666; margin-left: 1.5rem;">Requires f
 bodyHtml += '    </div>\n';
 bodyHtml += '    <div style="margin-bottom: 1rem;">\n';
 bodyHtml += '        <label style="display: block; margin-bottom: 0.25rem;">Re-enrollment Period (days)</label>\n';
-bodyHtml += '        <input type="number" id="reEnrollmentDays" value="' + (survey.re_enrollment_days || 90) + '" min="1" max="365" style="padding: 0.5rem; width: 150px;">\n';
+bodyHtml += '        <input type="number" id="reEnrollmentDays" value="' + h(survey.re_enrollment_days || 90) + '" min="1" max="365" style="padding: 0.5rem; width: 150px;">\n';
 bodyHtml += '        <small style="display: block; color: #666; margin-top: 0.25rem;">Number of days before a participant can re-enroll</small>\n';
 bodyHtml += '    </div>\n';
 bodyHtml += '    <div style="margin-bottom: 1rem;">\n';
@@ -120,9 +120,9 @@ bodyHtml += '        <strong>Current Languages:</strong>\n';
 bodyHtml += '        <div id="languagesList" style="margin: 0.5rem 0;">\n';
 surveyLanguages.forEach(lang => {
     bodyHtml += '            <div class="language-item" style="display: inline-block; margin: 0.25rem; padding: 0.5rem; background: #f0f0f0; border-radius: 4px;">\n';
-    bodyHtml += '                ' + lang + '\n';
+    bodyHtml += '                ' + h(lang) + '\n';
     if (surveyLanguages.length > 1) {  // Don't allow removing the last language
-        bodyHtml += '                <button onclick="removeLanguage(\'' + lang + '\')" style="margin-left: 0.5rem; background: #e74c3c; color: white; border: none; padding: 0.2rem 0.5rem; border-radius: 3px; cursor: pointer;">×</button>\n';
+        bodyHtml += '                <button data-lang="' + h(lang) + '" onclick="removeLanguage(this.dataset.lang)" style="margin-left: 0.5rem; background: #e74c3c; color: white; border: none; padding: 0.2rem 0.5rem; border-radius: 3px; cursor: pointer;">×</button>\n';
     }
     bodyHtml += '            </div>\n';
 });
@@ -139,12 +139,12 @@ bodyHtml += '<div class="card">\n';
 bodyHtml += '    <h3>Eligibility and Coupon Settings</h3>\n';
 bodyHtml += '    <div style="margin-bottom: 1rem;">\n';
 bodyHtml += '        <label><strong>Eligibility Script (JEXL Expression):</strong></label>\n';
-bodyHtml += '        <textarea id="eligibilityScript" style="width: 100%; min-height: 60px; padding: 0.5rem; font-family: monospace;">' + (survey.eligibility_script || '') + '</textarea>\n';
+bodyHtml += '        <textarea id="eligibilityScript" style="width: 100%; min-height: 60px; padding: 0.5rem; font-family: monospace;">' + h(survey.eligibility_script || '') + '</textarea>\n';
 bodyHtml += '        <small style="color: #666;">This script runs after the eligibility section. Example: consent == "1" && age >= 18 && age <= 65</small>\n';
 bodyHtml += '    </div>\n';
 bodyHtml += '    <div style="margin-bottom: 1rem;">\n';
 bodyHtml += '        <label><strong>Coupon Count Script (JEXL Expression, optional):</strong></label>\n';
-bodyHtml += '        <textarea id="couponCountScript" style="width: 100%; min-height: 60px; padding: 0.5rem; font-family: monospace;">' + (survey.coupon_count_script || '') + '</textarea>\n';
+bodyHtml += '        <textarea id="couponCountScript" style="width: 100%; min-height: 60px; padding: 0.5rem; font-family: monospace;">' + h(survey.coupon_count_script || '') + '</textarea>\n';
 bodyHtml += '        <small style="color: #666;">Runs at survey completion and can lower the number of coupons issued. The facility\'s coupon setting is always the ceiling; the script can never raise it. '
 bodyHtml += 'Leave blank to always issue the facility count. A number issues that many (floored, clamped to 0..ceiling). true issues the facility count, false issues none. '
 bodyHtml += 'Errors or a null result fall back to the facility count. Single-choice answers are the 0-based option index; numeric answers are numbers; <code>facility_coupons</code> holds the ceiling. '
@@ -169,12 +169,12 @@ if (sectionsData.length > 0) {
     sectionsData.forEach(section => {
         bodyHtml += '    <div class="section-group" style="margin-bottom: 2rem;">\n';
         bodyHtml += '        <h4 style="background: #f0f0f0; padding: 0.5rem; border-radius: 4px; margin-bottom: 0.5rem;">';
-        bodyHtml += section.name + ' (' + section.section_type + ')';
+        bodyHtml += h(section.name) + ' (' + h(section.section_type) + ')';
         if (section.section_type === 'eligibility') {
             bodyHtml += ' <span style="color: #e74c3c; font-size: 0.9rem;">⚠️ Determines eligibility</span>';
         }
         bodyHtml += '</h4>\n';
-        bodyHtml += '        <div class="section-questions" data-section-id="' + section.id + '">\n';
+        bodyHtml += '        <div class="section-questions" data-section-id="' + h(section.id) + '">\n';
         
         // Filter questions that belong to this section
         const sectionQuestions = questionsData.filter(q => q.section_id === section.id);
@@ -206,21 +206,21 @@ bodyHtml += '        <button onclick="saveQuestionOrder()" class="btn">Save Orde
 bodyHtml += '    </div>\n';
 
 function addQuestionHtml(q) {
-    bodyHtml += '        <div class="question-item" draggable="true" data-question-id="' + q.id + '" data-question-index="' + q.question_index + '">\n';
+    bodyHtml += '        <div class="question-item" draggable="true" data-question-id="' + h(q.id) + '" data-question-index="' + h(q.question_index) + '">\n';
     bodyHtml += '            <div class="question-header">\n';
     bodyHtml += '                <div style="flex: 1;">\n';
     bodyHtml += '                    <span class="drag-handle">≡</span>\n';
-    bodyHtml += '                    <span class="question-number">Q' + (q.question_index + 1) + '</span>\n';
-    bodyHtml += '                    <strong>' + q.short_name + '</strong>\n';
-    bodyHtml += '                    <span class="question-type-badge">' + q.question_type.replace('_', ' ') + '</span>\n';
+    bodyHtml += '                    <span class="question-number">Q' + h(q.question_index + 1) + '</span>\n';
+    bodyHtml += '                    <strong>' + h(q.short_name) + '</strong>\n';
+    bodyHtml += '                    <span class="question-type-badge">' + h(q.question_type.replace('_', ' ')) + '</span>\n';
     bodyHtml += '                </div>\n';
-    bodyHtml += '                <button onclick="editQuestion(' + q.id + ')" class="btn btn-sm">Edit</button>\n';
-    bodyHtml += '                <button onclick="deleteQuestion(' + q.id + ')" class="btn btn-sm btn-danger" style="margin-left: 0.5rem;">Delete</button>\n';
+    bodyHtml += '                <button data-question-id="' + h(q.id) + '" onclick="editQuestion(Number(this.dataset.questionId))" class="btn btn-sm">Edit</button>\n';
+    bodyHtml += '                <button data-question-id="' + h(q.id) + '" onclick="deleteQuestion(Number(this.dataset.questionId))" class="btn btn-sm btn-danger" style="margin-left: 0.5rem;">Delete</button>\n';
     bodyHtml += '            </div>\n';
     bodyHtml += '            <div style="margin-left: 2rem;">\n';
     // Get the first language text (use first survey language)
     const primaryText = q.texts[surveyLanguages[0]] || q.texts[Object.keys(q.texts)[0]] || 'No text';
-    bodyHtml += '                <p style="margin: 0.5rem 0;">' + primaryText + '</p>\n';
+    bodyHtml += '                <p style="margin: 0.5rem 0;">' + h(primaryText) + '</p>\n';
     
     // Show other language texts (only those active in survey)
     Object.keys(q.texts).filter(lang => {
@@ -229,7 +229,7 @@ function addQuestionHtml(q) {
         return surveyLanguages.some(activeLang => activeLang.toLowerCase() === lang.toLowerCase());
     }).forEach(lang => {
         bodyHtml += '                <p style="margin: 0.25rem 0; color: #666; font-size: 0.9rem;">\n';
-        bodyHtml += '                    <strong>' + lang + ':</strong> ' + q.texts[lang] + '\n';
+        bodyHtml += '                    <strong>' + h(lang) + ':</strong> ' + h(q.texts[lang]) + '\n';
         bodyHtml += '                </p>\n';
     });
     
@@ -242,7 +242,7 @@ function addQuestionHtml(q) {
             bodyHtml += '                    <div class="option-item">\n';
             bodyHtml += '                        <span class="option-index">' + optIdx + '</span>\n';
             const optPrimaryText = optTexts[surveyLanguages[0]] || optTexts[Object.keys(optTexts)[0]] || 'No text';
-            bodyHtml += '                        ' + optPrimaryText + '\n';
+            bodyHtml += '                        ' + h(optPrimaryText) + '\n';
             bodyHtml += '                    </div>\n';
             });
         bodyHtml += '                </div>\n';
@@ -251,13 +251,13 @@ function addQuestionHtml(q) {
     // Show skip logic and validation
     bodyHtml += '                <div>\n';
     if (q.pre_script) {
-        bodyHtml += '                    <span class="skip-logic-tag">Skip Logic: ' + q.pre_script + '</span>\n';
+        bodyHtml += '                    <span class="skip-logic-tag">Skip Logic: ' + h(q.pre_script) + '</span>\n';
     }
     if (q.skip_to_script && q.skip_to_target) {
-        bodyHtml += '                    <span class="skip-logic-tag" style="background: #e8f5e9; color: #2e7d32;">Skip-To: ' + q.skip_to_script + ' → ' + q.skip_to_target + '</span>\n';
+        bodyHtml += '                    <span class="skip-logic-tag" style="background: #e8f5e9; color: #2e7d32;">Skip-To: ' + h(q.skip_to_script) + ' → ' + h(q.skip_to_target) + '</span>\n';
     }
     if (q.validation_script) {
-        bodyHtml += '                    <span class="validation-tag">Validation: ' + q.validation_script + '</span>\n';
+        bodyHtml += '                    <span class="validation-tag">Validation: ' + h(q.validation_script) + '</span>\n';
     }
     bodyHtml += '                </div>\n';
     bodyHtml += '            </div>\n';
@@ -281,7 +281,7 @@ bodyHtml += '                <div class="form-group">\n';
 bodyHtml += '                    <label>Section</label>\n';
 bodyHtml += '                    <select id="sectionId" class="form-control">\n';
 sectionsData.forEach(section => {
-    bodyHtml += '                        <option value="' + section.id + '">' + section.name + ' (' + section.section_type + ')</option>\n';
+    bodyHtml += '                        <option value="' + h(section.id) + '">' + h(section.name) + ' (' + h(section.section_type) + ')</option>\n';
 });
 bodyHtml += '                    </select>\n';
 bodyHtml += '                </div>\n';
@@ -309,14 +309,14 @@ surveyLanguages.forEach(lang => {
     const langId = lang.replace(/\s+/g, '_');
     bodyHtml += '                    <div class="form-group">\n';
     bodyHtml += '                        <div style="display: flex; gap: 0.5rem; align-items: flex-start;">\n';
-    bodyHtml += '                            <textarea id="text_' + langId + '" class="form-control" placeholder="' + lang + ' text (Markdown supported)" rows="3" oninput="renderMarkdownPreview(\'' + langId + '\')" ' + (lang === surveyLanguages[0] ? 'required' : '') + ' style="flex: 1;"></textarea>\n';
+    bodyHtml += '                            <textarea id="text_' + h(langId) + '" class="form-control" placeholder="' + h(lang) + ' text (Markdown supported)" rows="3" data-lang-id="' + h(langId) + '" oninput="renderMarkdownPreview(this.dataset.langId)" ' + (lang === surveyLanguages[0] ? 'required' : '') + ' style="flex: 1;"></textarea>\n';
     bodyHtml += '                            <div style="display: flex; flex-direction: column; gap: 0.25rem;">\n';
-    bodyHtml += '                                <button type="button" id="record_' + langId + '" onclick="toggleRecording(\'' + langId + '\')" class="btn btn-sm" style="width: 100px;">🎤 Record</button>\n';
-    bodyHtml += '                                <button type="button" id="play_' + langId + '" onclick="playAudio(\'' + langId + '\')" class="btn btn-sm" style="display: none;">▶️ Play</button>\n';
+    bodyHtml += '                                <button type="button" id="record_' + h(langId) + '" data-lang-id="' + h(langId) + '" onclick="toggleRecording(this.dataset.langId)" class="btn btn-sm" style="width: 100px;">🎤 Record</button>\n';
+    bodyHtml += '                                <button type="button" id="play_' + h(langId) + '" data-lang-id="' + h(langId) + '" onclick="playAudio(this.dataset.langId)" class="btn btn-sm" style="display: none;">▶️ Play</button>\n';
     bodyHtml += '                            </div>\n';
     bodyHtml += '                        </div>\n';
-    bodyHtml += '                        <input type="hidden" id="audio_' + langId + '">\n';
-    bodyHtml += '                        <div class="md-preview" id="preview_' + langId + '" style="display: none; margin-top: 0.25rem; padding: 0.5rem 0.75rem; border: 1px dashed #ccc; border-radius: 4px; background: #fafafa;"></div>\n';
+    bodyHtml += '                        <input type="hidden" id="audio_' + h(langId) + '">\n';
+    bodyHtml += '                        <div class="md-preview" id="preview_' + h(langId) + '" style="display: none; margin-top: 0.25rem; padding: 0.5rem 0.75rem; border: 1px dashed #ccc; border-radius: 4px; background: #fafafa;"></div>\n';
     bodyHtml += '                    </div>\n';
 });
 bodyHtml += '                </div>\n';
@@ -408,12 +408,12 @@ bodyHtml += '</style>\n';
 
 // Add JavaScript
 bodyHtml += '<script>\n';
-bodyHtml += 'const surveyId = ' + survey.id + ';\n';
-bodyHtml += 'const surveyLanguages = ' + JSON.stringify(surveyLanguages) + ';\n';
-bodyHtml += 'const sectionsData = ' + JSON.stringify(sectionsData) + ';\n';
-bodyHtml += 'let questionOrder = [' + questions.map(q => q.id).join(', ') + '];\n';
+bodyHtml += 'const surveyId = ' + jsonForScript(survey.id) + ';\n';
+bodyHtml += 'const surveyLanguages = ' + jsonForScript(surveyLanguages) + ';\n';
+bodyHtml += 'const sectionsData = ' + jsonForScript(sectionsData) + ';\n';
+bodyHtml += 'let questionOrder = ' + jsonForScript(questions.map(q => q.id)) + ';\n';
 bodyHtml += 'let draggedElement = null;\n';
-bodyHtml += 'let questionsData = ' + JSON.stringify(questionsData) + ';\n';
+bodyHtml += 'let questionsData = ' + jsonForScript(questionsData) + ';\n';
 bodyHtml += 'let systemMessages = {};\n';
 bodyHtml += 'let messageAudioRecorders = {};\n';
 bodyHtml += '\n';
@@ -537,31 +537,31 @@ bodyHtml += '        html += `<div class="message-section" style="margin-bottom:
 bodyHtml += '        html += `<h4>${msgDef.title}</h4>`;\n';
 bodyHtml += '        html += `<p style="color: #666; font-size: 0.9rem;">${msgDef.description}</p>`;\n';
 bodyHtml += '        \n';
-bodyHtml += '        const languages = ' + JSON.stringify(surveyLanguages) + ';\n';
+bodyHtml += '        const languages = ' + jsonForScript(surveyLanguages) + ';\n';
 bodyHtml += '        languages.forEach(lang => {\n';
 bodyHtml += '            const langId = lang.replace(/\\s+/g, "_");\n';
 bodyHtml += '            const messageText = msg.text[lang] || "";\n';
 bodyHtml += '            const hasAudio = msg.audio && msg.audio[lang];\n';
 bodyHtml += '            \n';
 bodyHtml += '            html += `<div style="margin: 1rem 0; padding: 1rem; background: white; border-radius: 4px;">`;\n';
-bodyHtml += '            html += `<label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">${lang}:</label>`;\n';
-bodyHtml += '            html += `<textarea id="msg_${msgDef.key}_${langId}" data-key="${msgDef.key}" data-lang="${lang}" rows="2" style="width: 100%; padding: 0.5rem;" placeholder="Enter ${lang.toLowerCase()} message...">${messageText}</textarea>`;\n';
+bodyHtml += '            html += `<label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">${escapeHtml(lang)}:</label>`;\n';
+bodyHtml += '            html += `<textarea id="msg_${msgDef.key}_${escapeHtml(langId)}" data-key="${msgDef.key}" data-lang="${escapeHtml(lang)}" rows="2" style="width: 100%; padding: 0.5rem;" placeholder="Enter ${escapeHtml(lang.toLowerCase())} message...">${escapeHtml(messageText)}</textarea>`;\n';
 bodyHtml += '            \n';
 bodyHtml += '            // Audio controls\n';
 bodyHtml += '            html += `<div style="margin-top: 0.5rem; display: flex; gap: 0.5rem; align-items: center;">`;\n';
-bodyHtml += '            html += `<button onclick="startMessageRecording(\'${msgDef.key}\', \'${lang}\')" id="record_${msgDef.key}_${langId}" class="btn btn-sm" style="background: #e74c3c;">🎤 Record Audio</button>`;\n';
-bodyHtml += '            html += `<button onclick="stopMessageRecording(\'${msgDef.key}\', \'${lang}\')" id="stop_${msgDef.key}_${langId}" class="btn btn-sm" style="display: none; background: #95a5a6;">⏹ Stop</button>`;\n';
+bodyHtml += '            html += `<button data-key="${msgDef.key}" data-lang="${escapeHtml(lang)}" onclick="startMessageRecording(this.dataset.key, this.dataset.lang)" id="record_${msgDef.key}_${escapeHtml(langId)}" class="btn btn-sm" style="background: #e74c3c;">🎤 Record Audio</button>`;\n';
+bodyHtml += '            html += `<button data-key="${msgDef.key}" data-lang="${escapeHtml(lang)}" onclick="stopMessageRecording(this.dataset.key, this.dataset.lang)" id="stop_${msgDef.key}_${escapeHtml(langId)}" class="btn btn-sm" style="display: none; background: #95a5a6;">⏹ Stop</button>`;\n';
 bodyHtml += '            if (hasAudio) {\n';
-bodyHtml += '                html += `<button onclick="playMessageAudio(\'${msgDef.key}\', \'${lang}\')" class="btn btn-sm" style="background: #3498db;">▶ Play</button>`;\n';
-bodyHtml += '                html += `<button onclick="deleteMessageAudio(\'${msgDef.key}\', \'${lang}\')" class="btn btn-sm" style="background: #e67e22;">🗑 Delete Audio</button>`;\n';
+bodyHtml += '                html += `<button data-key="${msgDef.key}" data-lang="${escapeHtml(lang)}" onclick="playMessageAudio(this.dataset.key, this.dataset.lang)" class="btn btn-sm" style="background: #3498db;">▶ Play</button>`;\n';
+bodyHtml += '                html += `<button data-key="${msgDef.key}" data-lang="${escapeHtml(lang)}" onclick="deleteMessageAudio(this.dataset.key, this.dataset.lang)" class="btn btn-sm" style="background: #e67e22;">🗑 Delete Audio</button>`;\n';
 bodyHtml += '            }\n';
-bodyHtml += '            html += `<audio id="audio_${msgDef.key}_${langId}" style="display: none;"></audio>`;\n';
+bodyHtml += '            html += `<audio id="audio_${msgDef.key}_${escapeHtml(langId)}" style="display: none;"></audio>`;\n';
 bodyHtml += '            html += `</div>`;\n';
 bodyHtml += '            \n';
 bodyHtml += '            html += `</div>`;\n';
 bodyHtml += '        });\n';
 bodyHtml += '        \n';
-bodyHtml += '        html += `<button onclick="saveSystemMessage(\'${msgDef.key}\')" class="btn" style="background: #27ae60;">Save ${msgDef.title}</button>`;\n';
+bodyHtml += '        html += `<button onclick="saveSystemMessage(\'${msgDef.key}\')" class="btn" style="background: #27ae60;">Save ${escapeHtml(msgDef.title)}</button>`;\n';
 bodyHtml += '        html += `</div>`;\n';
 bodyHtml += '    });\n';
 bodyHtml += '    \n';
@@ -1055,11 +1055,11 @@ bodyHtml += '        const langId = lang.replace(/\\s+/g, "_");\n';
 bodyHtml += '        const optId = "opt_" + optionIndex + "_" + langId;\n';
 bodyHtml += '        html += \'<div style="margin-bottom: 0.5rem;">\';\n';
 bodyHtml += '        html += \'  <div style="display: flex; gap: 0.5rem; align-items: center;">\';\n';
-bodyHtml += '        html += \'    <input type="text" class="form-control option-text" data-lang="\' + lang + \'" placeholder="\' + lang + \' option" value="\' + (texts[lang] || "") + \'" style="flex: 1;">\';\n';
-bodyHtml += '        html += \'    <button type="button" onclick="toggleOptionRecording(\\\'\' + optId + \'\\\')" class="btn btn-sm" style="width: 100px;">🎤 Record</button>\';\n';
-bodyHtml += '        html += \'    <button type="button" onclick="playOptionAudio(\\\'\' + optId + \'\\\')" class="btn btn-sm" style="display: \' + (audioData && audioData[lang] ? "inline-block" : "none") + \';">▶️ Play</button>\';\n';
+bodyHtml += '        html += \'    <input type="text" class="form-control option-text" data-lang="\' + escapeHtml(lang) + \'" placeholder="\' + escapeHtml(lang) + \' option" value="\' + escapeHtml(texts[lang] || "") + \'" style="flex: 1;">\';\n';
+bodyHtml += '        html += \'    <button type="button" data-opt-id="\' + escapeHtml(optId) + \'" onclick="toggleOptionRecording(this.dataset.optId)" class="btn btn-sm" style="width: 100px;">🎤 Record</button>\';\n';
+bodyHtml += '        html += \'    <button type="button" data-opt-id="\' + escapeHtml(optId) + \'" onclick="playOptionAudio(this.dataset.optId)" class="btn btn-sm" style="display: \' + (audioData && audioData[lang] ? "inline-block" : "none") + \';">▶️ Play</button>\';\n';
 bodyHtml += '        html += \'  </div>\';\n';
-bodyHtml += '        html += \'  <input type="hidden" class="option-audio" data-lang="\' + lang + \'" id="audio_\' + optId + \'" value="\' + (audioData && audioData[lang] || "") + \'">\';\n';
+bodyHtml += '        html += \'  <input type="hidden" class="option-audio" data-lang="\' + escapeHtml(lang) + \'" id="audio_\' + escapeHtml(optId) + \'" value="\' + escapeHtml(audioData && audioData[lang] || "") + \'">\';\n';
 bodyHtml += '        html += \'</div>\';\n';
 bodyHtml += '    });\n';
 bodyHtml += '    html += \'<button type="button" onclick="removeOption(this)" class="btn btn-danger btn-sm">Remove Option</button>\';\n';
@@ -1612,18 +1612,18 @@ bodyHtml += '    \n';
 bodyHtml += '    tests.forEach(test => {\n';
 bodyHtml += '        html += "<tr style=\\"border-bottom: 1px solid #eee;\\">";\n';
 bodyHtml += '        html += "<td style=\\"padding: 0.75rem;\\">";\n';
-bodyHtml += '        html += "<span id=\\"test_" + test.test_id + "_name_display\\">" + test.test_name + "</span>";\n';
-bodyHtml += '        html += "<input type=\\"text\\" id=\\"test_" + test.test_id + "_name_edit\\" value=\\"" + test.test_name + "\\" style=\\"display: none; padding: 0.25rem;\\">";\n';
+bodyHtml += '        html += "<span id=\\"test_" + escapeHtml(test.test_id) + "_name_display\\">" + escapeHtml(test.test_name) + "</span>";\n';
+bodyHtml += '        html += "<input type=\\"text\\" id=\\"test_" + escapeHtml(test.test_id) + "_name_edit\\" value=\\"" + escapeHtml(test.test_name) + "\\" style=\\"display: none; padding: 0.25rem;\\">";\n';
 bodyHtml += '        html += "</td>";\n';
-bodyHtml += '        html += "<td style=\\"padding: 0.75rem; font-family: monospace; color: #666;\\">" + test.test_id + "</td>";\n';
+bodyHtml += '        html += "<td style=\\"padding: 0.75rem; font-family: monospace; color: #666;\\">" + escapeHtml(test.test_id) + "</td>";\n';
 bodyHtml += '        html += "<td style=\\"padding: 0.75rem; text-align: center;\\">";\n';
-bodyHtml += '        html += "<input type=\\"checkbox\\" id=\\"test_" + test.test_id + "_enabled\\" " + (test.enabled ? "checked" : "") + " onchange=\\"toggleTest(\'" + test.test_id + "\')\\">";\n';
+bodyHtml += '        html += "<input type=\\"checkbox\\" id=\\"test_" + escapeHtml(test.test_id) + "_enabled\\" " + (test.enabled ? "checked" : "") + " data-test-id=\\"" + escapeHtml(test.test_id) + "\\" onchange=\\"toggleTest(this.dataset.testId)\\">";\n';
 bodyHtml += '        html += "</td>";\n';
-bodyHtml += '        html += "<td style=\\"padding: 0.75rem; text-align: center;\\">" + test.display_order + "</td>";\n';
+bodyHtml += '        html += "<td style=\\"padding: 0.75rem; text-align: center;\\">" + escapeHtml(test.display_order) + "</td>";\n';
 bodyHtml += '        html += "<td style=\\"padding: 0.75rem; text-align: center;\\">";\n';
-bodyHtml += '        html += "<button onclick=\\"editTestName(\'" + test.test_id + "\')\\" id=\\"test_" + test.test_id + "_edit_btn\\" class=\\"btn\\" style=\\"padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-right: 0.25rem;\\">Edit</button>";\n';
-bodyHtml += '        html += "<button onclick=\\"saveTestName(\'" + test.test_id + "\')\\" id=\\"test_" + test.test_id + "_save_btn\\" class=\\"btn\\" style=\\"display: none; padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-right: 0.25rem;\\">Save</button>";\n';
-bodyHtml += '        html += "<button onclick=\\"cancelEditTestName(\'" + test.test_id + "\')\\" id=\\"test_" + test.test_id + "_cancel_btn\\" class=\\"btn\\" style=\\"display: none; padding: 0.25rem 0.5rem; font-size: 0.85rem; background: #95a5a6;\\">Cancel</button>";\n';
+bodyHtml += '        html += "<button data-test-id=\\"" + escapeHtml(test.test_id) + "\\" onclick=\\"editTestName(this.dataset.testId)\\" id=\\"test_" + escapeHtml(test.test_id) + "_edit_btn\\" class=\\"btn\\" style=\\"padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-right: 0.25rem;\\">Edit</button>";\n';
+bodyHtml += '        html += "<button data-test-id=\\"" + escapeHtml(test.test_id) + "\\" onclick=\\"saveTestName(this.dataset.testId)\\" id=\\"test_" + escapeHtml(test.test_id) + "_save_btn\\" class=\\"btn\\" style=\\"display: none; padding: 0.25rem 0.5rem; font-size: 0.85rem; margin-right: 0.25rem;\\">Save</button>";\n';
+bodyHtml += '        html += "<button data-test-id=\\"" + escapeHtml(test.test_id) + "\\" onclick=\\"cancelEditTestName(this.dataset.testId)\\" id=\\"test_" + escapeHtml(test.test_id) + "_cancel_btn\\" class=\\"btn\\" style=\\"display: none; padding: 0.25rem 0.5rem; font-size: 0.85rem; background: #95a5a6;\\">Cancel</button>";\n';
 bodyHtml += '        html += "</td>";\n';
 bodyHtml += '        html += "</tr>";\n';
 bodyHtml += '    });\n';
