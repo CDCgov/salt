@@ -33,9 +33,6 @@ import android.media.MediaPlayer
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.res.stringResource
 import com.dev.salt.fingerprint.IFingerprintCapture
-import com.dev.salt.fingerprint.SecuGenFingerprintImpl
-import com.dev.salt.fingerprint.MockFingerprintImpl
-import com.dev.salt.util.EmulatorDetector
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.app.PendingIntent
@@ -301,18 +298,7 @@ fun StaffValidationScreen(
                                     }
 
                                     // Create fingerprint implementation
-                                    val fingerprintImpl: IFingerprintCapture = if (EmulatorDetector.isEmulator()) {
-                                        Log.i("StaffValidation", "Using mock fingerprint implementation for emulator")
-                                        MockFingerprintImpl()
-                                    } else {
-                                        try {
-                                            Log.i("StaffValidation", "Using SecuGen fingerprint implementation")
-                                            SecuGenFingerprintImpl(context)
-                                        } catch (e: Exception) {
-                                            Log.e("StaffValidation", "Failed to create SecuGen implementation, using mock", e)
-                                            MockFingerprintImpl()
-                                        }
-                                    }
+                                    val fingerprintImpl: IFingerprintCapture = com.dev.salt.fingerprint.FingerprintImplFactory.create(context)
 
                                     // Initialize device
                                     if (!fingerprintImpl.initializeDevice()) {

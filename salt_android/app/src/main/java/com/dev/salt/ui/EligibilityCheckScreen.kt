@@ -34,9 +34,6 @@ import com.dev.salt.PasswordUtils
 import com.dev.salt.R
 import com.dev.salt.data.SurveyDatabase
 import com.dev.salt.fingerprint.IFingerprintCapture
-import com.dev.salt.fingerprint.SecuGenFingerprintImpl
-import com.dev.salt.fingerprint.MockFingerprintImpl
-import com.dev.salt.util.EmulatorDetector
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -297,18 +294,7 @@ fun EligibilityCheckScreen(
                                     }
 
                                     // Create fingerprint implementation
-                                    val fingerprintImpl: IFingerprintCapture = if (EmulatorDetector.isEmulator()) {
-                                        Log.i("EligibilityCheck", "Using mock fingerprint implementation for emulator")
-                                        MockFingerprintImpl()
-                                    } else {
-                                        try {
-                                            Log.i("EligibilityCheck", "Using SecuGen fingerprint implementation")
-                                            SecuGenFingerprintImpl(context)
-                                        } catch (e: Exception) {
-                                            Log.e("EligibilityCheck", "Failed to create SecuGen implementation, using mock", e)
-                                            MockFingerprintImpl()
-                                        }
-                                    }
+                                    val fingerprintImpl: IFingerprintCapture = com.dev.salt.fingerprint.FingerprintImplFactory.create(context)
 
                                     // Initialize device
                                     if (!fingerprintImpl.initializeDevice()) {

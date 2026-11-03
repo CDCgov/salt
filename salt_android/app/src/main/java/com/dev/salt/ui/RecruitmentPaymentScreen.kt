@@ -44,9 +44,6 @@ import com.dev.salt.data.Survey
 import com.dev.salt.data.SurveyDatabase
 import com.dev.salt.fingerprint.FingerprintManager
 import com.dev.salt.fingerprint.IFingerprintCapture
-import com.dev.salt.fingerprint.MockFingerprintImpl
-import com.dev.salt.fingerprint.SecuGenFingerprintImpl
-import com.dev.salt.util.EmulatorDetector
 import com.dev.salt.data.RecruitmentPaymentUploadState
 import com.dev.salt.upload.RecruitmentPaymentUploadManager
 import io.github.joelkanyi.sain.Sain
@@ -632,15 +629,7 @@ fun RecruitmentPaymentScreen(
                                     }
 
                                     // Create fingerprint implementation
-                                    val fingerprintImpl: IFingerprintCapture = if (EmulatorDetector.isEmulator()) {
-                                        MockFingerprintImpl()
-                                    } else {
-                                        try {
-                                            SecuGenFingerprintImpl(context)
-                                        } catch (e: Exception) {
-                                            MockFingerprintImpl()
-                                        }
-                                    }
+                                    val fingerprintImpl: IFingerprintCapture = com.dev.salt.fingerprint.FingerprintImplFactory.create(context)
 
                                     if (!fingerprintImpl.initializeDevice()) {
                                         errorMessage = deviceInitError

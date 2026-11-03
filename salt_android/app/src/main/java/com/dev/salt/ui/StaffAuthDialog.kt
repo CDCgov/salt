@@ -21,8 +21,8 @@ import com.dev.salt.PasswordUtils
 import com.dev.salt.R
 import com.dev.salt.data.SurveyDatabase
 import com.dev.salt.fingerprint.IFingerprintCapture
-import com.dev.salt.fingerprint.MockFingerprintImpl
-import com.dev.salt.fingerprint.SecuGenFingerprintImpl
+import com.dev.salt.BuildConfig
+import com.dev.salt.fingerprint.FingerprintImplFactory
 import com.dev.salt.util.EmulatorDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -66,9 +66,9 @@ fun StaffAuthDialog(
                     return@launch
                 }
 
-                val impl: IFingerprintCapture = if (EmulatorDetector.isEmulator()) {
-                    MockFingerprintImpl()
-                } else {
+                // The USB scanner checks apply whenever a real reader is used
+                // (every release build; debug builds on a physical device).
+                if (!(BuildConfig.DEBUG && EmulatorDetector.isEmulator())) {
                     val usbManager = context.getSystemService(android.content.Context.USB_SERVICE) as UsbManager
                     val device: UsbDevice? = usbManager.deviceList.values.firstOrNull { it.vendorId == 0x1162 } // SecuGen
                     if (device == null) {
@@ -85,8 +85,8 @@ fun StaffAuthDialog(
                         errorMessage = context.getString(R.string.error_fingerprint_usb_permission)
                         return@launch
                     }
-                    SecuGenFingerprintImpl(context)
                 }
+                val impl: IFingerprintCapture = FingerprintImplFactory.create(context)
 
                 if (!impl.initializeDevice()) {
                     errorMessage = context.getString(R.string.error_fingerprint_init_failed)

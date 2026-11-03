@@ -27,9 +27,6 @@ import com.dev.salt.data.SurveyDatabase
 import com.dev.salt.ui.components.MarkdownText
 import com.dev.salt.playAudio
 import com.dev.salt.fingerprint.IFingerprintCapture
-import com.dev.salt.fingerprint.SecuGenFingerprintImpl
-import com.dev.salt.fingerprint.MockFingerprintImpl
-import com.dev.salt.util.EmulatorDetector
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.app.PendingIntent
@@ -482,18 +479,7 @@ fun SubjectPaymentScreen(
                         }
 
                         // Create fingerprint implementation
-                        val fingerprintImpl: IFingerprintCapture = if (EmulatorDetector.isEmulator()) {
-                            Log.i("SubjectPaymentScreen", "Using mock fingerprint implementation for emulator")
-                            MockFingerprintImpl()
-                        } else {
-                            try {
-                                Log.i("SubjectPaymentScreen", "Using SecuGen fingerprint implementation")
-                                SecuGenFingerprintImpl(context)
-                            } catch (e: Exception) {
-                                Log.e("SubjectPaymentScreen", "Failed to create SecuGen implementation, using mock", e)
-                                MockFingerprintImpl()
-                            }
-                        }
+                        val fingerprintImpl: IFingerprintCapture = com.dev.salt.fingerprint.FingerprintImplFactory.create(context)
 
                         // Initialize fingerprint device
                         if (!fingerprintImpl.initializeDevice()) {
@@ -761,6 +747,21 @@ fun SubjectPaymentScreen(
                                 database.surveyDao().updateSurvey(updatedSurvey)
                                 database.couponDao().markCouponsAsIssued(surveyId)
                                 Log.i("SubjectPaymentScreen", "Survey marked complete (no payment) for survey $surveyId")
+
+                                // Consume the referral coupon, as the paid paths do, so it
+                                // can't enroll anyone else.
+                                updatedSurvey.referralCouponCode?.let { code ->
+                                    try {
+                                        database.couponDao().markCouponUsed(
+                                            code = code,
+                                            surveyId = updatedSurvey.id,
+                                            usedDate = System.currentTimeMillis()
+                                        )
+                                        Log.i("SubjectPaymentScreen", "Marked coupon $code as used (no payment) for survey ${updatedSurvey.id}")
+                                    } catch (e: Exception) {
+                                        Log.e("SubjectPaymentScreen", "Failed to mark coupon as used", e)
+                                    }
+                                }
                             }
 
                             // Upload survey
@@ -908,17 +909,7 @@ fun SubjectPaymentScreen(
                             }
 
                             // Create fingerprint implementation
-                            val fingerprintImpl: IFingerprintCapture = if (EmulatorDetector.isEmulator()) {
-                                Log.i("SubjectPaymentScreen", "Using mock fingerprint for admin override")
-                                MockFingerprintImpl()
-                            } else {
-                                try {
-                                    SecuGenFingerprintImpl(context)
-                                } catch (e: Exception) {
-                                    Log.e("SubjectPaymentScreen", "Failed to create SecuGen impl, using mock", e)
-                                    MockFingerprintImpl()
-                                }
-                            }
+                            val fingerprintImpl: IFingerprintCapture = com.dev.salt.fingerprint.FingerprintImplFactory.create(context)
 
                             // Initialize fingerprint device
                             if (!fingerprintImpl.initializeDevice()) {

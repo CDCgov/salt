@@ -36,9 +36,6 @@ import com.dev.salt.R
 import com.dev.salt.data.SurveyDatabase
 import com.dev.salt.fingerprint.FingerprintManager
 import com.dev.salt.fingerprint.IFingerprintCapture
-import com.dev.salt.fingerprint.MockFingerprintImpl
-import com.dev.salt.fingerprint.SecuGenFingerprintImpl
-import com.dev.salt.util.EmulatorDetector
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -225,10 +222,18 @@ fun RecruitmentLookupScreen(
                             val reEnrollmentDays = surveyConfig?.reEnrollmentDays ?: 90
 
                             // Search for matching fingerprint
-                            val match = fingerprintManager.checkDuplicateEnrollment(
-                                capturedTemplate,
-                                reEnrollmentDays
-                            )
+                            val match = try {
+                                fingerprintManager.checkDuplicateEnrollment(
+                                    capturedTemplate,
+                                    reEnrollmentDays
+                                )
+                            } catch (e: com.dev.salt.fingerprint.FingerprintMatchException) {
+                                Log.e("RecruitmentLookup", "Fingerprint search could not be completed", e)
+                                fingerprintManager.closeDevice()
+                                errorMessage = captureFailedError
+                                isCapturingFingerprint = false
+                                return@launch
+                            }
 
                             fingerprintManager.closeDevice()
 
@@ -488,15 +493,7 @@ fun RecruitmentLookupScreen(
                             }
 
                             // Create fingerprint implementation
-                            val fingerprintImpl: IFingerprintCapture = if (EmulatorDetector.isEmulator()) {
-                                MockFingerprintImpl()
-                            } else {
-                                try {
-                                    SecuGenFingerprintImpl(context)
-                                } catch (e: Exception) {
-                                    MockFingerprintImpl()
-                                }
-                            }
+                            val fingerprintImpl: IFingerprintCapture = com.dev.salt.fingerprint.FingerprintImplFactory.create(context)
 
                             if (!fingerprintImpl.initializeDevice()) {
                                 adminOverrideError = deviceInitError

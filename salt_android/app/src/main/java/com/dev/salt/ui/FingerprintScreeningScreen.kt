@@ -269,10 +269,19 @@ fun FingerprintScreeningScreen(
                         retryCount = 0
 
                         // Check for duplicate enrollment
-                        val duplicate = fingerprintManager.checkDuplicateEnrollment(
-                            fingerprintTemplate,
-                            reEnrollmentDays
-                        )
+                        // A failed comparison must not be treated as "no duplicate".
+                        val duplicate = try {
+                            fingerprintManager.checkDuplicateEnrollment(
+                                fingerprintTemplate,
+                                reEnrollmentDays
+                            )
+                        } catch (e: com.dev.salt.fingerprint.FingerprintMatchException) {
+                            Log.e("FingerprintScreen", "Duplicate check could not be completed", e)
+                            errorMessage = captureFailedError
+                            fingerprintManager.closeDevice()
+                            isCapturing = false
+                            return@launch
+                        }
 
                         if (duplicate != null) {
                             // Calculate days until re-enrollment allowed

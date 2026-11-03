@@ -21,36 +21,9 @@ class FingerprintManager(
     }
 
     private val implementation: IFingerprintCapture by lazy {
-        val useEmulator = EmulatorDetector.isEmulator()
-        val implType = when {
-            useEmulator -> {
-                Log.i(TAG, "Running in emulator - using MOCK fingerprint implementation")
-                MockFingerprintImpl()
-            }
-            context == null -> {
-                Log.w(TAG, "No context provided - using MOCK fingerprint implementation")
-                MockFingerprintImpl()
-            }
-            else -> {
-                try {
-                    Log.i(TAG, "Running on real device - attempting to use SecuGen implementation")
-                    SecuGenFingerprintImpl(context)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to initialize SecuGen, falling back to MOCK", e)
-                    MockFingerprintImpl()
-                } catch (e: NoClassDefFoundError) {
-                    Log.e(TAG, "SecuGen SDK not available, falling back to MOCK", e)
-                    MockFingerprintImpl()
-                }
-            }
-        }
-
-        Log.i(TAG, "===========================================")
-        Log.i(TAG, "Fingerprint Implementation: ${implType.getImplementationType()}")
-        Log.i(TAG, "Environment: ${EmulatorDetector.getEnvironmentDescription()}")
-        Log.i(TAG, "===========================================")
-
-        implType
+        val impl = FingerprintImplFactory.create(context)
+        Log.i(TAG, "Fingerprint implementation: ${impl.getImplementationType()} (${EmulatorDetector.getEnvironmentDescription()})")
+        impl
     }
 
     /**
@@ -82,6 +55,7 @@ class FingerprintManager(
             // For SecuGen implementation, perform template matching
             val impl = implementation
             if (impl is SecuGenFingerprintImpl) {
+                var failedComparisons = 0
                 for (storedFingerprint in recentFingerprints) {
                     val matchScore = impl.matchTemplatesWithScore(
                         fingerprintTemplate,
@@ -89,6 +63,14 @@ class FingerprintManager(
                     )
 
                     Log.d(TAG, "Match score: $matchScore")
+                    if (matchScore == null) {
+                        // One unreadable stored template is skipped, so a single corrupt
+                        // record can't block all enrollment. If every comparison fails
+                        // (below), the problem is the new scan or the reader: fail closed.
+                        failedComparisons++
+                        Log.w(TAG, "Fingerprint comparison failed for stored record ${storedFingerprint.id}")
+                        continue
+                    }
 
                     // Threshold for positive match (adjust based on security requirements)
                     // Typical values: 30-50 for normal security, 50-80 for high security
@@ -96,6 +78,9 @@ class FingerprintManager(
                         Log.i(TAG, "Duplicate enrollment found (score: $matchScore), enrolled on: ${storedFingerprint.enrollmentDate}")
                         return@withContext storedFingerprint
                     }
+                }
+                if (recentFingerprints.isNotEmpty() && failedComparisons == recentFingerprints.size) {
+                    throw FingerprintMatchException("All ${recentFingerprints.size} fingerprint comparisons failed")
                 }
             } else {
                 // For mock implementation, just do byte array comparison
