@@ -17,6 +17,9 @@ import com.dev.salt.R
  * @param showBackButton Whether to show a back button in the navigation icon position
  * @param showHomeButton Whether to show the Return to Menu button (default true)
  * @param onBack Custom back action. If null, uses navController.navigateUp()
+ * @param requireStaffAuthToLeave If true (default), Return to Menu requires a
+ *   staff fingerprint or password, so a participant holding the tablet cannot
+ *   leave the survey. Set false on staff-only screens.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,7 +28,8 @@ fun SaltTopAppBar(
     navController: NavController,
     showBackButton: Boolean = false,
     showHomeButton: Boolean = true,
-    onBack: (() -> Unit)? = null
+    onBack: (() -> Unit)? = null,
+    requireStaffAuthToLeave: Boolean = true
 ) {
     TopAppBar(
         title = { Text(title) },
@@ -48,7 +52,8 @@ fun SaltTopAppBar(
                             launchSingleTop = true
                         }
                     },
-                    isVisible = true
+                    isVisible = true,
+                    requireStaffAuth = requireStaffAuthToLeave
                 )
             }
         }

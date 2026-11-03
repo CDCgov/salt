@@ -61,7 +61,8 @@ fun StaffFingerprintEnrollmentScreen(
                 title = "Fingerprint Enrollment",
                 navController = navController,
                 showBackButton = false,
-                showHomeButton = true
+                showHomeButton = true,
+                requireStaffAuthToLeave = false // staff-only screen
             )
         }
     ) { paddingValues ->

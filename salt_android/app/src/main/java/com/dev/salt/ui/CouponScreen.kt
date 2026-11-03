@@ -73,7 +73,8 @@ fun CouponScreen(
                 title = stringResource(R.string.coupon_title),
                 navController = navController,
                 showBackButton = false,
-                showHomeButton = true
+                showHomeButton = true,
+                requireStaffAuthToLeave = false // staff-only screen
             )
         }
     ) { paddingValues ->

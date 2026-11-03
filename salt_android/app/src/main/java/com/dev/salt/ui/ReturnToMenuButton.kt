@@ -20,12 +20,16 @@ import com.dev.salt.R
  * @param onReturnToMenu Callback to navigate back to the appropriate main menu
  * @param modifier Optional modifier for the button
  * @param isVisible Whether the button should be visible (default true)
+ * @param requireStaffAuth If true, a staff member must authenticate (fingerprint
+ *   or username/password) before leaving, instead of a plain confirmation. Used
+ *   on screens a participant may be holding.
  */
 @Composable
 fun ReturnToMenuButton(
     onReturnToMenu: () -> Unit,
     modifier: Modifier = Modifier,
-    isVisible: Boolean = true
+    isVisible: Boolean = true,
+    requireStaffAuth: Boolean = false
 ) {
     var showConfirmDialog by remember { mutableStateOf(false) }
 
@@ -47,7 +51,17 @@ fun ReturnToMenuButton(
         }
     }
 
-    if (showConfirmDialog) {
+    if (showConfirmDialog && requireStaffAuth) {
+        StaffAuthDialog(
+            title = stringResource(R.string.leave_survey_auth_title),
+            message = stringResource(R.string.leave_survey_auth_message),
+            onAuthenticated = {
+                showConfirmDialog = false
+                onReturnToMenu()
+            },
+            onDismiss = { showConfirmDialog = false }
+        )
+    } else if (showConfirmDialog) {
         ReturnToMenuConfirmDialog(
             onConfirm = {
                 showConfirmDialog = false

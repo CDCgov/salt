@@ -110,6 +110,10 @@
     <string name="return_to_menu_confirm_title">Retour au menu principal ?</string>
     <string name="return_to_menu_confirm_message">Êtes-vous sûr de vouloir revenir au menu principal ? Toutes les modifications non enregistrées seront perdues.</string>
     <string name="return_to_menu_confirm_button">Retour au menu</string>
+    <string name="leave_survey_auth_title">Connexion du personnel requise</string>
+    <string name="leave_survey_auth_message">Un membre du personnel doit se connecter pour quitter l\'enquête et revenir au menu. La progression non enregistrée sur cet écran sera perdue.</string>
+    <string name="leave_survey_fingerprint_no_match">Empreinte non reconnue. Réessayez ou connectez-vous avec un nom d\'utilisateur et un mot de passe.</string>
+    <string name="leave_survey_confirm">Se connecter et quitter</string>
 
     <!-- User Management strings -->
     <string name="user_management_title">Gestion des utilisateurs</string>

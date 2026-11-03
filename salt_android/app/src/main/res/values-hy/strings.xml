@@ -105,6 +105,10 @@
     <string name="return_to_menu_confirm_title">Վերադառնա՞լ գլխավոր մենյու</string>
     <string name="return_to_menu_confirm_message">Վստահ եք, որ ցանկանում եք անցնել գլխավոր մենյու։ Բոլոր չպահպանված փոփոխությունները կկորչեն։</string>
     <string name="return_to_menu_confirm_button">Վերադառնալ մենյու</string>
+    <string name="leave_survey_auth_title">Պահանջվում է աշխատակցի մուտք</string>
+    <string name="leave_survey_auth_message">Հարցումից դուրս գալու և մենյու վերադառնալու համար աշխատակիցը պետք է մուտք գործի։ Այս էկրանի չպահպանված առաջընթացը կկորի։</string>
+    <string name="leave_survey_fingerprint_no_match">Մատնահետքը չճանաչվեց։ Փորձեք կրկին կամ մուտք գործեք օգտանունով և գաղտնաբառով։</string>
+    <string name="leave_survey_confirm">Մուտք գործել և դուրս գալ</string>
 
     <string name="user_management_title">Օգտատերերի կառավարում</string>
     <string name="user_add_button">Ավելացնել օգտատեր</string>

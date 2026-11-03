@@ -110,6 +110,10 @@
     <string name="return_to_menu_confirm_title">¿Volver al menú principal?</string>
     <string name="return_to_menu_confirm_message">¿Está seguro de que desea ir al menú principal? Todos los cambios no guardados se perderán.</string>
     <string name="return_to_menu_confirm_button">Volver al menú</string>
+    <string name="leave_survey_auth_title">Se requiere inicio de sesión del personal</string>
+    <string name="leave_survey_auth_message">Un miembro del personal debe iniciar sesión para salir de la encuesta y volver al menú. Se perderá el progreso no guardado de esta pantalla.</string>
+    <string name="leave_survey_fingerprint_no_match">Huella no reconocida. Inténtelo de nuevo o inicie sesión con usuario y contraseña.</string>
+    <string name="leave_survey_confirm">Iniciar sesión y salir</string>
 
     <!-- User Management strings -->
     <string name="user_management_title">Administración de usuarios</string>

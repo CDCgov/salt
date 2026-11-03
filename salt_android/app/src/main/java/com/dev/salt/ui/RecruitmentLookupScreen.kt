@@ -109,7 +109,8 @@ fun RecruitmentLookupScreen(
                 title = stringResource(R.string.recruitment_lookup_title),
                 navController = navController,
                 showBackButton = true,
-                showHomeButton = true
+                showHomeButton = true,
+                requireStaffAuthToLeave = false // staff-only screen
             )
         }
     ) { paddingValues ->

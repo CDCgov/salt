@@ -110,6 +110,10 @@
     <string name="return_to_menu_confirm_title">Kembali ke Menu Utama?</string>
     <string name="return_to_menu_confirm_message">Apakah Anda yakin ingin menuju menu utama? Semua perubahan yang belum disimpan akan hilang.</string>
     <string name="return_to_menu_confirm_button">Kembali ke Menu</string>
+    <string name="leave_survey_auth_title">Petugas harus masuk</string>
+    <string name="leave_survey_auth_message">Petugas harus masuk untuk keluar dari survei dan kembali ke menu. Kemajuan yang belum disimpan di layar ini akan hilang.</string>
+    <string name="leave_survey_fingerprint_no_match">Sidik jari tidak dikenali. Coba lagi atau masuk dengan nama pengguna dan kata sandi.</string>
+    <string name="leave_survey_confirm">Masuk dan keluar</string>
 
     <!-- User Management strings -->
     <string name="user_management_title">Manajemen Pengguna</string>

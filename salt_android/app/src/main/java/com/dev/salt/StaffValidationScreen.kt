@@ -49,8 +49,24 @@ import androidx.activity.compose.BackHandler
 fun StaffValidationScreen(
     surveyId: String,
     onValidationSuccess: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    // True where Cancel leaves the survey while a participant may hold the
+    // tablet: a staff member must authenticate before cancelling.
+    requireStaffAuthToCancel: Boolean = false
 ) {
+    var showCancelAuth by remember { mutableStateOf(false) }
+    if (showCancelAuth) {
+        com.dev.salt.ui.StaffAuthDialog(
+            title = stringResource(R.string.leave_survey_auth_title),
+            message = stringResource(R.string.leave_survey_auth_message),
+            onAuthenticated = {
+                showCancelAuth = false
+                onCancel()
+            },
+            onDismiss = { showCancelAuth = false }
+        )
+    }
+
     // Disable hardware back button during survey flow
     BackHandler(enabled = true) {
         // Intentionally empty - back button is disabled during survey flow
@@ -395,7 +411,7 @@ fun StaffValidationScreen(
 
                     // Cancel button
                     OutlinedButton(
-                        onClick = onCancel,
+                        onClick = { if (requireStaffAuthToCancel) showCancelAuth = true else onCancel() },
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(stringResource(R.string.staff_validation_cancel), fontSize = 16.sp)

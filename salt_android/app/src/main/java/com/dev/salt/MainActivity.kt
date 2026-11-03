@@ -1219,7 +1219,9 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(AppDestinations.MENU_SCREEN) {
                                     popUpTo(AppDestinations.SAMPLE_COLLECTION_STAFF_VALIDATION) { inclusive = true }
                                 }
-                            }
+                            },
+                            // The participant is still holding the tablet here.
+                            requireStaffAuthToCancel = true
                         )
                     }
 

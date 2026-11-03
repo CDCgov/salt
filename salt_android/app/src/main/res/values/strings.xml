@@ -110,6 +110,10 @@
     <string name="return_to_menu_confirm_title">Return to Main Menu?</string>
     <string name="return_to_menu_confirm_message">Are you sure you want to navigate to the main menu? All unsaved changes will be lost.</string>
     <string name="return_to_menu_confirm_button">Return to Menu</string>
+    <string name="leave_survey_auth_title">Staff sign-in required</string>
+    <string name="leave_survey_auth_message">A staff member must sign in to leave the survey and return to the menu. Unsaved progress on this screen will be lost.</string>
+    <string name="leave_survey_fingerprint_no_match">Fingerprint not recognized. Try again or sign in with a username and password.</string>
+    <string name="leave_survey_confirm">Sign in and leave</string>
 
     <!-- User Management strings -->
     <string name="user_management_title">User Management</string>

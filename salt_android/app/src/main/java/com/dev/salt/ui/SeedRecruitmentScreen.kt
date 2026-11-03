@@ -75,7 +75,8 @@ fun SeedRecruitmentScreen(navController: NavController) {
                 title = "Seed Recruitment",
                 navController = navController,
                 showBackButton = true,
-                showHomeButton = true
+                showHomeButton = true,
+                requireStaffAuthToLeave = false // staff-only screen
             )
         }
     ) { paddingValues ->
