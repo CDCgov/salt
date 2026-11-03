@@ -155,7 +155,7 @@ class TestManagementViewModel(application: Application) : AndroidViewModel(appli
                 // Reload test results
                 loadTestResults(surveyId)
 
-                Log.d("TestManagementVM", "Saved test result for $testName: $result")
+                Log.d("TestManagementVM", "Saved test result for $testName")
                 onSuccess()
             } catch (e: Exception) {
                 Log.e("TestManagementVM", "Error saving test result", e)

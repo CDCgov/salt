@@ -64,7 +64,7 @@ fun HIVRapidTestResultScreen(
                         survey?.let {
                             it.hivRapidTestResult = selectedResult
                             database.surveyDao().updateSurvey(it)
-                            Log.d("HIVTestResult", "Updated survey $surveyId with HIV test result: $selectedResult")
+                            Log.d("HIVTestResult", "Updated survey $surveyId with HIV test result")
                         }
                     }
 

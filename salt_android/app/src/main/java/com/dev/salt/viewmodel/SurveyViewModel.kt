@@ -653,11 +653,10 @@ class SurveyViewModel(
             val av : Any? = if (ans[i].isMultiSelect) ans[i].getSelectedIndices()
                             else ans[i].getValue()
             context[qus[i].questionShortName] = av
-            Log.d("JEXLContext", "Adding to context: ${qus[i].questionShortName} = $av")
         }
         // You can add other global variables to the context if needed
         // context["userAge"] = 25 // Example
-        Log.d("SurveyViewModel", "JEXL Context built: $context")
+        Log.d("SurveyViewModel", "JEXL context built with ${context.size} variables")
         return context
     }
 

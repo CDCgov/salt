@@ -59,7 +59,7 @@ class FacilitySetupViewModel(
 
             try {
 
-                android.util.Log.d("FacilitySetup", "Connecting to server: $serverUrl")
+                com.dev.salt.logging.AppLogger.d("FacilitySetup", "Connecting to server: $serverUrl")
 
                 // Call the facility setup endpoint
                 val url = URL("$serverUrl/api/sync/facility-setup")
@@ -75,11 +75,11 @@ class FacilitySetupViewModel(
 
                 // Send the short code
                 val requestBody = """{"shortCode": "${_uiState.value.shortCode}"}"""
-                android.util.Log.d("FacilitySetup", "Sending request: $requestBody")
+                com.dev.salt.logging.AppLogger.d("FacilitySetup", "Sending facility setup request")
                 connection.outputStream.use { it.write(requestBody.toByteArray()) }
 
                 val responseCode = connection.responseCode
-                android.util.Log.d("FacilitySetup", "Response code: $responseCode")
+                com.dev.salt.logging.AppLogger.d("FacilitySetup", "Response code: $responseCode")
 
                 val response = if (responseCode == HttpURLConnection.HTTP_OK) {
                     connection.inputStream.bufferedReader().use { it.readText() }
@@ -87,7 +87,7 @@ class FacilitySetupViewModel(
                     connection.errorStream?.bufferedReader()?.use { it.readText() } ?: "Unknown error"
                 }
 
-                android.util.Log.d("FacilitySetup", "Response: $response")
+                com.dev.salt.logging.AppLogger.d("FacilitySetup", "Response: $response")
 
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     // Parse the response
@@ -153,11 +153,11 @@ class FacilitySetupViewModel(
                             try {
                                 val restored = CouponRestoreManager(database)
                                     .restoreFromServer(serverUrl, apiKey)
-                                android.util.Log.d("FacilitySetup",
+                                com.dev.salt.logging.AppLogger.d("FacilitySetup",
                                     "Restored coupons=${restored.couponsRestored} " +
                                     "stubs=${restored.stubsRestored}")
                             } catch (restoreErr: Exception) {
-                                android.util.Log.e("FacilitySetup",
+                                com.dev.salt.logging.AppLogger.e("FacilitySetup",
                                     "Restore failed; rolling back facility setup", restoreErr)
                                 database.appServerConfigDao().clearServerConfig()
                                 database.facilityConfigDao().deleteAll()
@@ -214,7 +214,7 @@ class FacilitySetupViewModel(
                     }
                 }
             } catch (e: Exception) {
-                android.util.Log.e("FacilitySetup", "Setup failed", e)
+                com.dev.salt.logging.AppLogger.e("FacilitySetup", "Setup failed", e)
                 val errorMessage = when {
                     e is java.net.UnknownHostException -> "Cannot connect to server. Please check network connection."
                     e is java.net.ConnectException -> "Cannot connect to server at $serverUrl"

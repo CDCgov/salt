@@ -84,7 +84,7 @@ fun RapidTestResultScreen(
                             recordedAt = System.currentTimeMillis()
                         )
                         database.testResultDao().insertTestResult(testResult)
-                        Log.d("RapidTestResult", "Saved test result for $testName: $selectedResult")
+                        Log.d("RapidTestResult", "Saved test result for $testName")
                     }
 
                     onResultSubmitted()

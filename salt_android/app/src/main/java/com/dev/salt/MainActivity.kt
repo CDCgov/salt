@@ -1340,7 +1340,7 @@ class MainActivity : ComponentActivity() {
                             val actualSurveyId = sections.firstOrNull()?.surveyId?.toLong() ?: -1L
 
                             if (actualSurveyId == -1L) {
-                                android.util.Log.e("MainActivity", "CRITICAL ERROR: No sections found in database - survey not properly synced!")
+                                com.dev.salt.logging.AppLogger.e("MainActivity", "CRITICAL ERROR: No sections found in database - survey not properly synced!")
                             }
 
                             testManagementViewModel.loadEnabledTests(actualSurveyId)
@@ -1403,7 +1403,7 @@ class MainActivity : ComponentActivity() {
                             val actualSurveyId = sections.firstOrNull()?.surveyId?.toLong() ?: -1L
 
                             if (actualSurveyId == -1L) {
-                                android.util.Log.e("MainActivity", "CRITICAL ERROR: No sections found in database - survey not properly synced!")
+                                com.dev.salt.logging.AppLogger.e("MainActivity", "CRITICAL ERROR: No sections found in database - survey not properly synced!")
                             }
 
                             testManagementViewModel.loadEnabledTests(actualSurveyId)

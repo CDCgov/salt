@@ -606,7 +606,7 @@ fun SurveyScreen(
                     
                     // Debug logging
                     LaunchedEffect(selectedIndices) {
-                        android.util.Log.d("SurveyScreen", "Multi-select UI: selectedIndices=$selectedIndices")
+                        com.dev.salt.logging.AppLogger.d("SurveyScreen", "Multi-select UI: selectedIndices=$selectedIndices")
                     }
                     
                     // Show min/max selection info if applicable

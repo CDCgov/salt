@@ -72,7 +72,7 @@ fun LabCollectionScreen(
 
             // If no qualifying tests, auto-skip this screen
             if (qualifying.isEmpty()) {
-                android.util.Log.d("LabCollectionScreen", "No qualifying lab tests - auto-skipping screen")
+                com.dev.salt.logging.AppLogger.d("LabCollectionScreen", "No qualifying lab tests - auto-skipping screen")
                 shouldSkip = true
             }
             isLoading = false
@@ -87,7 +87,7 @@ fun LabCollectionScreen(
     // Auto-skip if no qualifying tests (but wait for debug dialogs to finish first)
     LaunchedEffect(shouldSkip, isLoading, currentDebugDialogIndex) {
         if (shouldSkip && !isLoading && currentDebugDialogIndex < 0) {
-            android.util.Log.d("LabCollectionScreen", "Auto-navigating past lab collection (no qualifying tests)")
+            com.dev.salt.logging.AppLogger.d("LabCollectionScreen", "Auto-navigating past lab collection (no qualifying tests)")
             onSamplesCollected() // Proceed to next screen as if samples were collected
         }
     }

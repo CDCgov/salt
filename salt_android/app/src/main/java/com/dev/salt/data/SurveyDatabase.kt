@@ -125,12 +125,12 @@ data class Survey(
     var answers: MutableList<Answer> = mutableListOf()
 
     fun populateFields(surveyDao: SurveyDao) {
-        android.util.Log.d("Survey", "PopulateFields called for survey $id with language: $language")
+        com.dev.salt.logging.AppLogger.d("Survey", "PopulateFields called for survey $id with language: $language")
         val questionCount = surveyDao.getQuestionCountByLanguage(this.language)
-        android.util.Log.d("Survey", "Found $questionCount questions for language: $language")
+        com.dev.salt.logging.AppLogger.d("Survey", "Found $questionCount questions for language: $language")
 
         this.questions = surveyDao.getQuestionsByLanguage(this.language)
-        android.util.Log.d("Survey", "Actually loaded ${this.questions.size} questions")
+        com.dev.salt.logging.AppLogger.d("Survey", "Actually loaded ${this.questions.size} questions")
 
         val existingAnswers = surveyDao.getAnswersBySurveyId(this.id)
         val answersByQuestionId = existingAnswers.associateBy { it.questionId }
@@ -155,7 +155,7 @@ data class Survey(
                 ))
             }
         }
-        android.util.Log.d("Survey", "Populated ${answers.size} answers (${existingAnswers.size} from DB, ${answers.size - existingAnswers.size} stubs)")
+        com.dev.salt.logging.AppLogger.d("Survey", "Populated ${answers.size} answers (${existingAnswers.size} from DB, ${answers.size - existingAnswers.size} stubs)")
     }
 }
 

@@ -541,7 +541,7 @@ fun SubjectPaymentScreen(
                             )
                             database.surveyDao().updateSurvey(updatedSurvey)
                             database.couponDao().markCouponsAsIssued(surveyId)
-                            Log.i("SubjectPaymentScreen", "Payment confirmed for survey $surveyId: amount=$paymentAmount, phone=${updatedSurvey.paymentPhoneNumber}")
+                            Log.i("SubjectPaymentScreen", "Payment confirmed for survey $surveyId: amount=$paymentAmount, phone recorded=${!updatedSurvey.paymentPhoneNumber.isNullOrBlank()}")
 
                             // Mark referral coupon as used ONLY after payment confirmed
                             s.referralCouponCode?.let { code ->
@@ -666,7 +666,7 @@ fun SubjectPaymentScreen(
                                 )
                                 database.surveyDao().updateSurvey(updatedSurvey)
                                 database.couponDao().markCouponsAsIssued(surveyId)
-                                Log.i("SubjectPaymentScreen", "Payment confirmed (no fingerprint) for survey $surveyId: amount=$paymentAmount, phone=${updatedSurvey.paymentPhoneNumber}")
+                                Log.i("SubjectPaymentScreen", "Payment confirmed (no fingerprint) for survey $surveyId: amount=$paymentAmount, phone recorded=${!updatedSurvey.paymentPhoneNumber.isNullOrBlank()}")
 
                                 // Mark referral coupon as used ONLY after payment confirmed
                                 s.referralCouponCode?.let { code ->
@@ -980,7 +980,7 @@ fun SubjectPaymentScreen(
                                 )
                                 database.surveyDao().updateSurvey(updatedSurvey)
                                 database.couponDao().markCouponsAsIssued(surveyId)
-                                Log.i("SubjectPaymentScreen", "Payment override confirmed by admin ${matchedAdmin.fullName}: amount=$paymentAmount, phone=${updatedSurvey.paymentPhoneNumber}")
+                                Log.i("SubjectPaymentScreen", "Payment override confirmed by admin ${matchedAdmin.fullName}: amount=$paymentAmount, phone recorded=${!updatedSurvey.paymentPhoneNumber.isNullOrBlank()}")
 
                                 // Mark referral coupon as used ONLY after payment confirmed (admin override)
                                 s.referralCouponCode?.let { code ->

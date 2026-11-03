@@ -169,7 +169,7 @@ class SeedRecruitmentManager(
         val allSurveys = database.surveyDao().getAllSurveysWithContact()
         Log.d(TAG, "All surveys with contact info: ${allSurveys.size}")
         allSurveys.forEach { survey ->
-            Log.d(TAG, "  Survey ${survey.id}: consent=${survey.contactConsent}, phone=${survey.contactPhone}, email=${survey.contactEmail}, date=${java.util.Date(survey.startDatetime)}")
+            Log.d(TAG, "  Survey ${survey.id}: consent=${survey.contactConsent}, hasPhone=${!survey.contactPhone.isNullOrBlank()}, hasEmail=${!survey.contactEmail.isNullOrBlank()}, date=${java.util.Date(survey.startDatetime)}")
         }
         
         val eligibleSubject = seedRecruitmentDao.getRandomEligibleSubject(
@@ -181,7 +181,7 @@ class SeedRecruitmentManager(
         Log.d(TAG, "Found eligible subject: ${eligibleSubject != null}")
         if (eligibleSubject != null) {
             Log.d(TAG, "  - Subject ID: ${eligibleSubject.id}")
-            Log.d(TAG, "  - Contact: ${eligibleSubject.contactPhone ?: eligibleSubject.contactEmail}")
+            Log.d(TAG, "  - Contact method: ${if (!eligibleSubject.contactPhone.isNullOrBlank()) "phone" else "email"}")
         }
         
         eligibleSubject != null

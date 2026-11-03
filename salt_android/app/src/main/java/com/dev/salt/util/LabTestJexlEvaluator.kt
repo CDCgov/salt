@@ -85,7 +85,7 @@ object LabTestJexlEvaluator {
                 }
                 surveyAnswers[shortName] = value
                 combinedContext[shortName] = value
-                Log.d(TAG, "Survey answer: $shortName = $value")
+                Log.d(TAG, "Survey answer available: $shortName")
             }
         }
 
@@ -157,7 +157,7 @@ object LabTestJexlEvaluator {
 
         Log.d(TAG, "Evaluating ${labTests.size} active lab tests")
         Log.d(TAG, "=== JEXL CONTEXT DEBUG ===")
-        Log.d(TAG, "Survey Answers: ${contextInfo.surveyAnswers}")
+        Log.d(TAG, "Survey answers in context: ${contextInfo.surveyAnswers.size}")
         Log.d(TAG, "Rapid Test Results: ${contextInfo.rapidTestResults}")
         Log.d(TAG, "Combined Context: ${contextInfo.combinedContext}")
 

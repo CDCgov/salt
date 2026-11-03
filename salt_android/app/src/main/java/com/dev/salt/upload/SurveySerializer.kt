@@ -130,7 +130,7 @@ class SurveySerializer {
                 )
             } else {
                 // Include answer even if question not found (shouldn't happen, but preserve data)
-                android.util.Log.w("SurveySerializer", "Question not found for answer with questionId: ${answer.questionId}")
+                com.dev.salt.logging.AppLogger.w("SurveySerializer", "Question not found for answer with questionId: ${answer.questionId}")
                 SerializedAnswer(
                     questionId = answer.questionId,
                     questionShortName = "unknown_${answer.questionId}",
@@ -147,7 +147,7 @@ class SurveySerializer {
         }
         
         // Log sample collection status for debugging
-        android.util.Log.d("SurveySerializer", "Survey ${survey.id} sample collection status: ${survey.sampleCollected}")
+        com.dev.salt.logging.AppLogger.d("SurveySerializer", "Survey ${survey.id} sample collection status: ${survey.sampleCollected}")
 
         // Serialize test results
         val serializedTestResults = testResults.map { testResult ->

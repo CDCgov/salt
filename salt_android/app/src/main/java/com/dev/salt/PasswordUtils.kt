@@ -67,7 +67,6 @@ object PasswordUtils {
             val factory = SecretKeyFactory.getInstance(ALGORITHM)
             val generatedHashedBytes = factory.generateSecret(spec).encoded
             val generatedHashedBase64 = Base64.getEncoder().encodeToString(generatedHashedBytes)
-            Log.e("PasswordUtils", "Generated Hash: $generatedHashedBase64, Stored Hash: $storedHashBase64")
             // Compare the newly generated hash (using the stored salt) with the stored hash
             generatedHashedBase64 == storedHashBase64
         } catch (e: Exception) {

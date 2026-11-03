@@ -51,7 +51,7 @@ class SurveySyncManager(private val context: Context) {
         val config = appServerConfigDao.getServerConfig()
 
         return if (config != null) {
-            Log.d("SurveySyncManager", "Using server config: URL=${config.serverUrl}, API Key=${config.apiKey.take(10)}...")
+            Log.d("SurveySyncManager", "Using server config: URL=${config.serverUrl}, API key configured=${config.apiKey.isNotBlank()}")
             Pair(config.serverUrl, config.apiKey)
         } else {
             Log.e("SurveySyncManager", "No server configuration found. Please configure server settings.")

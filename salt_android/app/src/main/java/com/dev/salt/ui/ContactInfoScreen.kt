@@ -50,13 +50,13 @@ fun ContactInfoScreen(
             val actualSurveyId = sections.firstOrNull()?.surveyId?.toLong() ?: -1L
 
             if (actualSurveyId == -1L) {
-                android.util.Log.e("ContactInfoScreen", "CRITICAL ERROR: No sections found in database - survey not properly synced!")
-                android.util.Log.e("ContactInfoScreen", "Using fallback survey ID -1, no tests will be found")
+                com.dev.salt.logging.AppLogger.e("ContactInfoScreen", "CRITICAL ERROR: No sections found in database - survey not properly synced!")
+                com.dev.salt.logging.AppLogger.e("ContactInfoScreen", "Using fallback survey ID -1, no tests will be found")
             }
 
             val tests = database.testConfigurationDao().getEnabledTestConfigurations(actualSurveyId)
             enabledTestsCount = tests.size
-            android.util.Log.d("ContactInfoScreen", "Found ${tests.size} enabled tests for survey ID $actualSurveyId")
+            com.dev.salt.logging.AppLogger.d("ContactInfoScreen", "Found ${tests.size} enabled tests for survey ID $actualSurveyId")
         }
     }
 
@@ -234,13 +234,13 @@ fun ContactInfoScreen(
                                 }
                                 database.surveyDao().updateSurvey(updatedSurvey)
                                 
-                                android.util.Log.d("ContactInfo", "Saved contact info for survey $surveyId: $contactType = $contactInfo")
+                                com.dev.salt.logging.AppLogger.d("ContactInfo", "Saved contact info for survey $surveyId (type: $contactType)")
                             }
 
                             // Navigate to test results or lab collection
                             navigateNext()
                         } catch (e: Exception) {
-                            android.util.Log.e("ContactInfo", "Error saving contact info", e)
+                            com.dev.salt.logging.AppLogger.e("ContactInfo", "Error saving contact info", e)
                             showError = true
                         } finally {
                             isSaving = false

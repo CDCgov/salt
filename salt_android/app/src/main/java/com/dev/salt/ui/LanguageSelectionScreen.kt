@@ -48,7 +48,7 @@ fun LanguageSelectionScreen(
             try {
                 // Query distinct languages from questions table
                 val languages = database.surveyDao().getDistinctLanguages()
-                android.util.Log.d("LanguageSelection", "Available languages in DB: $languages")
+                com.dev.salt.logging.AppLogger.d("LanguageSelection", "Available languages in DB: $languages")
                 
                 // Create language options directly from database
                 availableLanguages = languages.map { langCode ->
@@ -57,11 +57,11 @@ fun LanguageSelectionScreen(
                 
                 // Default to first available language
                 selectedLanguage = availableLanguages.firstOrNull()
-                android.util.Log.d("LanguageSelection", "Selected default language: ${selectedLanguage?.code}")
+                com.dev.salt.logging.AppLogger.d("LanguageSelection", "Selected default language: ${selectedLanguage?.code}")
                     
                 isLoading = false
             } catch (e: Exception) {
-                android.util.Log.e("LanguageSelection", "Error loading languages", e)
+                com.dev.salt.logging.AppLogger.e("LanguageSelection", "Error loading languages", e)
                 // Default to English if there's an error
                 availableLanguages = listOf(LanguageOption("English"))
                 selectedLanguage = availableLanguages.first()
@@ -155,36 +155,36 @@ fun LanguageSelectionScreen(
                                 try {
                                     // Update the survey with the selected language
                                     val survey = database.surveyDao().getSurveyById(surveyId)
-                                    android.util.Log.d("LanguageSelection", "Updating survey $surveyId from language '${survey?.language}' to '${lang.code}'")
+                                    com.dev.salt.logging.AppLogger.d("LanguageSelection", "Updating survey $surveyId from language '${survey?.language}' to '${lang.code}'")
                                     if (survey != null) {
                                         val updatedSurvey = survey.copy(language = lang.code)
                                         database.surveyDao().updateSurvey(updatedSurvey)
-                                        android.util.Log.d("LanguageSelection", "Survey language updated successfully")
+                                        com.dev.salt.logging.AppLogger.d("LanguageSelection", "Survey language updated successfully")
                                     } else {
-                                        android.util.Log.e("LanguageSelection", "Survey $surveyId not found in database!")
+                                        com.dev.salt.logging.AppLogger.e("LanguageSelection", "Survey $surveyId not found in database!")
                                     }
 
                                     // Check if staff eligibility screening is enabled
                                     val surveyConfig = database.surveyConfigDao().getSurveyConfig()
                                     val staffEligibilityScreening = surveyConfig?.staffEligibilityScreening ?: false
-                                    android.util.Log.d("LanguageSelection", "Staff eligibility screening: $staffEligibilityScreening")
+                                    com.dev.salt.logging.AppLogger.d("LanguageSelection", "Staff eligibility screening: $staffEligibilityScreening")
 
                                     if (staffEligibilityScreening) {
                                         // Staff screening mode: skip consent, go to survey start
                                         // Consent will be collected after eligibility is confirmed
-                                        android.util.Log.d("LanguageSelection", "Staff screening enabled - skipping consent, going to survey start")
+                                        com.dev.salt.logging.AppLogger.d("LanguageSelection", "Staff screening enabled - skipping consent, going to survey start")
                                         navController.navigate("${AppDestinations.SURVEY_START_INSTRUCTION}?surveyId=$surveyId&couponCode=$couponCode") {
                                             popUpTo(AppDestinations.LANGUAGE_SELECTION) { inclusive = true }
                                         }
                                     } else {
                                         // Self-screening mode: consent first (current behavior)
-                                        android.util.Log.d("LanguageSelection", "Self-screening mode - going to consent first")
+                                        com.dev.salt.logging.AppLogger.d("LanguageSelection", "Self-screening mode - going to consent first")
                                         navController.navigate("${AppDestinations.CONSENT_INSTRUCTION}/$surveyId?coupons=$couponCode") {
                                             popUpTo(AppDestinations.LANGUAGE_SELECTION) { inclusive = true }
                                         }
                                     }
                                 } catch (e: Exception) {
-                                    android.util.Log.e("LanguageSelection", "Error starting survey", e)
+                                    com.dev.salt.logging.AppLogger.e("LanguageSelection", "Error starting survey", e)
                                 }
                             }
                         }
