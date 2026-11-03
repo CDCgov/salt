@@ -1,5 +1,7 @@
 package com.dev.salt.ui
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -104,10 +106,12 @@ fun DeveloperSettingsScreen(
             )
         }
     ) { paddingValues ->
+        // Scrollable so the bottom buttons (e.g. Clear logs) stay reachable in landscape.
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {

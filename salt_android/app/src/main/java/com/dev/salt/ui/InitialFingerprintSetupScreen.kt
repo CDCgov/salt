@@ -1,5 +1,7 @@
 package com.dev.salt.ui
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import com.dev.salt.logging.AppLogger as Log
 import android.content.Context
 import android.hardware.usb.UsbDevice
@@ -186,10 +188,13 @@ fun InitialFingerprintSetupScreen(
             )
         }
     ) { paddingValues ->
+        // Scrollable so the content fits in landscape on tablets; without it the
+        // buttons were squeezed off-screen and rendered with no visible labels.
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -293,7 +298,7 @@ fun InitialFingerprintSetupScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Action buttons
             Row(
