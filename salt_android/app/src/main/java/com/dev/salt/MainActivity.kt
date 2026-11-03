@@ -147,7 +147,6 @@ object AppDestinations {
 /*database.clearAllTables()
 val viewModel: SurveyViewModel = viewModel { SurveyViewModel(database) }
 val surveyApplication = SurveyApplication()
-surveyApplication.populateSampleData()
 surveyApplication.copyRawFilesToLocalStorage(this)
 val coroutineScope = rememberCoroutineScope()
 SurveyScreen(viewModel, coroutineScope)*/
@@ -272,7 +271,6 @@ class MainActivity : ComponentActivity() {
                         val context: Context = LocalContext.current
                         val database = SurveyDatabase.getInstance(context)
                         val surveyApplication = SurveyApplication()
-                        surveyApplication.populateSampleData()
                         surveyApplication.copyRawFilesToLocalStorage(context)
 
                         // Check if setup is needed (users and facility configuration)
