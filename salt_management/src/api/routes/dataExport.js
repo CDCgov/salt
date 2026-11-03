@@ -11,7 +11,7 @@ const DataExporter = require('../../services/dataExporter');
 router.get('/export/long', requireAdmin, async (req, res) => {
     try {
         const { preview } = req.query;
-        const exporter = new DataExporter();
+        const exporter = new DataExporter({ forSpreadsheet: true });
 
         // For now, DataExporter doesn't support filtering, so we'll use the full export
         // TODO: Add filtering support to DataExporter
@@ -67,7 +67,7 @@ router.get('/export/long', requireAdmin, async (req, res) => {
 router.get('/export/wide', requireAdmin, async (req, res) => {
     try {
         const { preview, valueType } = req.query;
-        const exporter = new DataExporter();
+        const exporter = new DataExporter({ forSpreadsheet: true });
 
         // Use the shared exporter
         const csvData = await exporter.exportWideFormat(valueType || 'numeric');
@@ -132,7 +132,7 @@ router.get('/export/data-dictionary', requireAdmin, async (req, res) => {
         }
         if (!surveyId) return res.status(404).json({ error: 'No survey found' });
 
-        const csvData = await generateDictionaryCsv(surveyId);
+        const csvData = await generateDictionaryCsv(surveyId, { forSpreadsheet: true });
         const date = new Date().toISOString().split('T')[0];
         res.setHeader('Content-Type', 'text/csv; charset=utf-8');
         res.setHeader('Content-Disposition', `attachment; filename="salt_data_dictionary_survey${surveyId}_${date}.csv"`);

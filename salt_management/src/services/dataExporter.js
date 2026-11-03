@@ -1,6 +1,16 @@
+const { neutralizeFormula } = require('./csvSafety');
 const { allAsync } = require('../models/database');
 
 class DataExporter {
+    /**
+     * @param {{forSpreadsheet?: boolean}} options  forSpreadsheet: neutralize
+     *   formula-like text cells (see csvSafety.js). Set only for admin downloads;
+     *   report inputs must stay unchanged.
+     */
+    constructor({ forSpreadsheet = false } = {}) {
+        this.forSpreadsheet = forSpreadsheet;
+    }
+
     /**
      * Load { short_name -> [option_index, ...] } for every multi_select
      * question, so multi-select answers can be exploded into one column per
@@ -782,7 +792,7 @@ class DataExporter {
             const values = sortedColumns.map(col => {
                 const value = row[col];
                 if (value === null || value === undefined) return '';
-                const stringValue = String(value);
+                const stringValue = this.forSpreadsheet ? neutralizeFormula(value) : String(value);
                 if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
                     return `"${stringValue.replace(/"/g, '""')}"`;
                 }
@@ -825,7 +835,7 @@ class DataExporter {
                 const value = row[header];
                 // Escape and quote values
                 if (value === null || value === undefined) return '';
-                const stringValue = String(value);
+                const stringValue = this.forSpreadsheet ? neutralizeFormula(value) : String(value);
                 if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')) {
                     return `"${stringValue.replace(/"/g, '""')}"`;
                 }

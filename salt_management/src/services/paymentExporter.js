@@ -1,3 +1,4 @@
+const { neutralizeFormula } = require('./csvSafety');
 const fs = require('fs').promises;
 const path = require('path');
 const glob = require('path');
@@ -117,7 +118,7 @@ class PaymentExporter {
 
     _csvEscape(value) {
         if (value === null || value === undefined) return '';
-        const str = String(value);
+        const str = neutralizeFormula(value); // download-only file
         if (str.includes(',') || str.includes('"') || str.includes('\n')) {
             return `"${str.replace(/"/g, '""')}"`;
         }

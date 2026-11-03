@@ -223,14 +223,16 @@ async function buildDictionaryRows(surveyId) {
 }
 
 /** Minimal RFC-4180 CSV cell escaping. */
-function csvCell(value) {
-    const s = value == null ? '' : String(value);
+const { neutralizeFormula } = require('./csvSafety');
+
+function csvCell(value, forSpreadsheet = false) {
+    const s = value == null ? '' : (forSpreadsheet ? neutralizeFormula(value) : String(value));
     return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-function rowsToCsv(rows) {
+function rowsToCsv(rows, { forSpreadsheet = false } = {}) {
     const lines = [DICTIONARY_COLUMNS.join(',')];
-    for (const r of rows) lines.push(DICTIONARY_COLUMNS.map(c => csvCell(r[c])).join(','));
+    for (const r of rows) lines.push(DICTIONARY_COLUMNS.map(c => csvCell(r[c], forSpreadsheet)).join(','));
     return lines.join('\n') + '\n';
 }
 
@@ -239,9 +241,9 @@ function rowsToCsv(rows) {
  * @param {number} surveyId
  * @returns {Promise<string>} CSV text
  */
-async function generateDictionaryCsv(surveyId) {
+async function generateDictionaryCsv(surveyId, { forSpreadsheet = false } = {}) {
     const { rows } = await buildDictionaryRows(surveyId);
-    return rowsToCsv(rows);
+    return rowsToCsv(rows, { forSpreadsheet });
 }
 
 module.exports = {

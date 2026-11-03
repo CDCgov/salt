@@ -8,6 +8,7 @@
 const express = require('express');
 const { getAsync, allAsync } = require('../../models/database');
 const { requireAdmin } = require('../../middleware/auth');
+const { neutralizeFormula } = require('../../services/csvSafety');
 const router = express.Router();
 
 function extractText(jsonStr) {
@@ -255,7 +256,7 @@ function tryParse(s) {
 
 function csvEscape(v) {
     if (v === null || v === undefined) return '';
-    const s = String(v);
+    const s = neutralizeFormula(v); // download-only file
     if (s.includes(',') || s.includes('"') || s.includes('\n')) {
         return `"${s.replace(/"/g, '""')}"`;
     }
