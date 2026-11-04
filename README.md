@@ -23,7 +23,7 @@ Stand up a complete, production-ready SALT server on a fresh machine. You need:
 From the server, run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ifellows/salt/main/salt_management/install.sh \
+curl -fsSL https://raw.githubusercontent.com/cdcgov/salt/main/salt_management/install.sh \
   | sudo bash -s -- your-domain.example.org admin@example.org
 ```
 

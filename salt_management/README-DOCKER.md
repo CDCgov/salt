@@ -12,7 +12,7 @@ lives in a host volume.
 DNS already pointed at the droplet, root SSH access. From the droplet:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ifellows/salt/main/salt_management/install.sh \
+curl -fsSL https://raw.githubusercontent.com/cdcgov/salt/main/salt_management/install.sh \
   | sudo bash -s -- your-domain.example.org admin@example.org
 ```
 

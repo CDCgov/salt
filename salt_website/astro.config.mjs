@@ -13,7 +13,7 @@ export default defineConfig({
         replacesTitle: true,
       },
       social: {
-        github: 'https://github.com/ifellows/salt',
+        github: 'https://github.com/cdcgov/salt',
       },
       sidebar: [
         {

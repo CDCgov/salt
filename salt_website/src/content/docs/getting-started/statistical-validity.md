@@ -38,7 +38,7 @@ By contrast, Gile's Successive Sampling and Volz-Heckathorn (RDS-II) only adjust
 
 | Method | Long recruitment chains | Seeds start at equilibrium | Robust estimators |
 | --- | --- | --- | --- |
-| [**SALT**](https://github.com/ifellows/salt/blob/main/SALT.pdf) | ✅ | <span style="color: #2a9d3a; font-weight: 600;">✅\*</span> | <span style="color: #2a9d3a; font-weight: 600;">With HCG or RDS-I</span> |
+| [**SALT**](https://github.com/cdcgov/salt/blob/main/SALT.pdf) | ✅ | <span style="color: #2a9d3a; font-weight: 600;">✅\*</span> | <span style="color: #2a9d3a; font-weight: 600;">With HCG or RDS-I</span> |
 | [RDS](https://www.lisagjohnston.com/respondent-driven-sampling) | ✅ | ❌ | <span style="color: #2a9d3a; font-weight: 600;">With HCG or RDS-I</span> |
 | [Starfish](https://pubmed.ncbi.nlm.nih.gov/30328063/) | ❌ | ✅ | ❌ |
 | [BBS-lite](https://www.unaids.org/en/resources/documents/2024/BBS-lite-tool) | ❌ | ❌ | <span style="color: #2a9d3a; font-weight: 600;">With HCG or RDS-I</span> |

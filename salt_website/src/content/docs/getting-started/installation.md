@@ -16,7 +16,7 @@ The server needs outbound internet access to pull Docker images and obtain a Let
 From the server (as root or via sudo), run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/ifellows/salt/main/salt_management/install.sh \
+curl -fsSL https://raw.githubusercontent.com/cdcgov/salt/main/salt_management/install.sh \
   | sudo bash -s -- your-domain.example.org admin@example.org
 ```
 

@@ -1,6 +1,6 @@
 # SALT Documentation Website
 
-Static marketing and documentation site for [SALT (System Assisted Link Tracing)](https://github.com/ifellows/salt), built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/).
+Static marketing and documentation site for [SALT (System Assisted Link Tracing)](https://github.com/cdcgov/salt), built with [Astro](https://astro.build/) and [Starlight](https://starlight.astro.build/).
 
 ## Development
 

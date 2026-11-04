@@ -7,7 +7,7 @@
 # auto-restart on reboot).
 #
 # Usage (one-liner — installs git, clones repo, builds, runs everything):
-#   curl -fsSL https://raw.githubusercontent.com/ifellows/salt/main/salt_management/install.sh \
+#   curl -fsSL https://raw.githubusercontent.com/cdcgov/salt/main/salt_management/install.sh \
 #     | sudo bash -s -- <domain> <admin-email>
 #
 # Usage (already-cloned repo):
@@ -19,7 +19,7 @@
 # Options:
 #   --install-dir DIR   Where to install / where the data lives (default: /opt/salt)
 #   --repo URL          Git repo to clone if running outside a checkout
-#                       (default: https://github.com/ifellows/salt.git)
+#                       (default: https://github.com/cdcgov/salt.git)
 #   --branch NAME       Branch / tag / commit to check out (default: main)
 #   --image IMAGE       Docker image to run (default: build locally from the checkout).
 #                       Pass e.g. "fellstat/salt:latest" once the image is published.
@@ -57,7 +57,7 @@ set -euo pipefail
 DOMAIN=""
 EMAIL=""
 INSTALL_DIR="/opt/salt"
-REPO_URL="https://github.com/ifellows/salt.git"
+REPO_URL="https://github.com/cdcgov/salt.git"
 REPO_BRANCH="main"
 IMAGE=""              # empty = build locally
 UPSTREAM_PORT=3000

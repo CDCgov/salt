@@ -7,7 +7,7 @@ SALT is open-source software hosted on GitHub.
 
 ## Repository
 
-**[https://github.com/ifellows/salt](https://github.com/ifellows/salt)**
+**[https://github.com/cdcgov/salt](https://github.com/cdcgov/salt)**
 
 The repository contains three main components:
 
@@ -29,7 +29,7 @@ The repository contains three main components:
 The one-command installer is hosted at:
 
 ```
-https://raw.githubusercontent.com/ifellows/salt/main/salt_management/install.sh
+https://raw.githubusercontent.com/cdcgov/salt/main/salt_management/install.sh
 ```
 
 See [Installation](/getting-started/installation/) for usage.
@@ -40,7 +40,7 @@ See the `LICENSE` file in the repository root.
 
 ## Reporting issues
 
-Open an issue on the GitHub repository: [https://github.com/ifellows/salt/issues](https://github.com/ifellows/salt/issues)
+Open an issue on the GitHub repository: [https://github.com/cdcgov/salt/issues](https://github.com/cdcgov/salt/issues)
 
 Include:
 - A description of the problem

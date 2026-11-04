@@ -67,7 +67,7 @@ Canonical external references for the sampling-methods table:
 - Starfish → https://pubmed.ncbi.nlm.nih.gov/30328063/
 - BBS-lite → https://www.unaids.org/en/resources/documents/2024/BBS-lite-tool
 
-GitHub repo (the only "code" link on the site): https://github.com/ifellows/salt
+GitHub repo (the only "code" link on the site): https://github.com/cdcgov/salt
 
 ---
 
@@ -86,7 +86,7 @@ project files directly:
 - `salt_website/astro.config.mjs` —
   - `site: 'https://surveysalt.com'`
   - Starlight integration with: `title: 'SALT'`, `description`, the GitHub
-    social link to `https://github.com/ifellows/salt`, the sidebar tree from
+    social link to `https://github.com/cdcgov/salt`, the sidebar tree from
     plan §3, search on (Pagefind default).
 - `salt_website/tsconfig.json` — `extends: 'astro/tsconfigs/strict'`.
 - `salt_website/src/content.config.ts` — Starlight docs collection (per the
@@ -291,14 +291,14 @@ The site must:
 
 - **Framework:** Astro + Starlight (docs theme — sidebar nav, Pagefind search,
   dark mode, responsive, Markdown/MDX).
-- **Location:** `salt_website/` inside the existing `ifellows/salt` repo.
+- **Location:** `salt_website/` inside the existing `cdcgov/salt` repo.
 - **Droplet:** already runs a web server — only adds an nginx vhost + TLS.
 
 ## Shape of the change
 
 ```mermaid
 flowchart LR
-    subgraph repo["ifellows/salt"]
+    subgraph repo["cdcgov/salt"]
         SW["salt_website/"]
         Docs["existing .md docs<br/>(README, ARCHITECTURE,<br/>SURVEY_LOGIC,<br/>SURVEY_IMPORT_EXPORT,<br/>README-DOCKER,<br/>salt_android/README)"]
     end
@@ -322,7 +322,7 @@ Files created:
 
 - `salt_website/package.json`, `astro.config.mjs`, `tsconfig.json`
 - `astro.config.mjs` — `site: 'https://surveysalt.com'`; Starlight config: title
-  "SALT", logo, GitHub social link to `https://github.com/ifellows/salt`,
+  "SALT", logo, GitHub social link to `https://github.com/cdcgov/salt`,
   sidebar tree (see §3), Pagefind on.
 - `salt_website/src/content.config.ts` — Starlight docs collection.
 - `salt_website/src/content/docs/index.mdx` — landing (splash template).
@@ -552,7 +552,7 @@ During implementation:
 - `npm run build` finishes with no broken-link warnings; `npm run preview`
   serves `dist/`.
 - Manual check: every internal link resolves; the install one-liner renders
-  intact; all GitHub links point to `https://github.com/ifellows/salt`.
+  intact; all GitHub links point to `https://github.com/cdcgov/salt`.
 - Spot-check that every admin tab listed in `nav.ejs` has a page, and every
   `*Screen.kt` file in `salt_android/app/src/main/java/com/dev/salt/ui/` is
   mentioned in either the staff or admin guide.
