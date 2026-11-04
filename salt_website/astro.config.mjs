@@ -44,7 +44,7 @@ export default defineConfig({
             { label: 'Users', slug: 'management/users' },
             { label: 'Lab Tests', slug: 'management/lab-tests' },
             { label: 'Reports', slug: 'management/reports' },
-            { label: 'AI Report Builder', slug: 'management/ai-report-builder' },
+            { label: 'AI Assistant (MCP)', slug: 'management/ai-report-builder' },
             { label: 'Export Data', slug: 'management/export-data' },
             { label: 'Edit Data', slug: 'management/edit-data' },
           ],

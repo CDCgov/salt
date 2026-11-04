@@ -262,7 +262,7 @@ const callJson = async (c, name, args = {}) => {
     const c = await mcpClient(toolTok);
     const toolList = (await c.listTools()).tools;
     const tools = toolList.map(t => t.name);
-    ok('all 14 tools registered', tools.length === 14, tools.join(','));
+    ok('all 36 tools registered (14 report + 22 survey/lab test)', tools.length === 36, tools.join(','));
     ok('get_report_instructions description says CALL FIRST', /FIRST/i.test(toolList.find(t => t.name === 'get_report_instructions')?.description || ''));
 
     ok('list_surveys', (await callJson(c, 'list_surveys')).text.includes('"id"'));

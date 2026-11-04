@@ -17,7 +17,7 @@ const { ROLES } = require('../constants/roles');
 const AUTH_CODE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const PENDING_TTL_MS = 10 * 60 * 1000;   // how long a consent screen stays valid
 
-// Only active administrators may connect the report builder.
+// Only active administrators may connect the SALT MCP server.
 async function activeAdmin(userId) {
     if (!userId) return null;
     const u = await getAsync(
@@ -217,7 +217,7 @@ function consentPage({ view, username, returnUrl, pending }) {
         let host = pending.redirectUri;
         try { host = new URL(pending.redirectUri).host; } catch { /* keep raw */ }
         body = `<p>Signed in as <strong>${escapeHtml(username)}</strong>.</p>
-           <p><strong>${escapeHtml(name)}</strong> is asking to use the SALT report builder as you.</p>
+           <p><strong>${escapeHtml(name)}</strong> is asking to use SALT as you: build reports, and edit inactive surveys and lab tests.</p>
            <p>If you allow it, it can read the survey data dictionary and summaries, and create
               and run reports. Reports run R code against the survey data, so the application
               can access individual participant records, though the AI is instructed to avoid
@@ -244,7 +244,7 @@ function consentPage({ view, username, returnUrl, pending }) {
            </script>`;
     } else if (view === 'not_admin') {
         body = `<p>Signed in as <strong>${escapeHtml(username)}</strong>.</p>
-           <p>Connecting the report builder requires an active administrator account.</p>`;
+           <p>Connecting an AI assistant to SALT requires an active administrator account.</p>`;
     } else if (view === 'login') {
         const next = isLocalAuthorizePath(returnUrl) ? returnUrl : null;
         body = `<p>Sign in to your SALT administrator account to connect.</p>
@@ -281,7 +281,7 @@ function consentPage({ view, username, returnUrl, pending }) {
         .allow{background:#2563eb;color:#fff} .deny{background:#e5e7eb;color:#111;margin-left:.5rem}
         .row{margin-top:1rem} .err{color:#b91c1c;margin-top:.5rem;font-size:.9rem}
       </style></head>
-      <body><div class="card"><h1>Connect to SALT report builder</h1>${body}</div></body></html>`;
+      <body><div class="card"><h1>Connect your AI assistant to SALT</h1>${body}</div></body></html>`;
 }
 
 function escapeHtml(s) {
@@ -353,7 +353,7 @@ async function mountOAuth(app, { baseUrl }) {
         baseUrl: issuerUrl,
         resourceServerUrl,
         scopesSupported: ['mcp'],
-        resourceName: 'SALT report builder',
+        resourceName: 'SALT',
     }));
 
     console.log(`[mcp] OAuth authorization server mounted (issuer ${issuerUrl.href})`);

@@ -1,4 +1,5 @@
 const express = require('express');
+const editing = require('../../services/surveyEditing');
 const router = express.Router();
 const { requireAdmin } = require('../../middleware/auth');
 const { getAsync, runAsync, allAsync } = require('../../models/database');
@@ -64,55 +65,21 @@ router.put('/:surveyId/messages/:messageKey', async (req, res) => {
         const { surveyId, messageKey } = req.params;
         const { message_text_json, audio_files_json, message_type, display_order } = req.body;
 
-        // Validate input
-        if (!message_text_json || typeof message_text_json !== 'object') {
-            return res.status(400).json({ error: 'message_text_json is required and must be an object' });
-        }
-
-        const textJson = JSON.stringify(message_text_json);
-        const audioJson = JSON.stringify(audio_files_json || {});
-        const type = message_type || 'system';
-        const order = display_order || 0;
-
-        // Use INSERT OR REPLACE to handle both create and update
-        await runAsync(
-            `INSERT INTO survey_messages (survey_id, message_key, message_text_json, audio_files_json, message_type, display_order, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-             ON CONFLICT(survey_id, message_key) DO UPDATE SET
-                message_text_json = excluded.message_text_json,
-                audio_files_json = excluded.audio_files_json,
-                message_type = excluded.message_type,
-                display_order = excluded.display_order,
-                updated_at = CURRENT_TIMESTAMP`,
-            [surveyId, messageKey, textJson, audioJson, type, order]
-        );
-
-        // Update the survey's updated_at timestamp to trigger sync
-        await runAsync(
-            `UPDATE surveys SET updated_at = CURRENT_TIMESTAMP WHERE id = ?`,
-            [surveyId]
-        );
-
-        // Fetch the updated/created message
-        const message = await getAsync(
-            `SELECT * FROM survey_messages WHERE survey_id = ? AND message_key = ?`,
-            [surveyId, messageKey]
-        );
+        // The editor sends the full audio map on every save, so it replaces the stored one.
+        const message = await editing.setMessage(surveyId, messageKey, {
+            text: message_text_json,
+            audio: audio_files_json,
+            messageType: message_type,
+            displayOrder: display_order || 0
+        }, { userId: req.session && req.session.userId, via: 'web' }, { replaceAudio: true });
 
         message.message_text_json = JSON.parse(message.message_text_json || '{}');
         message.audio_files_json = JSON.parse(message.audio_files_json || '{}');
-
-        // Log the action (use session userId since req.user isn't populated)
-        if (req.session && req.session.userId) {
-            await logAudit(req.session.userId, 'UPDATE_MESSAGE', {
-                surveyId,
-                messageKey,
-                message_type: type
-            });
-        }
-
         res.json(message);
     } catch (error) {
+        if (error instanceof editing.EditError) {
+            return res.status(error.status).json({ error: error.message });
+        }
         console.error('Error updating message:', error);
         res.status(500).json({ error: 'Failed to update message' });
     }

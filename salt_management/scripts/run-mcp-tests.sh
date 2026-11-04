@@ -20,7 +20,8 @@ PIDFILE=/tmp/salt_mcp_test.pid
 # the shipped defaults and never touches the operator's editable data/reports.
 export MCP_INSTRUCTIONS_FILE=/tmp/salt_mcp_test_instructions.md
 export MCP_TEMPLATES_DIR=/tmp/salt_mcp_test_templates
-rm -f "$MCP_INSTRUCTIONS_FILE"; rm -rf "$MCP_TEMPLATES_DIR"
+export MCP_SURVEY_GUIDE_FILE=/tmp/salt_mcp_test_survey_guide.md
+rm -f "$MCP_INSTRUCTIONS_FILE" "$MCP_SURVEY_GUIDE_FILE"; rm -rf "$MCP_TEMPLATES_DIR"
 
 cleanup() {
     [[ -f "$PIDFILE" ]] && kill "$(cat "$PIDFILE")" 2>/dev/null
@@ -28,7 +29,7 @@ cleanup() {
     # Restore the original DB (discards all test writes) and clear temp renders.
     if [[ -f "$BACKUP" ]]; then cp -f "$BACKUP" "$DB" && rm -f "$BACKUP"; fi
     rm -rf data/reports/temp/* 2>/dev/null
-    rm -f "$PIDFILE" "$MCP_INSTRUCTIONS_FILE"; rm -rf "$MCP_TEMPLATES_DIR"
+    rm -f "$PIDFILE" "$MCP_INSTRUCTIONS_FILE" "$MCP_SURVEY_GUIDE_FILE"; rm -rf "$MCP_TEMPLATES_DIR"
 }
 trap cleanup EXIT
 
@@ -50,6 +51,11 @@ done
 echo "[test] running harness"
 BASE="http://localhost:$PORT" node scripts/test-mcp.mjs
 RC=$?
+
+echo "[test] running survey / lab test tools harness"
+BASE="http://localhost:$PORT" node scripts/test-mcp-survey.mjs
+RC2=$?
+[[ $RC -eq 0 ]] && RC=$RC2
 
 echo "[test] server startup failures: $(grep -ciE 'cannot find module|EADDRINUSE|listen|unhandled' "$LOG" || true)"
 exit $RC

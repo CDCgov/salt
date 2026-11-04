@@ -23,7 +23,8 @@ const express = require('express');
 const { getAsync, allAsync, runAsync } = require('../../models/database');
 const { requireAdmin } = require('../../middleware/auth');
 const { logAudit } = require('../../services/auditService');
-const { importSurveyBundle, SCHEMA_VERSION } = require('../../services/surveyImport');
+const { importSurveyBundle } = require('../../services/surveyImport');
+const { buildSurveyBundle } = require('../../services/surveyBundle');
 const database = require('../../models/database');
 const { checkSurvey } = require('../../services/jexlCheck');
 const router = express.Router();
@@ -39,45 +40,11 @@ router.get('/admin/surveys/:id/export', requireAdmin, async (req, res) => {
             return res.status(400).json({ status: 'error', message: 'Invalid survey id' });
         }
 
-        const survey = await getAsync('SELECT * FROM surveys WHERE id = ?', [id]);
-        if (!survey) {
+        const bundle = await buildSurveyBundle(id, { host: req.get('host') || null });
+        if (!bundle) {
             return res.status(404).json({ status: 'error', message: 'Survey not found' });
         }
-        const sections = await allAsync(
-            'SELECT * FROM sections WHERE survey_id = ? ORDER BY section_index', [id]
-        );
-        const questions = await allAsync(
-            'SELECT * FROM questions WHERE survey_id = ? ORDER BY question_index', [id]
-        );
-        const questionIds = questions.map(q => q.id);
-        const options = questionIds.length
-            ? await allAsync(
-                  `SELECT * FROM options WHERE question_id IN (${questionIds.map(() => '?').join(',')}) ORDER BY question_id, option_index`,
-                  questionIds
-              )
-            : [];
-        const messages = await allAsync(
-            'SELECT * FROM survey_messages WHERE survey_id = ? ORDER BY message_key', [id]
-        );
-        const testConfigs = await allAsync(
-            'SELECT * FROM test_configurations WHERE survey_id = ? ORDER BY display_order', [id]
-        );
-
-        const bundle = {
-            schema_version: SCHEMA_VERSION,
-            exported_at: new Date().toISOString(),
-            source: {
-                survey_name: survey.name,
-                survey_version: survey.version,
-                host: req.get('host') || null
-            },
-            survey,
-            sections,
-            questions,
-            options,
-            survey_messages: messages,
-            test_configurations: testConfigs
-        };
+        const { survey, questions, survey_messages: messages } = bundle;
 
         const filename = `salt-survey_${safeFilename(survey.name)}_v${survey.version}_${new Date().toISOString().slice(0, 10)}.json`;
 

@@ -1,6 +1,6 @@
 /**
- * MCP report-builder entry point. Enabled by default; set MCP_ENABLED to a
- * falsy value (false/0/no/off) to disable the report builder MCP server.
+ * SALT MCP server entry point (reports, survey editing, lab tests). Enabled by
+ * default; set MCP_ENABLED to a falsy value (false/0/no/off) to disable it.
  *
  * Usage from app.js (before the catch-all 404 handler):
  *   require('./mcp').init(app).finally(startServerAndFallbacks)

@@ -1,7 +1,8 @@
 /**
- * tools.js — registers the MCP tool surface on an McpServer instance.
+ * tools.js — registers the MCP tool surface on an McpServer instance: the
+ * report tools below, plus the survey and lab test tools in surveyTools.js.
  *
- * Every tool is a thin wrapper over existing SALT services. No tool returns
+ * Every report tool is a thin wrapper over existing SALT services. No tool returns
  * row-level data: the agent sees schema (dictionary), aggregates (profile),
  * templates, report .qmd code, render status, and the executed-markdown
  * preview — never participant rows. Row data is read only by the server-side
@@ -22,6 +23,7 @@ const ReportExecutor = require('../services/reportExecutor');
 const { getReportInstructions } = require('../services/reportInstructions');
 const { logAudit } = require('../services/auditService');
 const reportTemplates = require('../services/reportTemplates');
+const { registerSurveyTools } = require('./surveyTools');
 
 // Example report templates are managed by the shared reportTemplates service
 // (seeded from src/mcp/templates-default into the data volume; the web report
@@ -103,11 +105,11 @@ function markRenderEnd(userId) {
 function registerTools(server) {
     server.registerTool('list_surveys', {
         title: 'List surveys',
-        description: 'List surveys with completed-response counts and date range.',
+        description: 'List surveys with completed-response counts and date range. is_active = 1 is the live survey that tablets download; it can be read but not edited (use copy_survey).',
         inputSchema: {},
     }, async () => {
         const rows = await allAsync(`
-            SELECT s.id, s.name, s.version, s.is_active,
+            SELECT s.id, s.name, s.version, s.is_active, s.is_draft, s.updated_at, s.base_survey_id, s.parent_survey_id,
                    (SELECT COUNT(*) FROM completed_surveys c WHERE c.survey_id = s.id AND c.deleted_at IS NULL) AS n_completed,
                    (SELECT MIN(completed_at) FROM completed_surveys c WHERE c.survey_id = s.id AND c.deleted_at IS NULL) AS first_completed,
                    (SELECT MAX(completed_at) FROM completed_surveys c WHERE c.survey_id = s.id AND c.deleted_at IS NULL) AS last_completed
@@ -359,6 +361,8 @@ function registerTools(server) {
             markdown_preview: markdown,
         }, null, 2));
     });
+
+    registerSurveyTools(server);
 }
 
 module.exports = { registerTools, seedTemplates, _internals: { getProfile, profileCache } };

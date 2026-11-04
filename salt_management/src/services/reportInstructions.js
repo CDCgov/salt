@@ -24,11 +24,13 @@ const DEFAULT_FILE = path.join(__dirname, '..', 'mcp', 'report-instructions.defa
 // separate from (and shorter than) the full guidance so it is unmissable: it
 // compels the agent to fetch the full instructions before doing any analysis.
 const BOOTSTRAP_INSTRUCTIONS =
-    'You are connected to the SALT report builder (MCP). Your FIRST action in any session MUST ' +
-    'be to call the `get_report_instructions` tool and follow what it returns — do this before ' +
-    'reading data, writing any R/Quarto, or calling any other tool. It contains the data ' +
-    'contract, exact variable naming, data-cleaning rules, available R packages, and output ' +
-    'requirements; without it the analysis will be wrong.';
+    'You are connected to the SALT server (MCP): reports, survey editing, and lab tests. ' +
+    'For report work, your FIRST action MUST be to call the `get_report_instructions` tool and ' +
+    'follow what it returns — do this before reading data, writing any R/Quarto, or calling any ' +
+    'other report tool. It contains the data contract, exact variable naming, data-cleaning rules, ' +
+    'available R packages, and output requirements; without it the analysis will be wrong. ' +
+    'For creating or editing surveys or lab tests, your FIRST action MUST be to call ' +
+    '`get_survey_authoring_guide` and follow it: survey logic has rules that are easy to get wrong.';
 
 /** Path to the editable instructions file (env-overridable). */
 function instructionsFilePath() {

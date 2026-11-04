@@ -1,5 +1,6 @@
 /**
- * server.js — mounts the MCP report-builder server onto the existing Express app.
+ * server.js — mounts the SALT MCP server (reports, survey editing, lab tests)
+ * onto the existing Express app.
  *
  * Self-contained: everything lives under src/mcp/, gated by MCP_ENABLED, and is
  * mounted with a single call from app.js. The MCP SDK is ESM, so it is loaded
@@ -14,7 +15,7 @@
 const { verifyAccessToken } = require('./sessionStore');
 const { registerTools } = require('./tools');
 
-const SERVER_INFO = { name: 'salt-report-builder', version: '0.1.0' };
+const SERVER_INFO = { name: 'salt', version: '0.2.0' };
 
 /**
  * Mount MCP endpoints on the app. Returns true if mounted.
@@ -60,7 +61,7 @@ async function mountMcp(app) {
         const server = new McpServer(SERVER_INFO, {
             capabilities: { tools: {} },
             // Short bootstrap that forces the agent to fetch the full guidance
-            // via get_report_instructions before doing any analysis.
+            // (get_report_instructions / get_survey_authoring_guide) first.
             instructions: require('../services/reportInstructions').BOOTSTRAP_INSTRUCTIONS,
         });
         registerTools(server);
@@ -96,6 +97,14 @@ async function mountMcp(app) {
         console.warn('[mcp] could not seed report instructions:', e.message);
     }
 
+    try {
+        const guide = require('../services/surveyAuthoringGuide');
+        guide.ensureSeeded();
+        console.log(`[mcp] survey authoring guide (editable): ${guide.guideFilePath()}`);
+    } catch (e) {
+        console.warn('[mcp] could not seed survey authoring guide:', e.message);
+    }
+
     // Seed the example report templates into the data volume (it is
     // dockerignored/gitignored, so they ship as defaults and are copied in).
     try {
@@ -104,7 +113,7 @@ async function mountMcp(app) {
         console.warn('[mcp] could not seed templates:', e.message);
     }
 
-    console.log(`[mcp] report-builder MCP server mounted at ${baseUrl}/mcp`);
+    console.log(`[mcp] SALT MCP server (reports, surveys, lab tests) mounted at ${baseUrl}/mcp`);
     return true;
 }
 

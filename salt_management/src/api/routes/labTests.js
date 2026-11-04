@@ -3,23 +3,10 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { getAsync, allAsync, runAsync } = require('../../models/database');
 const { requireAdmin, requireStaffOrAdmin } = require('../../middleware/auth');
-const database = require('../../models/database');
-const { checkLabConditions, loadSurveyData } = require('../../services/jexlCheck');
+const labEditing = require('../../services/labTestEditing');
+const { labConditionReport } = labEditing;
+const { EditError } = require('../../services/surveyEditing');
 
-// Checks a lab test's JEXL condition against the active survey. Saves are
-// never blocked; the result is returned with the save response.
-async function labConditionReport(testId) {
-    try {
-        const lab = await getAsync('SELECT id, test_name, jexl_condition FROM lab_test_configurations WHERE id = ?', [testId]);
-        if (!lab || !lab.jexl_condition) return { errors: [], warnings: [], checked: true };
-        const active = await getAsync('SELECT id FROM surveys WHERE is_active = 1 ORDER BY id DESC LIMIT 1');
-        const data = active ? await loadSurveyData(database, active.id) : null;
-        return await checkLabConditions([lab], data);
-    } catch (err) {
-        console.error('Lab condition check failed:', err);
-        return null;
-    }
-}
 
 // Get all lab tests (admin only)
 router.get('/lab-tests', requireAdmin, async (req, res) => {
@@ -160,73 +147,7 @@ router.post('/lab-tests',
         }
 
         try {
-            const {
-                test_name,
-                test_code,
-                test_type,
-                options,
-                min_value,
-                max_value,
-                unit,
-                description,
-                display_order,
-                jexl_condition
-            } = req.body;
-
-            // Check if test name already exists
-            const existing = await getAsync(
-                'SELECT id FROM lab_test_configurations WHERE test_name = ?',
-                [test_name]
-            );
-
-            if (existing) {
-                return res.status(409).json({ error: 'Test name already exists' });
-            }
-
-            // Check if test code already exists
-            if (test_code) {
-                const existingCode = await getAsync(
-                    'SELECT id FROM lab_test_configurations WHERE test_code = ?',
-                    [test_code]
-                );
-
-                if (existingCode) {
-                    return res.status(409).json({ error: 'Test code already exists' });
-                }
-            }
-
-            // Prepare values based on test type
-            let finalOptions = null;
-            let finalMinValue = null;
-            let finalMaxValue = null;
-            let finalUnit = null;
-
-            if (test_type === 'dropdown') {
-                finalOptions = JSON.stringify(options);
-            } else if (test_type === 'numeric') {
-                finalMinValue = min_value !== undefined ? parseFloat(min_value) : null;
-                finalMaxValue = max_value !== undefined ? parseFloat(max_value) : null;
-                finalUnit = unit || null;
-            }
-
-            const result = await runAsync(
-                `INSERT INTO lab_test_configurations
-                (test_name, test_code, test_type, options, min_value, max_value, unit, description, display_order, jexl_condition)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [
-                    test_name,
-                    test_code || null,
-                    test_type,
-                    finalOptions,
-                    finalMinValue,
-                    finalMaxValue,
-                    finalUnit,
-                    description || null,
-                    display_order || 0,
-                    jexl_condition || null
-                ]
-            );
-
+            const result = await labEditing.createLabTest(req.body, { userId: req.session && req.session.userId, via: 'web' });
             res.status(201).json({
                 success: true,
                 message: 'Lab test created successfully',
@@ -234,6 +155,7 @@ router.post('/lab-tests',
                 jexl_check: await labConditionReport(result.id)
             });
         } catch (error) {
+            if (error instanceof EditError) return res.status(error.status).json({ error: error.message });
             console.error('Error creating lab test:', error);
             res.status(500).json({ error: 'Failed to create lab test' });
         }
@@ -282,107 +204,14 @@ router.put('/lab-tests/:id',
 
         try {
             const testId = parseInt(req.params.id);
-            const updates = req.body;
-
-            // Check if test exists
-            const existing = await getAsync(
-                'SELECT * FROM lab_test_configurations WHERE id = ?',
-                [testId]
-            );
-
-            if (!existing) {
-                return res.status(404).json({ error: 'Lab test not found' });
-            }
-
-            // Build update query
-            const updateFields = [];
-            const params = [];
-
-            if (updates.test_name !== undefined) {
-                // Check if new name already exists
-                const nameExists = await getAsync(
-                    'SELECT id FROM lab_test_configurations WHERE test_name = ? AND id != ?',
-                    [updates.test_name, testId]
-                );
-                if (nameExists) {
-                    return res.status(409).json({ error: 'Test name already exists' });
-                }
-                updateFields.push('test_name = ?');
-                params.push(updates.test_name);
-            }
-
-            if (updates.test_code !== undefined) {
-                // Check if new code already exists
-                if (updates.test_code) {
-                    const codeExists = await getAsync(
-                        'SELECT id FROM lab_test_configurations WHERE test_code = ? AND id != ?',
-                        [updates.test_code, testId]
-                    );
-                    if (codeExists) {
-                        return res.status(409).json({ error: 'Test code already exists' });
-                    }
-                }
-                updateFields.push('test_code = ?');
-                params.push(updates.test_code || null);
-            }
-
-            if (updates.options !== undefined) {
-                updateFields.push('options = ?');
-                params.push(JSON.stringify(updates.options));
-            }
-
-            if (updates.min_value !== undefined) {
-                updateFields.push('min_value = ?');
-                params.push(parseFloat(updates.min_value));
-            }
-
-            if (updates.max_value !== undefined) {
-                updateFields.push('max_value = ?');
-                params.push(parseFloat(updates.max_value));
-            }
-
-            if (updates.unit !== undefined) {
-                updateFields.push('unit = ?');
-                params.push(updates.unit);
-            }
-
-            if (updates.description !== undefined) {
-                updateFields.push('description = ?');
-                params.push(updates.description);
-            }
-
-            if (updates.display_order !== undefined) {
-                updateFields.push('display_order = ?');
-                params.push(updates.display_order);
-            }
-
-            if (updates.is_active !== undefined) {
-                updateFields.push('is_active = ?');
-                params.push(updates.is_active ? 1 : 0);
-            }
-
-            if (updates.jexl_condition !== undefined) {
-                updateFields.push('jexl_condition = ?');
-                params.push(updates.jexl_condition || null);
-            }
-
-            if (updateFields.length === 0) {
-                return res.status(400).json({ error: 'No valid updates provided' });
-            }
-
-            params.push(testId);
-
-            await runAsync(
-                `UPDATE lab_test_configurations SET ${updateFields.join(', ')} WHERE id = ?`,
-                params
-            );
-
+            await labEditing.updateLabTest(testId, req.body, { userId: req.session && req.session.userId, via: 'web' });
             res.json({
                 success: true,
                 message: 'Lab test updated successfully',
                 jexl_check: await labConditionReport(testId)
             });
         } catch (error) {
+            if (error instanceof EditError) return res.status(error.status).json({ error: error.message });
             console.error('Error updating lab test:', error);
             res.status(500).json({ error: 'Failed to update lab test' });
         }

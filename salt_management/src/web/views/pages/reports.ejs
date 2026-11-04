@@ -10,7 +10,7 @@ var body = `
         <h3>Available Reports</h3>
         <div style="display: flex; gap: 0.5rem;">
             <button class="btn" style="background: #6f42c1;" onclick="showAiBuilder()">
-                <i class="fas fa-robot"></i> AI Report Builder
+                <i class="fas fa-robot"></i> AI Assistant
             </button>
             <button class="btn" onclick="createNewReport()">
                 <i class="fas fa-plus"></i> New Report
@@ -64,11 +64,11 @@ var body = `
     </div>
 </div>
 
-<!-- AI Report Builder Modal -->
+<!-- AI Assistant (MCP) Modal -->
 <div id="aiBuilderModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
     <div style="background: white; margin: 4% auto; padding: 2rem; width: 660px; max-width: 92%; border-radius: 8px; max-height: 88vh; overflow: auto;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h3 style="margin: 0;"><i class="fas fa-robot"></i> AI Report Builder</h3>
+            <h3 style="margin: 0;"><i class="fas fa-robot"></i> AI Assistant</h3>
             <button class="btn" style="background: #95a5a6;" onclick="closeAiBuilder()">Close</button>
         </div>
 
@@ -79,7 +79,11 @@ var body = `
         any individual-level detail) is shared with that service, so design your reports
         accordingly.</p>
 
-        ${mcpEnabled ? '' : '<div style="background:#fff3cd; color:#856404; padding:0.75rem 1rem; border-radius:6px; margin-bottom:1rem;"><strong>Currently disabled.</strong> Ask your administrator to enable the AI Report Builder (set <code>MCP_ENABLED=true</code> on the server) before connecting.</div>'}
+        <p>The assistant can also create and edit <strong>inactive</strong> surveys and lab tests.
+        It can't change or activate the active survey: it edits a copy, and you review and activate
+        the copy on the Surveys page.</p>
+
+        ${mcpEnabled ? '' : '<div style="background:#fff3cd; color:#856404; padding:0.75rem 1rem; border-radius:6px; margin-bottom:1rem;"><strong>Currently disabled.</strong> Ask your administrator to enable the AI Assistant (set <code>MCP_ENABLED=true</code> on the server) before connecting.</div>'}
 
         <div style="margin: 1rem 0;">
             <label style="font-weight: 600;">Connector URL</label>

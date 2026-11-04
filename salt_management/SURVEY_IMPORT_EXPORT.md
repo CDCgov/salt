@@ -146,9 +146,8 @@ Force-overridden on import (omit or any value — ignored): `is_active` → 0,
 #### `sections` array
 
 **Every survey must contain exactly two sections — an Eligibility section and
-a Main section.** The tablet relies on this; a survey missing either will not
-run correctly. The importer does not enforce it, so a generated bundle must
-always include both, exactly as follows:
+a Main section.** The tablet relies on this, and the importer refuses a bundle
+with a missing, duplicated or extra section type. Include both, exactly as follows:
 
 | `section_index` | `section_type` | `name` |
 |-----------------|----------------|--------|
@@ -356,6 +355,10 @@ The request is rejected with `400` if:
 - `schema_version` does not equal the server's supported version (`1`).
 - The `survey` object is missing or has no `name`.
 - The bundle contains zero questions.
+- `sections` doesn't have exactly one `eligibility` and one `main` section, or
+  has a section of any other type.
+- Two questions share a `short_name`, or a question uses the reserved
+  `value` or `facility_coupons`.
 - An option has `is_other = 1` on a question that is not `multiple_choice` or
   `multi_select`.
 - A question has more than one `is_other` option.

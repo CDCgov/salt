@@ -3,43 +3,23 @@ const { body, validationResult } = require('express-validator');
 const { getAsync, runAsync, allAsync } = require('../../models/database');
 const { requireAdmin } = require('../../middleware/auth');
 const { logAudit } = require('../../services/auditService');
-const { isOtherFlag, validateOtherOptions, otherNameClash } = require('../../services/otherOption');
 const database = require('../../models/database');
-const { checkSurvey, filterIssues } = require('../../services/jexlCheck');
+const { checkSurvey } = require('../../services/jexlCheck');
+const editing = require('../../services/surveyEditing');
+const { jexlReport } = editing;
 const router = express.Router();
 
-// JEXL check results to return with a save. Saves are never blocked by the
-// check (drafts are often half-finished), and a checker failure never fails
-// the save. `scope` is passed to filterIssues.
-async function jexlReport(surveyId, scope) {
-    try {
-        const full = await checkSurvey(database, surveyId);
-        if (!full) return null;
-        return {
-            ...filterIssues(full, scope),
-            survey_error_count: full.errors.length,
-            survey_warning_count: full.warnings.length
-        };
-    } catch (err) {
-        console.error('JEXL check failed:', err);
-        return null;
+// Shared-service failures carry an HTTP status; anything else is a 500.
+function sendEditError(res, error, fallback) {
+    if (error instanceof editing.EditError) {
+        return res.status(error.status).json({ error: error.message });
     }
+    console.error(fallback + ':', error);
+    return res.status(500).json({ error: fallback });
 }
 
 // All routes require admin authentication
 router.use(requireAdmin);
-
-// The survey's questions other than `excludeId`, with whether each has an
-// "other" option — for the reserved <short_name>_other name check.
-async function siblingQuestionsForOtherCheck(surveyId, excludeId) {
-    const rows = await allAsync(
-        `SELECT q.short_name,
-                EXISTS(SELECT 1 FROM options o WHERE o.question_id = q.id AND o.is_other = 1) AS has_other
-         FROM questions q WHERE q.survey_id = ? AND q.id != ?`,
-        [surveyId, excludeId || 0]
-    );
-    return rows.map(r => ({ short_name: r.short_name, has_other: !!r.has_other }));
-}
 
 // List all survey versions
 router.get('/', async (req, res) => {
@@ -187,183 +167,29 @@ router.put('/:id', [
             return res.status(404).json({ error: 'Survey not found' });
         }
         
-        // If create_version is true and survey is not a draft, create a new version
+        // If create_version is true and survey is not a draft, create a new
+        // version: a full copy (settings, questions, options, messages, rapid
+        // tests, audio) with this request's settings applied.
         if (create_version && !oldSurvey.is_draft) {
-            // Get the next version number for this base survey
-            const baseId = oldSurvey.base_survey_id || oldSurvey.id;
-            const maxVersion = await getAsync(
-                'SELECT MAX(version) as max_version FROM surveys WHERE base_survey_id = ? OR id = ?',
-                [baseId, baseId]
-            );
-            const newVersion = (maxVersion?.max_version || 0) + 1;
-            
-            // Create new survey version
-            const newSurveyResult = await runAsync(
-                `INSERT INTO surveys (version, base_survey_id, parent_survey_id, name, description, 
-                 languages, eligibility_script, coupon_count_script, eligibility_message_json, is_active, is_draft)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [newVersion, baseId, surveyId, 
-                 name || oldSurvey.name,
-                 description !== undefined ? description : oldSurvey.description,
-                 languages || oldSurvey.languages,
-                 eligibility_script !== undefined ? eligibility_script : oldSurvey.eligibility_script,
-                 coupon_count_script !== undefined ? coupon_count_script : oldSurvey.coupon_count_script,
-                 eligibility_message_json !== undefined ? 
-                    (typeof eligibility_message_json === 'object' ? 
-                        JSON.stringify(eligibility_message_json) : eligibility_message_json) 
-                    : oldSurvey.eligibility_message_json,
-                 0, 0]  // not active, not draft
-            );
-            
-            const newSurveyId = newSurveyResult.id;
-            
-            // Copy all sections, questions, and options to the new version
-            const sections = await allAsync('SELECT * FROM sections WHERE survey_id = ?', [surveyId]);
-            const sectionMapping = {};
-            
-            for (const section of sections) {
-                const sectionResult = await runAsync(
-                    `INSERT INTO sections (survey_id, section_index, section_type, name, description)
-                     VALUES (?, ?, ?, ?, ?)`,
-                    [newSurveyId, section.section_index, section.section_type, section.name, section.description]
-                );
-                sectionMapping[section.id] = sectionResult.id;
-            }
-            
-            const questions = await allAsync('SELECT * FROM questions WHERE survey_id = ?', [surveyId]);
-            
-            for (const question of questions) {
-                const newSectionId = sectionMapping[question.section_id];
-                const questionResult = await runAsync(
-                    `INSERT INTO questions (survey_id, question_index, short_name, question_text_json,
-                     audio_files_json, question_type, validation_script, validation_error_json, pre_script, section_id,
-                     min_selections, max_selections, skip_to_script, skip_to_target)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [newSurveyId, question.question_index, question.short_name, question.question_text_json,
-                     question.audio_files_json, question.question_type, question.validation_script,
-                     question.validation_error_json, question.pre_script, newSectionId,
-                     question.min_selections, question.max_selections, question.skip_to_script, question.skip_to_target]
-                );
-                
-                const options = await allAsync('SELECT * FROM options WHERE question_id = ?', [question.id]);
-                for (const option of options) {
-                    await runAsync(
-                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
-                         VALUES (?, ?, ?, ?, ?)`,
-                        [questionResult.id, option.option_index, option.option_text_json,
-                         option.audio_files_json, option.is_other ? 1 : 0]
-                    );
-                }
-            }
-            
-            await logAudit(
-                req.session.userId,
-                'CREATE_SURVEY_VERSION',
-                'survey',
-                newSurveyId,
-                oldSurvey,
-                { version: newVersion, changes: req.body }
-            );
-            
-            res.json({ 
+            const result = await editing.createVersion(surveyId, req.body, { userId: req.session.userId, via: 'web' });
+            res.json({
                 message: 'New survey version created successfully',
-                newSurveyId: newSurveyId,
-                version: newVersion,
-                jexl_check: await jexlReport(newSurveyId, { fields: ['eligibility_script', 'coupon_count_script'] })
+                newSurveyId: result.surveyId,
+                version: result.version,
+                jexl_check: await jexlReport(result.surveyId, { fields: ['eligibility_script', 'coupon_count_script'] })
             });
-            
+
         } else {
             // Update the existing survey (for drafts or when create_version is false)
-            const updates = [];
-            const params = [];
-            
-            if (name !== undefined) {
-                updates.push('name = ?');
-                params.push(name);
-            }
-            if (description !== undefined) {
-                updates.push('description = ?');
-                params.push(description);
-            }
-            if (languages !== undefined) {
-                updates.push('languages = ?');
-                params.push(languages);
-            }
-            if (eligibility_script !== undefined) {
-                updates.push('eligibility_script = ?');
-                params.push(eligibility_script);
-            }
-            if (coupon_count_script !== undefined) {
-                updates.push('coupon_count_script = ?');
-                params.push(coupon_count_script);
-            }
-            if (eligibility_message_json !== undefined) {
-                updates.push('eligibility_message_json = ?');
-                params.push(typeof eligibility_message_json === 'object' ? 
-                    JSON.stringify(eligibility_message_json) : eligibility_message_json);
-            }
-            if (fingerprint_enabled !== undefined) {
-                updates.push('fingerprint_enabled = ?');
-                params.push(fingerprint_enabled);
-            }
-            if (req.body.hiv_rapid_test_enabled !== undefined) {
-                updates.push('hiv_rapid_test_enabled = ?');
-                params.push(req.body.hiv_rapid_test_enabled ? 1 : 0);
-            }
-            if (re_enrollment_days !== undefined) {
-                updates.push('re_enrollment_days = ?');
-                params.push(re_enrollment_days);
-            }
-            if (staff_validation_message_json !== undefined) {
-                updates.push('staff_validation_message_json = ?');
-                params.push(typeof staff_validation_message_json === 'object' ?
-                    JSON.stringify(staff_validation_message_json) : staff_validation_message_json);
-            }
-            if (contact_info_enabled !== undefined) {
-                updates.push('contact_info_enabled = ?');
-                params.push(contact_info_enabled);
-            }
-            if (staff_eligibility_screening !== undefined) {
-                updates.push('staff_eligibility_screening = ?');
-                params.push(staff_eligibility_screening);
-            }
-            if (rapid_test_samples_after_eligibility !== undefined) {
-                updates.push('rapid_test_samples_after_eligibility = ?');
-                params.push(rapid_test_samples_after_eligibility);
-            }
-            if (payment_audit_phone_enabled !== undefined) {
-                updates.push('payment_audit_phone_enabled = ?');
-                params.push(payment_audit_phone_enabled);
-            }
+            await editing.updateSurveySettings(surveyId, req.body, { userId: req.session.userId, via: 'web' });
 
-            if (updates.length > 0) {
-                updates.push('updated_at = CURRENT_TIMESTAMP');
-                params.push(surveyId);
-                
-                const sql = `UPDATE surveys SET ${updates.join(', ')} WHERE id = ?`;
-                console.log('Executing SQL:', sql);
-                console.log('With params:', params);
-                
-                await runAsync(sql, params);
-            }
-            
-            await logAudit(
-                req.session.userId,
-                'UPDATE_SURVEY',
-                'survey',
-                surveyId,
-                oldSurvey,
-                { name, description, languages }
-            );
-            
             res.json({
                 message: 'Survey updated successfully',
                 jexl_check: await jexlReport(surveyId, { fields: ['eligibility_script', 'coupon_count_script'] })
             });
         }
     } catch (error) {
-        console.error('Error updating survey:', error);
-        res.status(500).json({ error: 'Failed to update survey' });
+        sendEditError(res, error, 'Failed to update survey');
     }
 });
 
@@ -402,89 +228,16 @@ router.post('/:surveyId/questions', [
     }
 
     const surveyId = req.params.surveyId;
-    const {
-        question_index, short_name, question_text_json, audio_files_json,
-        question_type, validation_script, validation_error_json, pre_script,
-        section_id, options = [], min_selections, max_selections,
-        skip_to_script, skip_to_target
-    } = req.body;
-    
-    try {
-        // Check survey exists
-        const survey = await getAsync(
-            'SELECT * FROM surveys WHERE id = ?',
-            [surveyId]
-        );
-        
-        if (!survey) {
-            return res.status(404).json({ error: 'Survey not found' });
-        }
 
-        const otherError = validateOtherOptions(question_type, options)
-            || otherNameClash(
-                { short_name, has_other: options.some(o => isOtherFlag(o.is_other)) },
-                await siblingQuestionsForOtherCheck(surveyId, null)
-            );
-        if (otherError) {
-            return res.status(400).json({ error: otherError });
-        }
-        
-        // If no section_id provided, default to the survey's "main" section
-        // (falling back to the lowest-index section). The non-eligibility body
-        // section is 'main' — there is no 'survey' section_type.
-        let finalSectionId = section_id;
-        if (!finalSectionId) {
-            const defaultSection = await getAsync(
-                `SELECT id FROM sections WHERE survey_id = ?
-                 ORDER BY (section_type = 'main') DESC, section_index ASC LIMIT 1`,
-                [surveyId]
-            );
-            finalSectionId = defaultSection ? defaultSection.id : null;
-        }
-        
-        // Insert question
-        const questionResult = await runAsync(
-            `INSERT INTO questions (survey_id, question_index, short_name, question_text_json,
-             audio_files_json, question_type, validation_script, validation_error_json, pre_script, section_id,
-             min_selections, max_selections, skip_to_script, skip_to_target)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [surveyId, question_index, short_name, JSON.stringify(question_text_json),
-             JSON.stringify(audio_files_json || {}), question_type, validation_script,
-             JSON.stringify(validation_error_json || {"English": "Invalid answer"}), pre_script, finalSectionId,
-             min_selections || null, max_selections || null, skip_to_script || null, skip_to_target || null]
-        );
-        
-        const questionId = questionResult.id;
-        
-        // Insert options if provided
-        for (const option of options) {
-            await runAsync(
-                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
-                 VALUES (?, ?, ?, ?, ?)`,
-                [questionId, option.option_index || 0,
-                 JSON.stringify(option.text_json || {}),
-                 JSON.stringify(option.audio_json || {}),
-                 isOtherFlag(option.is_other) ? 1 : 0]
-            );
-        }
-        
-        await logAudit(
-            req.session.userId,
-            'ADD_QUESTION',
-            'question',
-            questionId,
-            null,
-            { surveyId, short_name, question_text_json }
-        );
-        
+    try {
+        const { id: questionId } = await editing.addQuestion(surveyId, req.body, { userId: req.session.userId, via: 'web' });
         res.status(201).json({
             id: questionId,
             message: 'Question added successfully',
             jexl_check: await jexlReport(surveyId, { questionId })
         });
     } catch (error) {
-        console.error('Error adding question:', error);
-        res.status(500).json({ error: 'Failed to add question' });
+        sendEditError(res, error, 'Failed to add question');
     }
 });
 
@@ -523,176 +276,27 @@ router.put('/:surveyId/questions/:questionId', [
     }
 
     const { surveyId, questionId } = req.params;
-    const {
-        question_index, short_name, question_text_json, audio_files_json,
-        question_type, validation_script, validation_error_json, pre_script, section_id, options,
-        min_selections, max_selections, skip_to_script, skip_to_target
-    } = req.body;
-    
+
     try {
-        // Check question exists
-        const question = await getAsync(
-            'SELECT * FROM questions WHERE id = ? AND survey_id = ?',
-            [questionId, surveyId]
-        );
-        
-        if (!question) {
-            return res.status(404).json({ error: 'Question not found' });
-        }
-
-        // Check the "other" option against the question as it will be after
-        // this update (fields left out keep their current values).
-        const finalType = question_type || question.question_type;
-        const finalOptions = options !== undefined
-            ? options
-            : await allAsync('SELECT is_other FROM options WHERE question_id = ?', [questionId]);
-        const otherError = validateOtherOptions(finalType, finalOptions)
-            || otherNameClash(
-                {
-                    short_name: short_name !== undefined ? short_name : question.short_name,
-                    has_other: finalOptions.some(o => isOtherFlag(o.is_other))
-                },
-                await siblingQuestionsForOtherCheck(surveyId, questionId)
-            );
-        if (otherError) {
-            return res.status(400).json({ error: otherError });
-        }
-        
-        // Build update query
-        const updates = [];
-        const params = [];
-        
-        if (question_index !== undefined) {
-            updates.push('question_index = ?');
-            params.push(question_index);
-        }
-        if (short_name !== undefined) {
-            updates.push('short_name = ?');
-            params.push(short_name);
-        }
-        if (question_text_json !== undefined) {
-            updates.push('question_text_json = ?');
-            params.push(JSON.stringify(question_text_json));
-        }
-        if (audio_files_json !== undefined) {
-            updates.push('audio_files_json = ?');
-            params.push(JSON.stringify(audio_files_json));
-        }
-        if (question_type !== undefined) {
-            updates.push('question_type = ?');
-            params.push(question_type);
-        }
-        if (validation_script !== undefined) {
-            updates.push('validation_script = ?');
-            params.push(validation_script);
-        }
-        if (validation_error_json !== undefined) {
-            updates.push('validation_error_json = ?');
-            params.push(JSON.stringify(validation_error_json));
-        }
-        if (pre_script !== undefined) {
-            updates.push('pre_script = ?');
-            params.push(pre_script);
-        }
-        if (section_id !== undefined) {
-            updates.push('section_id = ?');
-            params.push(section_id);
-        }
-        if (min_selections !== undefined) {
-            updates.push('min_selections = ?');
-            params.push(min_selections);
-        }
-        if (max_selections !== undefined) {
-            updates.push('max_selections = ?');
-            params.push(max_selections);
-        }
-        if (skip_to_script !== undefined) {
-            updates.push('skip_to_script = ?');
-            params.push(skip_to_script);
-        }
-        if (skip_to_target !== undefined) {
-            updates.push('skip_to_target = ?');
-            params.push(skip_to_target);
-        }
-
-        if (updates.length > 0) {
-            params.push(questionId);
-            await runAsync(
-                `UPDATE questions SET ${updates.join(', ')} WHERE id = ?`,
-                params
-            );
-        }
-        
-        // Update options if provided
-        if (options !== undefined) {
-            // Delete existing options
-            await runAsync('DELETE FROM options WHERE question_id = ?', [questionId]);
-            
-            // Insert new options
-            for (const option of options) {
-                await runAsync(
-                    `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
-                     VALUES (?, ?, ?, ?, ?)`,
-                    [questionId, option.option_index || 0,
-                     JSON.stringify(option.text_json || {}),
-                     JSON.stringify(option.audio_json || {}),
-                     isOtherFlag(option.is_other) ? 1 : 0]
-                );
-            }
-        }
-        
-        await logAudit(
-            req.session.userId,
-            'UPDATE_QUESTION',
-            'question',
-            questionId,
-            question,
-            req.body
-        );
-        
+        await editing.updateQuestion(surveyId, Number(questionId), req.body, { userId: req.session.userId, via: 'web' });
         res.json({
             message: 'Question updated successfully',
             jexl_check: await jexlReport(surveyId, { questionId: Number(questionId) })
         });
     } catch (error) {
-        console.error('Error updating question:', error);
-        res.status(500).json({ error: 'Failed to update question' });
+        sendEditError(res, error, 'Failed to update question');
     }
 });
 
 // Delete question
 router.delete('/:surveyId/questions/:questionId', async (req, res) => {
     const { surveyId, questionId } = req.params;
-    
+
     try {
-        const question = await getAsync(
-            'SELECT * FROM questions WHERE id = ? AND survey_id = ?',
-            [questionId, surveyId]
-        );
-        
-        if (!question) {
-            return res.status(404).json({ error: 'Question not found' });
-        }
-        
-        // Delete options first
-        await runAsync('DELETE FROM options WHERE question_id = ?', [questionId]);
-        
-        // Delete question
-        await runAsync('DELETE FROM questions WHERE id = ?', [questionId]);
-        
-        await logAudit(
-            req.session.userId,
-            'DELETE_QUESTION',
-            'question',
-            questionId,
-            question,
-            null
-        );
-        
+        await editing.deleteQuestion(surveyId, Number(questionId), { userId: req.session.userId, via: 'web' });
         res.json({ message: 'Question deleted successfully' });
     } catch (error) {
-        console.error('Error deleting question:', error);
-        res.status(500).json({ error: 'Failed to delete question' });
+        sendEditError(res, error, 'Failed to delete question');
     }
 });
 
@@ -708,28 +312,12 @@ router.post('/:surveyId/reorder', [
 
     const { surveyId } = req.params;
     const { questionOrder } = req.body;
-    
+
     try {
-        for (let i = 0; i < questionOrder.length; i++) {
-            await runAsync(
-                'UPDATE questions SET question_index = ? WHERE id = ? AND survey_id = ?',
-                [i, questionOrder[i], surveyId]
-            );
-        }
-        
-        await logAudit(
-            req.session.userId,
-            'REORDER_QUESTIONS',
-            'survey',
-            surveyId,
-            null,
-            { questionOrder }
-        );
-        
+        await editing.reorderQuestions(surveyId, questionOrder, { userId: req.session.userId, via: 'web' });
         res.json({ message: 'Questions reordered successfully' });
     } catch (error) {
-        console.error('Error reordering questions:', error);
-        res.status(500).json({ error: 'Failed to reorder questions' });
+        sendEditError(res, error, 'Failed to reorder questions');
     }
 });
 
@@ -747,59 +335,39 @@ router.post('/', [
     }
 
     const { name, description, languages, basedOnSurveyId } = req.body;
+
+    // Copy of an existing survey: everything in it (settings, questions,
+    // options, messages, rapid tests, audio), as a new survey at version 1.
+    if (basedOnSurveyId) {
+        try {
+            const result = await editing.copyAsNewSurvey(basedOnSurveyId, { name, description, languages },
+                { userId: req.session.userId, via: 'web' });
+            return res.status(201).json({
+                id: result.surveyId,
+                version: result.version,
+                name,
+                description,
+                message: 'Survey created successfully'
+            });
+        } catch (error) {
+            return sendEditError(res, error, 'Failed to create survey');
+        }
+    }
     
     try {
         // New surveys always start at version 1
         const newVersion = 1;
         
-        // Get settings from base survey if cloning
-        let surveyLanguages = languages || '["en"]';
-        let eligibilityScript = 'consent == "1" && age >= 18 && age <= 65';
-        let eligibilityMessageJson = null;
-        let fingerprintEnabled = 0;
-        let reEnrollmentDays = 90;
-        let staffValidationMessageJson = null;
-        let hivRapidTestEnabled = 1;
-        let couponCountScript = null;
+        const surveyLanguages = languages || '["en"]';
+        const eligibilityScript = 'consent == "1" && age >= 18 && age <= 65';
+        const eligibilityMessageJson = null;
+        const fingerprintEnabled = 0;
+        const reEnrollmentDays = 90;
+        const staffValidationMessageJson = null;
+        const hivRapidTestEnabled = 1;
+        const couponCountScript = null;
 
-        if (basedOnSurveyId) {
-            const baseSurvey = await getAsync(
-                `SELECT languages, eligibility_script, coupon_count_script, eligibility_message_json,
-                        fingerprint_enabled, re_enrollment_days, staff_validation_message_json,
-                        hiv_rapid_test_enabled
-                 FROM surveys WHERE id = ?`,
-                [basedOnSurveyId]
-            );
-            if (baseSurvey) {
-                // Copy all settings from base survey
-                if (!languages && baseSurvey.languages) {
-                    surveyLanguages = baseSurvey.languages;
-                }
-                if (baseSurvey.eligibility_script) {
-                    eligibilityScript = baseSurvey.eligibility_script;
-                }
-                if (baseSurvey.coupon_count_script) {
-                    couponCountScript = baseSurvey.coupon_count_script;
-                }
-                if (baseSurvey.eligibility_message_json) {
-                    eligibilityMessageJson = baseSurvey.eligibility_message_json;
-                }
-                if (baseSurvey.fingerprint_enabled !== null) {
-                    fingerprintEnabled = baseSurvey.fingerprint_enabled;
-                }
-                if (baseSurvey.re_enrollment_days !== null) {
-                    reEnrollmentDays = baseSurvey.re_enrollment_days;
-                }
-                if (baseSurvey.staff_validation_message_json) {
-                    staffValidationMessageJson = baseSurvey.staff_validation_message_json;
-                }
-                if (baseSurvey.hiv_rapid_test_enabled !== null) {
-                    hivRapidTestEnabled = baseSurvey.hiv_rapid_test_enabled;
-                }
-            }
-        }
-
-        // Create new survey with settings from base survey or defaults
+        // Create a blank survey with default settings
         const result = await runAsync(
             `INSERT INTO surveys (version, base_survey_id, name, description, languages,
                                   eligibility_script, coupon_count_script, eligibility_message_json, fingerprint_enabled,
@@ -817,100 +385,18 @@ router.post('/', [
         await runAsync('UPDATE surveys SET base_survey_id = ? WHERE id = ?', [newSurveyId, newSurveyId]);
         
         // Create default sections for the new survey
-        const eligibilitySection = await runAsync(
+        await runAsync(
             `INSERT INTO sections (survey_id, section_index, section_type, name, description) 
              VALUES (?, ?, ?, ?, ?)`,
             [newSurveyId, 0, 'eligibility', 'Eligibility', 'Screening questions to determine eligibility']
         );
         
-        const mainSection = await runAsync(
+        await runAsync(
             `INSERT INTO sections (survey_id, section_index, section_type, name, description) 
              VALUES (?, ?, ?, ?, ?)`,
             [newSurveyId, 1, 'main', 'Main', 'Primary survey questions']
         );
         
-        // If based on existing survey, copy sections, questions and options
-        if (basedOnSurveyId) {
-            // Copy additional sections if they exist (beyond the default two)
-            const baseSections = await allAsync(
-                'SELECT * FROM sections WHERE survey_id = ? AND section_type NOT IN (?, ?) ORDER BY section_index',
-                [basedOnSurveyId, 'eligibility', 'main']
-            );
-            
-            const sectionMapping = {};
-            for (const section of baseSections) {
-                const newSectionResult = await runAsync(
-                    `INSERT INTO sections (survey_id, section_index, section_type, name, description) 
-                     VALUES (?, ?, ?, ?, ?)`,
-                    [newSurveyId, section.section_index + 2, section.section_type, section.name, section.description]
-                );
-                sectionMapping[section.id] = newSectionResult.id;
-            }
-            
-            // Map the default sections
-            const baseEligibility = await getAsync(
-                'SELECT id FROM sections WHERE survey_id = ? AND section_type = ?',
-                [basedOnSurveyId, 'eligibility']
-            );
-            const baseMain = await getAsync(
-                'SELECT id FROM sections WHERE survey_id = ? AND section_type = ?',
-                [basedOnSurveyId, 'main']
-            );
-            
-            if (baseEligibility) sectionMapping[baseEligibility.id] = eligibilitySection.id;
-            if (baseMain) sectionMapping[baseMain.id] = mainSection.id;
-            const questions = await allAsync(
-                'SELECT * FROM questions WHERE survey_id = ?',
-                [basedOnSurveyId]
-            );
-            
-            for (const question of questions) {
-                // Map the section_id to the new survey's sections
-                const newSectionId = sectionMapping[question.section_id] || mainSection.id;
-                
-                const questionResult = await runAsync(
-                    `INSERT INTO questions (survey_id, question_index, short_name, question_text_json, 
-                     audio_files_json, question_type, validation_script, validation_error_json, pre_script, section_id)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [newSurveyId, question.question_index, question.short_name, 
-                     question.question_text_json, question.audio_files_json,
-                     question.question_type, question.validation_script, 
-                     question.validation_error_json, question.pre_script, newSectionId]
-                );
-                
-                // Copy options for this question
-                const options = await allAsync(
-                    'SELECT * FROM options WHERE question_id = ?',
-                    [question.id]
-                );
-                
-                for (const option of options) {
-                    await runAsync(
-                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
-                         VALUES (?, ?, ?, ?, ?)`,
-                        [questionResult.id, option.option_index, option.option_text_json,
-                         option.audio_files_json, option.is_other ? 1 : 0]
-                    );
-                }
-            }
-
-            // Copy system messages
-            const systemMessages = await allAsync(
-                'SELECT * FROM survey_messages WHERE survey_id = ?',
-                [basedOnSurveyId]
-            );
-
-            for (const message of systemMessages) {
-                await runAsync(
-                    `INSERT INTO survey_messages (survey_id, message_key, display_order,
-                     message_text_json, audio_files_json, message_type)
-                     VALUES (?, ?, ?, ?, ?, ?)`,
-                    [newSurveyId, message.message_key, message.display_order,
-                     message.message_text_json, message.audio_files_json, message.message_type]
-                );
-            }
-        }
-
         await logAudit(
             req.session.userId,
             'CREATE_SURVEY',
