@@ -605,1022 +605,852 @@
     {
       "question_id": 101,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Female\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Female\"}"
     },
     {
       "question_id": 101,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Male\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Male\"}"
     },
     {
       "question_id": 103,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 103,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 104,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Within the last 6 months\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Within the last 6 months\"}"
     },
     {
       "question_id": 104,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"More than 6 months ago\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"More than 6 months ago\"}"
     },
     {
       "question_id": 104,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "7"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 105,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Friend\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Friend\"}"
     },
     {
       "question_id": 105,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Family member\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Family member\"}"
     },
     {
       "question_id": 105,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Stranger\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Stranger\"}"
     },
     {
       "question_id": 105,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Found it\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Found it\"}"
     },
     {
       "question_id": 105,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Bought the coupon\"}",
-      "option_value": "7"
+      "option_text_json": "{\"English\": \"Bought the coupon\"}"
     },
     {
       "question_id": 107,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Never went to school\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Never went to school\"}"
     },
     {
       "question_id": 107,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Some primary\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Some primary\"}"
     },
     {
       "question_id": 107,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Completed primary\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Completed primary\"}"
     },
     {
       "question_id": 107,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Some secondary\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Some secondary\"}"
     },
     {
       "question_id": 107,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Completed secondary or higher\"}",
-      "option_value": "5"
+      "option_text_json": "{\"English\": \"Completed secondary or higher\"}"
     },
     {
       "question_id": 112,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Ugandan\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Ugandan\"}"
     },
     {
       "question_id": 112,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Other\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Other\"}"
     },
     {
       "question_id": 113,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Single, never married\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Single, never married\"}"
     },
     {
       "question_id": 113,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Married\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Married\"}"
     },
     {
       "question_id": 113,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Separated/divorced\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Separated/divorced\"}"
     },
     {
       "question_id": 113,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Widowed\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Widowed\"}"
     },
     {
       "question_id": 113,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "7"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 113,
       "option_index": 5,
-      "option_text_json": "{\"English\": \"Prefer not to answer\"}",
-      "option_value": "8"
+      "option_text_json": "{\"English\": \"Prefer not to answer\"}"
     },
     {
       "question_id": 115,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 115,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 115,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 115,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Refused to answer\"}",
-      "option_value": "7"
+      "option_text_json": "{\"English\": \"Refused to answer\"}"
     },
     {
       "question_id": 116,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"I was using PrEP\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"I was using PrEP\"}"
     },
     {
       "question_id": 116,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"I am virally suppressed\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"I am virally suppressed\"}"
     },
     {
       "question_id": 116,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"I am on HIV treatment\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"I am on HIV treatment\"}"
     },
     {
       "question_id": 116,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Other\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Other\"}"
     },
     {
       "question_id": 116,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "5"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 116,
       "option_index": 5,
-      "option_text_json": "{\"English\": \"Refused to answer\"}",
-      "option_value": "6"
+      "option_text_json": "{\"English\": \"Refused to answer\"}"
     },
     {
       "question_id": 117,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 117,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 121,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Never\"}",
-      "option_value": "0"
+      "option_text_json": "{\"English\": \"Never\"}"
     },
     {
       "question_id": 121,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Monthly or less\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Monthly or less\"}"
     },
     {
       "question_id": 121,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"2-4 times a month\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"2-4 times a month\"}"
     },
     {
       "question_id": 121,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"2-3 times a week\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"2-3 times a week\"}"
     },
     {
       "question_id": 121,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"4 or more times a week\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"4 or more times a week\"}"
     },
     {
       "question_id": 122,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"One or less\"}",
-      "option_value": "0"
+      "option_text_json": "{\"English\": \"One or less\"}"
     },
     {
       "question_id": 122,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"About two\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"About two\"}"
     },
     {
       "question_id": 122,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"About three\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"About three\"}"
     },
     {
       "question_id": 122,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"About four\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"About four\"}"
     },
     {
       "question_id": 122,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Five or more\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Five or more\"}"
     },
     {
       "question_id": 123,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Never\"}",
-      "option_value": "0"
+      "option_text_json": "{\"English\": \"Never\"}"
     },
     {
       "question_id": 123,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Less than monthly\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Less than monthly\"}"
     },
     {
       "question_id": 123,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Monthly\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Monthly\"}"
     },
     {
       "question_id": 123,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Weekly\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Weekly\"}"
     },
     {
       "question_id": 123,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Daily or almost daily\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Daily or almost daily\"}"
     },
     {
       "question_id": 125,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 125,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 125,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 125,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Refused to answer\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Refused to answer\"}"
     },
     {
       "question_id": 126,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes, in the last 6 months\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes, in the last 6 months\"}"
     },
     {
       "question_id": 126,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Yes, but more than 6 months ago\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Yes, but more than 6 months ago\"}"
     },
     {
       "question_id": 126,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Never shared needles or syringes\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Never shared needles or syringes\"}"
     },
     {
       "question_id": 128,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Not at all\"}",
-      "option_value": "0"
+      "option_text_json": "{\"English\": \"Not at all\"}"
     },
     {
       "question_id": 128,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Several days\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Several days\"}"
     },
     {
       "question_id": 128,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"More than half the days\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"More than half the days\"}"
     },
     {
       "question_id": 128,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Nearly every day\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Nearly every day\"}"
     },
     {
       "question_id": 129,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Not at all\"}",
-      "option_value": "0"
+      "option_text_json": "{\"English\": \"Not at all\"}"
     },
     {
       "question_id": 129,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Several days\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Several days\"}"
     },
     {
       "question_id": 129,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"More than half the days\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"More than half the days\"}"
     },
     {
       "question_id": 129,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Nearly every day\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Nearly every day\"}"
     },
     {
       "question_id": 130,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 130,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 132,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Never\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Never\"}"
     },
     {
       "question_id": 132,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Once\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Once\"}"
     },
     {
       "question_id": 132,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"A few times\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"A few times\"}"
     },
     {
       "question_id": 132,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Often\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Often\"}"
     },
     {
       "question_id": 132,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Does not apply because no one knows I have sex with men\"}",
-      "option_value": "5"
+      "option_text_json": "{\"English\": \"Does not apply because no one knows I have sex with men\"}"
     },
     {
       "question_id": 132,
       "option_index": 5,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "7"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 132,
       "option_index": 6,
-      "option_text_json": "{\"English\": \"Prefer not to answer\"}",
-      "option_value": "8"
+      "option_text_json": "{\"English\": \"Prefer not to answer\"}"
     },
     {
       "question_id": 133,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 133,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 134,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Never\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Never\"}"
     },
     {
       "question_id": 134,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Once\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Once\"}"
     },
     {
       "question_id": 134,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"A few times\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"A few times\"}"
     },
     {
       "question_id": 134,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Often\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Often\"}"
     },
     {
       "question_id": 134,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Does not apply because no one knows I have sex with men\"}",
-      "option_value": "5"
+      "option_text_json": "{\"English\": \"Does not apply because no one knows I have sex with men\"}"
     },
     {
       "question_id": 134,
       "option_index": 5,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "7"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 134,
       "option_index": 6,
-      "option_text_json": "{\"English\": \"Prefer not to answer\"}",
-      "option_value": "8"
+      "option_text_json": "{\"English\": \"Prefer not to answer\"}"
     },
     {
       "question_id": 135,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Never\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Never\"}"
     },
     {
       "question_id": 135,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Once\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Once\"}"
     },
     {
       "question_id": 135,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"A few times\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"A few times\"}"
     },
     {
       "question_id": 135,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Often\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Often\"}"
     },
     {
       "question_id": 136,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes, in the last 6 months\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes, in the last 6 months\"}"
     },
     {
       "question_id": 136,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Yes, but more than 6 months ago\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Yes, but more than 6 months ago\"}"
     },
     {
       "question_id": 136,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Never\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Never\"}"
     },
     {
       "question_id": 137,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 137,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 138,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"I don't feel at risk\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"I don't feel at risk\"}"
     },
     {
       "question_id": 138,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"I fear testing positive\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"I fear testing positive\"}"
     },
     {
       "question_id": 138,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"I fear stigma by a health care provider\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"I fear stigma by a health care provider\"}"
     },
     {
       "question_id": 138,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"I fear others may learn my result\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"I fear others may learn my result\"}"
     },
     {
       "question_id": 139,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 139,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 140,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"I don't feel at risk\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"I don't feel at risk\"}"
     },
     {
       "question_id": 140,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"I fear testing positive\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"I fear testing positive\"}"
     },
     {
       "question_id": 140,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"I fear stigma by a health care provider\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"I fear stigma by a health care provider\"}"
     },
     {
       "question_id": 140,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"I fear others may learn my result\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"I fear others may learn my result\"}"
     },
     {
       "question_id": 140,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"I already know I am positive\"}",
-      "option_value": "5"
+      "option_text_json": "{\"English\": \"I already know I am positive\"}"
     },
     {
       "question_id": 141,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Positive\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Positive\"}"
     },
     {
       "question_id": 141,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Negative\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Negative\"}"
     },
     {
       "question_id": 141,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"I don't know\"}",
-      "option_value": "995"
+      "option_text_json": "{\"English\": \"I don't know\"}"
     },
     {
       "question_id": 142,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 142,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 144,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 144,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 145,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 145,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 146,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Directly at a hospital or clinic\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Directly at a hospital or clinic\"}"
     },
     {
       "question_id": 146,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"At an NGO with services for people like me\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"At an NGO with services for people like me\"}"
     },
     {
       "question_id": 146,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"At a drop-in centre\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"At a drop-in centre\"}"
     },
     {
       "question_id": 146,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"At a pharmacy or drug shop\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"At a pharmacy or drug shop\"}"
     },
     {
       "question_id": 146,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Other\"}",
-      "option_value": "96"
+      "option_text_json": "{\"English\": \"Other\"}"
     },
     {
       "question_id": 147,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 147,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 148,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes, in the last 12 months\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes, in the last 12 months\"}"
     },
     {
       "question_id": 148,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Yes, but more than 12 months ago\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Yes, but more than 12 months ago\"}"
     },
     {
       "question_id": 148,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Never tested for viral load\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Never tested for viral load\"}"
     },
     {
       "question_id": 148,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Don't know / don't remember\"}",
-      "option_value": "995"
+      "option_text_json": "{\"English\": \"Don't know / don't remember\"}"
     },
     {
       "question_id": 149,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Suppressed\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Suppressed\"}"
     },
     {
       "question_id": 149,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Undetectable\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Undetectable\"}"
     },
     {
       "question_id": 149,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Not suppressed/unsuppressed\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Not suppressed/unsuppressed\"}"
     },
     {
       "question_id": 149,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"They did not tell me the result\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"They did not tell me the result\"}"
     },
     {
       "question_id": 149,
       "option_index": 4,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "7"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 149,
       "option_index": 5,
-      "option_text_json": "{\"English\": \"Prefer not to answer\"}",
-      "option_value": "8"
+      "option_text_json": "{\"English\": \"Prefer not to answer\"}"
     },
     {
       "question_id": 150,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"I understood my viral load result\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"I understood my viral load result\"}"
     },
     {
       "question_id": 150,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"I did not understand my result\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"I did not understand my result\"}"
     },
     {
       "question_id": 150,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"I did not get the result\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"I did not get the result\"}"
     },
     {
       "question_id": 150,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"I don't know or don't remember\"}",
-      "option_value": "995"
+      "option_text_json": "{\"English\": \"I don't know or don't remember\"}"
     },
     {
       "question_id": 151,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 151,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 151,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Not sure\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Not sure\"}"
     },
     {
       "question_id": 152,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"It's true\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"It's true\"}"
     },
     {
       "question_id": 152,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"I'm not sure if it's true\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"I'm not sure if it's true\"}"
     },
     {
       "question_id": 152,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"It's not true\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"It's not true\"}"
     },
     {
       "question_id": 154,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 154,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 154,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 154,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Prefer not to answer\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"Prefer not to answer\"}"
     },
     {
       "question_id": 155,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 155,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 156,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 156,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 157,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes, in the last 7 days\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes, in the last 7 days\"}"
     },
     {
       "question_id": 157,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"Yes, in the last 6 months\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"Yes, in the last 6 months\"}"
     },
     {
       "question_id": 157,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Yes, more than 6 months ago\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"Yes, more than 6 months ago\"}"
     },
     {
       "question_id": 157,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"No, I have never taken PrEP\"}",
-      "option_value": "4"
+      "option_text_json": "{\"English\": \"No, I have never taken PrEP\"}"
     },
     {
       "question_id": 158,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 158,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 158,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "995"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 160,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes, I was asked about TB symptoms\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes, I was asked about TB symptoms\"}"
     },
     {
       "question_id": 160,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No, I was not asked\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No, I was not asked\"}"
     },
     {
       "question_id": 160,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"I don't remember\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"I don't remember\"}"
     },
     {
       "question_id": 161,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"No one talked to me about TB\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"No one talked to me about TB\"}"
     },
     {
       "question_id": 161,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"The provider told me I have TB\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"The provider told me I have TB\"}"
     },
     {
       "question_id": 161,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"The provider told me I do not have TB\"}",
-      "option_value": "3"
+      "option_text_json": "{\"English\": \"The provider told me I do not have TB\"}"
     },
     {
       "question_id": 162,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 162,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 163,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 163,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 164,
       "option_index": 0,
-      "option_text_json": "{\"English\": \"Yes\"}",
-      "option_value": "1"
+      "option_text_json": "{\"English\": \"Yes\"}"
     },
     {
       "question_id": 164,
       "option_index": 1,
-      "option_text_json": "{\"English\": \"No\"}",
-      "option_value": "2"
+      "option_text_json": "{\"English\": \"No\"}"
     },
     {
       "question_id": 164,
       "option_index": 2,
-      "option_text_json": "{\"English\": \"Don't know\"}",
-      "option_value": "7"
+      "option_text_json": "{\"English\": \"Don't know\"}"
     },
     {
       "question_id": 164,
       "option_index": 3,
-      "option_text_json": "{\"English\": \"Prefer not to answer\"}",
-      "option_value": "8"
+      "option_text_json": "{\"English\": \"Prefer not to answer\"}"
     }
   ],
   "survey_messages": [

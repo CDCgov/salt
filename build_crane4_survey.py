@@ -7,8 +7,8 @@ See salt_management/SURVEY_IMPORT_EXPORT.md for the bundle contract.
 
 Conventions applied here:
   - JEXL multiple_choice answers are 0-based OPTION INDICES (verified in
-    SurveyViewModel.buildJexlContext / Answer.getValue). option_value is set
-    to the docx code purely for analysis exports.
+    SurveyViewModel.buildJexlContext / Answer.getValue). The docx codes in
+    opts are kept for reference only; SALT has no field for them.
   - pre_script is SKIP-IF: true => question hidden.
   - Computed/hidden docx fields (TUTDOB, ALCSCR1/2, PHQSUM/SCRE, BMHIV, TSTAT)
     are dropped; SALT has no computed question type.
@@ -33,7 +33,7 @@ def tj(text):
 # Question specifications, in survey order.
 #   sec : 'e' (Eligibility) | 'm' (Main)
 #   t   : multiple_choice | multi_select | numeric | text | info
-#   opts: list of [option_value, option_text]
+#   opts: list of [docx_code, option_text]
 #   pre : pre_script (skip-if JEXL)
 #   vs  : validation_script ; ve : validation error text
 #   minsel/maxsel : multi_select bounds
@@ -466,12 +466,11 @@ for idx, spec in enumerate(Q):
         q["max_selections"] = spec.get("maxsel")
     questions.append(q)
 
-    for oidx, (val, otext) in enumerate(spec.get("opts", [])):
+    for oidx, (_code, otext) in enumerate(spec.get("opts", [])):
         options.append({
             "question_id": qid,
             "option_index": oidx,
             "option_text_json": tj(otext),
-            "option_value": val,
         })
 
 # ---------------------------------------------------------------------------

@@ -132,7 +132,6 @@ CREATE TABLE IF NOT EXISTS options (
     option_index INTEGER,
     option_text_json TEXT NOT NULL,
     audio_files_json TEXT DEFAULT '{}',
-    option_value TEXT,
     FOREIGN KEY (question_id) REFERENCES questions(id)
 );
 
@@ -514,8 +513,8 @@ const SAMPLE_SURVEY = {
             question_text: '{"English": "Do you consent to participate in this survey?", "Swahili": "Je, unakubali kushiriki katika utafiti huu?"}',
             question_type: 'multiple_choice',
             options: [
-                { text: '{"English": "Yes", "Swahili": "Ndio"}', value: '1' },
-                { text: '{"English": "No", "Swahili": "Hapana"}', value: '0' }
+                { text: '{"English": "Yes", "Swahili": "Ndio"}' },
+                { text: '{"English": "No", "Swahili": "Hapana"}' }
             ]
         },
         {
@@ -532,9 +531,9 @@ const SAMPLE_SURVEY = {
             question_type: 'multiple_choice',
             pre_script: 'consent == "1"',
             options: [
-                { text: '{"English": "Male", "Swahili": "Mwanaume"}', value: 'male' },
-                { text: '{"English": "Female", "Swahili": "Mwanamke"}', value: 'female' },
-                { text: '{"English": "Other", "Swahili": "Nyingine"}', value: 'other' }
+                { text: '{"English": "Male", "Swahili": "Mwanaume"}' },
+                { text: '{"English": "Female", "Swahili": "Mwanamke"}' },
+                { text: '{"English": "Other", "Swahili": "Nyingine"}' }
             ]
         },
         {
@@ -543,9 +542,9 @@ const SAMPLE_SURVEY = {
             question_type: 'multiple_choice',
             pre_script: 'consent == "1" && age >= 18',
             options: [
-                { text: '{"English": "Yes", "Swahili": "Ndio"}', value: 'yes' },
-                { text: '{"English": "No", "Swahili": "Hapana"}', value: 'no' },
-                { text: '{"English": "Prefer not to answer", "Swahili": "Napendelea kutokjibu"}', value: 'no_answer' }
+                { text: '{"English": "Yes", "Swahili": "Ndio"}' },
+                { text: '{"English": "No", "Swahili": "Hapana"}' },
+                { text: '{"English": "Prefer not to answer", "Swahili": "Napendelea kutokjibu"}' }
             ]
         },
         {
@@ -554,9 +553,9 @@ const SAMPLE_SURVEY = {
             question_type: 'multiple_choice',
             pre_script: 'hiv_tested == "yes"',
             options: [
-                { text: '{"English": "Negative", "Swahili": "Hasi"}', value: 'negative' },
-                { text: '{"English": "Positive", "Swahili": "Chanya"}', value: 'positive' },
-                { text: '{"English": "Prefer not to answer", "Swahili": "Napendelea kutokjibu"}', value: 'no_answer' }
+                { text: '{"English": "Negative", "Swahili": "Hasi"}' },
+                { text: '{"English": "Positive", "Swahili": "Chanya"}' },
+                { text: '{"English": "Prefer not to answer", "Swahili": "Napendelea kutokjibu"}' }
             ]
         },
         {
@@ -565,8 +564,8 @@ const SAMPLE_SURVEY = {
             question_type: 'multiple_choice',
             pre_script: 'test_result == "positive"',
             options: [
-                { text: '{"English": "Yes", "Swahili": "Ndio"}', value: 'yes' },
-                { text: '{"English": "No", "Swahili": "Hapana"}', value: 'no' }
+                { text: '{"English": "Yes", "Swahili": "Ndio"}' },
+                { text: '{"English": "No", "Swahili": "Hapana"}' }
             ]
         }
     ]
@@ -752,8 +751,8 @@ async function seedSampleSurvey(db) {
                 const opt = q.options[j];
                 await runAsync(
                     db,
-                    'INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, option_value) VALUES (?, ?, ?, ?, ?)',
-                    [questionId, j, opt.text, '{}', opt.value]
+                    'INSERT INTO options (question_id, option_index, option_text_json, audio_files_json) VALUES (?, ?, ?, ?)',
+                    [questionId, j, opt.text, '{}']
                 );
             }
         }

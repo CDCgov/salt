@@ -159,14 +159,14 @@ async function importSurveyBundle(dbx, bundle, opts = {}) {
             questionIdMap.set(q.id, r.id);
         }
 
-        // Options — remap question_id; drop orphans.
+        // Options — remap question_id; drop orphans. option_value in older bundles is ignored.
         for (const o of srcOptions) {
             const remappedQuestion = questionIdMap.get(o.question_id);
             if (!remappedQuestion) continue;
             await dbx.run(
-                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, option_value)
-                 VALUES (?, ?, ?, ?, ?)`,
-                [remappedQuestion, o.option_index, o.option_text_json, o.audio_files_json || '{}', o.option_value || null]
+                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
+                 VALUES (?, ?, ?, ?)`,
+                [remappedQuestion, o.option_index, o.option_text_json, o.audio_files_json || '{}']
             );
         }
 

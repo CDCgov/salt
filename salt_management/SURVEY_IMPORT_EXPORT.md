@@ -204,8 +204,9 @@ Answer choices for `multiple_choice` / `multi_select` questions only.
 | `question_id` | integer | **yes** | The `id` of a question in this bundle. |
 | `option_index` | integer | **yes** | 0-based order within the question. |
 | `option_text_json` | JSON-string | **yes** | Multilingual option label. |
-| `option_value` | string | no | Stable code stored when this option is chosen (e.g. `"1"`, `"yes"`). Recommended. |
 | `audio_files_json` | JSON-string | no | Multilingual audio; `"{}"` or omit when none. |
+
+Older bundles may carry an `option_value` field on options. It was never used and is ignored on import. Scripts refer to options by `option_index`.
 
 #### `survey_messages` array
 
@@ -291,8 +292,8 @@ question with options and skip logic, and the not-eligible message:
     }
   ],
   "options": [
-    { "question_id": 101, "option_index": 0, "option_text_json": "{\"en\":\"Yes\"}", "option_value": "yes" },
-    { "question_id": 101, "option_index": 1, "option_text_json": "{\"en\":\"No\"}",  "option_value": "no" }
+    { "question_id": 101, "option_index": 0, "option_text_json": "{\"en\":\"Yes\"}" },
+    { "question_id": 101, "option_index": 1, "option_text_json": "{\"en\":\"No\"}" }
   ],
   "survey_messages": [
     {
@@ -315,7 +316,7 @@ Notes on the example:
 - The `numeric` question has no options. The `multiple_choice` question has two.
 - `eligibility_not_eligible` is the message shown when `eligibility_script` evaluates false.
 - `questions` must contain at least one entry; `options`, `survey_messages`, and `test_configurations` may be empty (`test_configurations: []` here), but `sections` must contain the two required sections.
-- When a `pre_script` references an option-type answer, it compares against the option's `option_value` (e.g. `"yes"`), not the displayed label.
+- When a script references an option-type answer, it compares against the option's 0-based `option_index`, not the displayed label. Here `hiv_tested == 0` means "Yes". A `multi_select` answer is a list of indices (e.g. `q =~ [0]` or `q.contains(0)`).
 
 ### Download filename
 

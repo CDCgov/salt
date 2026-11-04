@@ -215,10 +215,10 @@ router.put('/:id', [
                 const options = await allAsync('SELECT * FROM options WHERE question_id = ?', [question.id]);
                 for (const option of options) {
                     await runAsync(
-                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, option_value)
-                         VALUES (?, ?, ?, ?, ?)`,
+                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
+                         VALUES (?, ?, ?, ?)`,
                         [questionResult.id, option.option_index, option.option_text_json,
-                         option.audio_files_json, option.option_value]
+                         option.audio_files_json]
                     );
                 }
             }
@@ -413,12 +413,11 @@ router.post('/:surveyId/questions', [
         // Insert options if provided
         for (const option of options) {
             await runAsync(
-                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, option_value)
-                 VALUES (?, ?, ?, ?, ?)`,
+                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
+                 VALUES (?, ?, ?, ?)`,
                 [questionId, option.option_index || 0,
                  JSON.stringify(option.text_json || {}),
-                 JSON.stringify(option.audio_json || {}),
-                 option.value || JSON.stringify(option.text_json)]
+                 JSON.stringify(option.audio_json || {})]
             );
         }
         
@@ -566,12 +565,11 @@ router.put('/:surveyId/questions/:questionId', [
             // Insert new options
             for (const option of options) {
                 await runAsync(
-                    `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, option_value)
-                     VALUES (?, ?, ?, ?, ?)`,
+                    `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
+                     VALUES (?, ?, ?, ?)`,
                     [questionId, option.option_index || 0,
                      JSON.stringify(option.text_json || {}),
-                     JSON.stringify(option.audio_json || {}),
-                     option.value || JSON.stringify(option.text_json)]
+                     JSON.stringify(option.audio_json || {})]
                 );
             }
         }
@@ -818,10 +816,10 @@ router.post('/', [
                 
                 for (const option of options) {
                     await runAsync(
-                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, option_value)
-                         VALUES (?, ?, ?, ?, ?)`,
+                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
+                         VALUES (?, ?, ?, ?)`,
                         [questionResult.id, option.option_index, option.option_text_json, 
-                         option.audio_files_json, option.option_value]
+                         option.audio_files_json]
                     );
                 }
             }
