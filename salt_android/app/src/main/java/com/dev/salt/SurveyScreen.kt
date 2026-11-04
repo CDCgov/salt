@@ -331,6 +331,27 @@ fun SurveyScreen(
         )
     }
 
+    // Free text for the question's "other, specify" option, resets when the
+    // question changes. Saved to the answer when navigating away.
+    var otherTextValue by rememberSaveable(currentQuestion?.first?.id) {
+        mutableStateOf(currentQuestion?.third?.otherText ?: "")
+    }
+    val otherOption = currentQuestion?.second?.firstOrNull { it.isOther }
+    val isOtherSelected = currentQuestion?.let { (question, _, answer) ->
+        otherOption != null && answer != null && when (question.questionType) {
+            "multiple_choice" -> answer.optionQuestionIndex == otherOption.optionQuestionIndex
+            "multi_select" -> answer.getSelectedIndices().contains(otherOption.optionQuestionIndex)
+            else -> false
+        }
+    } ?: false
+    // Deselecting the other option discards its text.
+    LaunchedEffect(isOtherSelected) {
+        if (!isOtherSelected) otherTextValue = ""
+    }
+    val otherPromptMessage = remember(currentQuestion?.first?.id, otherOption != null) {
+        if (otherOption != null) viewModel.getOtherSpecifyPrompt() else null
+    }
+
     // Check if current question is answered
     val isQuestionAnswered by remember(currentQuestion, textInputValue) {
         derivedStateOf {
@@ -483,6 +504,24 @@ fun SurveyScreen(
         }
     }
 
+    // Plays the other_specify_prompt audio (if any) when the "other" option is
+    // selected, replacing whatever question/option audio was playing.
+    fun playOtherPrompt(audioFileName: String?) {
+        if (audioFileName.isNullOrEmpty()) return
+        stopAudioPlayback()
+        audioJob = coroutineScope.launch {
+            currentMediaPlayer = playAudio(context, audioFileName)
+            currentMediaPlayer?.let { player ->
+                player.setOnCompletionListener {
+                    it.release()
+                    currentMediaPlayer = null
+                }
+                player.start()
+                player.awaitCompletion()
+            }
+        }
+    }
+
     LaunchedEffect(currentQuestion) {
         launchAudioPlayback()
     }
@@ -536,6 +575,7 @@ fun SurveyScreen(
                         if (question.questionType != "multiple_choice" && question.questionType != "info") {
                             viewModel.answerQuestion(textInputValue)
                         }
+                        viewModel.answerOtherText(otherTextValue)
                     }
                     viewModel.loadPreviousQuestion()
                 }, enabled = viewModel.hasPreviousQuestion.value) {
@@ -547,6 +587,7 @@ fun SurveyScreen(
                         if (question.questionType != "multiple_choice" && question.questionType != "info") {
                             viewModel.answerQuestion(textInputValue)
                         }
+                        viewModel.answerOtherText(otherTextValue)
                     }
                     val message = viewModel.loadNextQuestion()
                     if(message != null){
@@ -603,7 +644,9 @@ fun SurveyScreen(
                         }
                         Button(
                             onClick = {
+                                val wasSelected = isOtherSelected
                                 viewModel.answerQuestion(option.id)
+                                if (option.isOther && !wasSelected) playOtherPrompt(otherPromptMessage?.audioFileName)
                                       },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -613,6 +656,14 @@ fun SurveyScreen(
                             // Inline markdown (bold/italic) supported; inherits the
                             // button's content color so it still flips on highlight/select.
                             MarkdownText(markdown = option.text)
+                        }
+                        if (option.isOther && isOtherSelected) {
+                            OtherSpecifyField(
+                                value = otherTextValue,
+                                onValueChange = { otherTextValue = it },
+                                label = otherPromptMessage?.messageText
+                                    ?: stringResource(R.string.survey_other_specify)
+                            )
                         }
                     }
                 } else if (question.questionType == "multi_select") {
@@ -663,6 +714,7 @@ fun SurveyScreen(
                                 )
                                 .clickable {
                                     viewModel.toggleMultiSelectOption(option.optionQuestionIndex)
+                                    if (option.isOther && !isSelected) playOtherPrompt(otherPromptMessage?.audioFileName)
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -670,11 +722,20 @@ fun SurveyScreen(
                                 checked = isSelected,
                                 onCheckedChange = {
                                     viewModel.toggleMultiSelectOption(option.optionQuestionIndex)
+                                    if (option.isOther && !isSelected) playOtherPrompt(otherPromptMessage?.audioFileName)
                                 }
                             )
                             MarkdownText(
                                 markdown = option.text,
                                 modifier = Modifier.padding(start = 8.dp)
+                            )
+                        }
+                        if (option.isOther && isSelected) {
+                            OtherSpecifyField(
+                                value = otherTextValue,
+                                onValueChange = { otherTextValue = it },
+                                label = otherPromptMessage?.messageText
+                                    ?: stringResource(R.string.survey_other_specify)
                             )
                         }
                     }
@@ -711,4 +772,22 @@ fun SurveyScreen(
             } ?: Text(stringResource(R.string.survey_completed), style = MaterialTheme.typography.headlineMedium)
         }
     }
+}
+
+// Free-text box shown under a selected "other, specify" option.
+@Composable
+private fun OtherSpecifyField(value: String, onValueChange: (String) -> Unit, label: String) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+        ),
+        singleLine = true
+    )
 }

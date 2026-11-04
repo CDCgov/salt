@@ -45,7 +45,7 @@ Click **Edit** on any question to open the edit modal.
 | **Short Name** | Unique machine-readable identifier. Used in skip logic, data column names, and exports. Must be unique within the survey. Cannot be `value`. |
 | **Question Type** | Select from the five types above |
 | **Question Text** | The question displayed to participants in the default language |
-| **Options** | For Multiple Choice and Multi-Select: the list of answer options, in the order they appear. Each option has a **Record** button to record audio. |
+| **Options** | For Multiple Choice and Multi-Select: the list of answer options, in the order they appear. Each option has a **Record** button to record audio, and an **Other (free text)** checkbox (see below). |
 | **Min / Max Selections** | For Multi-Select only: the minimum and maximum number of options the participant must select |
 
 ### Bottom half, logic fields
@@ -64,6 +64,21 @@ See [Survey Logic](/management/survey-logic/) for a complete guide to writing th
 ## Option numbering
 
 Options are numbered **starting at 0**, not 1. The first option in the list is option `0`, the second is `1`, and so on. This is the most common source of errors in skip logic, always double-check option numbers when writing conditions.
+
+## "Other, specify" options
+
+On a Multiple Choice or Multi-Select question, tick **Other (free text)** on an option to let participants type their own answer when they pick it. Only one option per question can be marked; ticking one unticks the others. In the question list, the question shows a purple tag **Other text: `<short name>_other`** and the option is marked "(other, free text)".
+
+On the tablet:
+
+- **Multiple Choice**: tapping the other option selects it and shows a text box under it. The survey does not move on by itself; the participant presses **Next**. Choosing a different option hides the box and clears the text.
+- **Multi-Select**: ticking the other option shows the text box. Unticking it clears the text.
+- Going back to the question shows the saved text.
+- The text is optional. A blank answer is stored as empty.
+
+The text box label is the **Other, Specify Prompt** system message (`other_specify_prompt`, see [System Messages](/management/system-messages/)). If it has audio, the audio plays when the participant selects the other option. The text is available in logic as `<short name>_other` (see [Survey Logic](/management/survey-logic/#other-specify-text)) and appears in exports as `q_<short name>_other`.
+
+Because `<short name>_other` is reserved, you cannot give another question that Short Name. Existing surveys are not changed. The older pattern of a choice question followed by a separate Text question with Skip Logic still works.
 
 ## Sections
 

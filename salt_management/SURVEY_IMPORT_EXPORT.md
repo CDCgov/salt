@@ -205,6 +205,9 @@ Answer choices for `multiple_choice` / `multi_select` questions only.
 | `option_index` | integer | **yes** | 0-based order within the question. |
 | `option_text_json` | JSON-string | **yes** | Multilingual option label. |
 | `audio_files_json` | JSON-string | no | Multilingual audio; `"{}"` or omit when none. |
+| `is_other` | integer 0/1 | no (default 0) | `1` marks an "Other, specify" option: the tablet shows a text box when it is selected, stored as `<short_name>_other`. At most one per question. |
+
+Bundles without `is_other` import with every option as a normal option. Export includes it automatically.
 
 Older bundles may carry an `option_value` field on options. It was never used and is ignored on import. Scripts refer to options by `option_index`.
 
@@ -221,7 +224,8 @@ Multilingual system messages shown at various points in the survey flow.
 | `message_type` | string | no (default `system`) | e.g. `system`, `instruction`, `confirmation`. |
 
 Known `message_key` values: `eligibility_not_eligible`, `staff_validation`,
-`payment_confirmation`, `consent_agreement`, `coupon_instructions`, and
+`payment_confirmation`, `consent_agreement`, `coupon_instructions`,
+`other_specify_prompt` (label for the "Other, specify" text box), and
 `<testId>_rapid_test_instruction` for rapid-test screens. The importer does
 not validate the key; it must be one the tablet build looks for.
 
@@ -316,7 +320,7 @@ Notes on the example:
 - The `numeric` question has no options. The `multiple_choice` question has two.
 - `eligibility_not_eligible` is the message shown when `eligibility_script` evaluates false.
 - `questions` must contain at least one entry; `options`, `survey_messages`, and `test_configurations` may be empty (`test_configurations: []` here), but `sections` must contain the two required sections.
-- When a script references an option-type answer, it compares against the option's 0-based `option_index`, not the displayed label. Here `hiv_tested == 0` means "Yes". A `multi_select` answer is a list of indices (e.g. `q =~ [0]` or `q.contains(0)`).
+- When a script references an option-type answer, it compares against the option's 0-based `option_index`, not the displayed label. Here `hiv_tested == 0` means "Yes". A `multi_select` answer is a list of indices (e.g. `0 =~ q` or `q.contains(0)`).
 
 ### Download filename
 
@@ -352,6 +356,11 @@ The request is rejected with `400` if:
 - `schema_version` does not equal the server's supported version (`1`).
 - The `survey` object is missing or has no `name`.
 - The bundle contains zero questions.
+- An option has `is_other = 1` on a question that is not `multiple_choice` or
+  `multi_select`.
+- A question has more than one `is_other` option.
+- A question's `short_name` equals `<short_name>_other` of another question
+  that has an `is_other` option (the derived name is reserved).
 
 ### Forced fields
 

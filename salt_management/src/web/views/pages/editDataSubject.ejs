@@ -62,7 +62,11 @@
                                 <% } %>
                             <% } else if (it.answerType === 'multiple_choice') { %>
                                 <%= it.responseOptionIndex !== null ? `${it.responseOptionIndex}: ${it.responseOptionText || ''}` : '-' %>
-                            <% } else { %>
+                            <% } %>
+                            <% if (it.otherText) { %>
+                                <div style="color: #555;">Other: <code>q_<%= it.shortName %>_other</code> = <%= it.otherText %></div>
+                            <% } %>
+                            <% if (it.answerType !== 'multi_select' && it.answerType !== 'multiple_choice') { %>
                                 <%= it.responseValue !== null ? it.responseValue : '-' %>
                             <% } %>
                         </td>
@@ -235,6 +239,19 @@ function openEditor(item) {
         body.innerHTML = '<em>Editing this answer type is not supported.</em>';
     }
 
+    // "Other, specify" free text, kept only while the other option is selected.
+    const otherOption = (item.answerType === 'multiple_choice' || item.answerType === 'multi_select')
+        ? item.options.find(o => o.isOther) : null;
+    if (otherOption) {
+        const wrap = document.createElement('div');
+        wrap.style.marginTop = '0.5rem';
+        wrap.innerHTML = `<label>Other text (<code>q_${escapeHtml(item.shortName)}_other</code>, kept only when option
+            ${escapeHtml(otherOption.index)} is selected)<br>
+            <input type="text" id="editOtherText" style="width: 100%;"></label>`;
+        body.appendChild(wrap);
+        document.getElementById('editOtherText').value = item.otherText ?? '';
+    }
+
     document.getElementById('editModal').style.display = 'block';
 }
 
@@ -355,6 +372,8 @@ document.getElementById('editSave').addEventListener('click', async () => {
         } else {
             return;
         }
+        const otherInput = document.getElementById('editOtherText');
+        if (otherInput) body.otherText = otherInput.value;
         url = `/api/admin/subjects/${SUBJECT_ID}/responses/${encodeURIComponent(currentItem.shortName)}`;
     } else if (currentItem.kind === 'rapid') {
         const checked = document.querySelector('input[name="rapidResult"]:checked');

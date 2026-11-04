@@ -3,10 +3,23 @@ const { body, validationResult } = require('express-validator');
 const { getAsync, runAsync, allAsync } = require('../../models/database');
 const { requireAdmin } = require('../../middleware/auth');
 const { logAudit } = require('../../services/auditService');
+const { isOtherFlag, validateOtherOptions, otherNameClash } = require('../../services/otherOption');
 const router = express.Router();
 
 // All routes require admin authentication
 router.use(requireAdmin);
+
+// The survey's questions other than `excludeId`, with whether each has an
+// "other" option — for the reserved <short_name>_other name check.
+async function siblingQuestionsForOtherCheck(surveyId, excludeId) {
+    const rows = await allAsync(
+        `SELECT q.short_name,
+                EXISTS(SELECT 1 FROM options o WHERE o.question_id = q.id AND o.is_other = 1) AS has_other
+         FROM questions q WHERE q.survey_id = ? AND q.id != ?`,
+        [surveyId, excludeId || 0]
+    );
+    return rows.map(r => ({ short_name: r.short_name, has_other: !!r.has_other }));
+}
 
 // List all survey versions
 router.get('/', async (req, res) => {
@@ -215,10 +228,10 @@ router.put('/:id', [
                 const options = await allAsync('SELECT * FROM options WHERE question_id = ?', [question.id]);
                 for (const option of options) {
                     await runAsync(
-                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
-                         VALUES (?, ?, ?, ?)`,
+                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
+                         VALUES (?, ?, ?, ?, ?)`,
                         [questionResult.id, option.option_index, option.option_text_json,
-                         option.audio_files_json]
+                         option.audio_files_json, option.is_other ? 1 : 0]
                     );
                 }
             }
@@ -382,6 +395,15 @@ router.post('/:surveyId/questions', [
         if (!survey) {
             return res.status(404).json({ error: 'Survey not found' });
         }
+
+        const otherError = validateOtherOptions(question_type, options)
+            || otherNameClash(
+                { short_name, has_other: options.some(o => isOtherFlag(o.is_other)) },
+                await siblingQuestionsForOtherCheck(surveyId, null)
+            );
+        if (otherError) {
+            return res.status(400).json({ error: otherError });
+        }
         
         // If no section_id provided, default to the survey's "main" section
         // (falling back to the lowest-index section). The non-eligibility body
@@ -413,11 +435,12 @@ router.post('/:surveyId/questions', [
         // Insert options if provided
         for (const option of options) {
             await runAsync(
-                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
-                 VALUES (?, ?, ?, ?)`,
+                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
+                 VALUES (?, ?, ?, ?, ?)`,
                 [questionId, option.option_index || 0,
                  JSON.stringify(option.text_json || {}),
-                 JSON.stringify(option.audio_json || {})]
+                 JSON.stringify(option.audio_json || {}),
+                 isOtherFlag(option.is_other) ? 1 : 0]
             );
         }
         
@@ -490,6 +513,24 @@ router.put('/:surveyId/questions/:questionId', [
         
         if (!question) {
             return res.status(404).json({ error: 'Question not found' });
+        }
+
+        // Check the "other" option against the question as it will be after
+        // this update (fields left out keep their current values).
+        const finalType = question_type || question.question_type;
+        const finalOptions = options !== undefined
+            ? options
+            : await allAsync('SELECT is_other FROM options WHERE question_id = ?', [questionId]);
+        const otherError = validateOtherOptions(finalType, finalOptions)
+            || otherNameClash(
+                {
+                    short_name: short_name !== undefined ? short_name : question.short_name,
+                    has_other: finalOptions.some(o => isOtherFlag(o.is_other))
+                },
+                await siblingQuestionsForOtherCheck(surveyId, questionId)
+            );
+        if (otherError) {
+            return res.status(400).json({ error: otherError });
         }
         
         // Build update query
@@ -565,11 +606,12 @@ router.put('/:surveyId/questions/:questionId', [
             // Insert new options
             for (const option of options) {
                 await runAsync(
-                    `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
-                     VALUES (?, ?, ?, ?)`,
+                    `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
+                     VALUES (?, ?, ?, ?, ?)`,
                     [questionId, option.option_index || 0,
                      JSON.stringify(option.text_json || {}),
-                     JSON.stringify(option.audio_json || {})]
+                     JSON.stringify(option.audio_json || {}),
+                     isOtherFlag(option.is_other) ? 1 : 0]
                 );
             }
         }
@@ -816,10 +858,10 @@ router.post('/', [
                 
                 for (const option of options) {
                     await runAsync(
-                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
-                         VALUES (?, ?, ?, ?)`,
-                        [questionResult.id, option.option_index, option.option_text_json, 
-                         option.audio_files_json]
+                        `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
+                         VALUES (?, ?, ?, ?, ?)`,
+                        [questionResult.id, option.option_index, option.option_text_json,
+                         option.audio_files_json, option.is_other ? 1 : 0]
                     );
                 }
             }

@@ -50,6 +50,7 @@ Eligible participants proceed to the self-interview. The participant answers que
 - For multiple choice questions, the participant taps their answer
 - For numeric questions, the participant enters a number
 - For multi-select questions, the participant taps all applicable answers
+- If the participant picks an option marked "Other", a text box appears under it where they can type their answer (optional). On a multiple choice question the survey waits for them to press **Next** instead of moving on by itself
 - A **Replay** button replays the audio for the current question
 - Questions hidden by skip logic do not appear
 

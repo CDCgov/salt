@@ -57,7 +57,8 @@ data class SerializedAnswer(
     val questionShortName: String,
     val answerValue: Any?,
     val answerType: String, // "multiple_choice", "numeric", "text"
-    val optionText: String? = null
+    val optionText: String? = null,
+    val otherText: String? = null // free text for the question's "other" option
 )
 
 data class DeviceInfo(
@@ -126,7 +127,9 @@ class SurveySerializer {
                     questionShortName = question.questionShortName,
                     answerValue = answerValue,
                     answerType = answerType,
-                    optionText = optionText
+                    optionText = optionText,
+                    otherText = if (answerType == "multiple_choice" || answerType == "multi_select")
+                        answer.otherText?.takeIf { it.isNotBlank() } else null
                 )
             } else {
                 // Include answer even if question not found (shouldn't happen, but preserve data)
@@ -298,6 +301,7 @@ class SurveySerializer {
                         put("answerValue", answer.answerValue)
                         put("answerType", answer.answerType)
                         answer.optionText?.let { put("optionText", it) }
+                        answer.otherText?.let { put("otherText", it) }
                     })
                 }
             })

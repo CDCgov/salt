@@ -139,7 +139,7 @@ async function buildDictionaryRows(surveyId) {
 
     for (const q of questions) {
         const options = await allAsync(
-            'SELECT option_index, option_text_json FROM options WHERE question_id = ? ORDER BY option_index',
+            'SELECT option_index, option_text_json, is_other FROM options WHERE question_id = ? ORDER BY option_index',
             [q.id]
         );
         const label = clean(extractEnglish(q.question_text_json));
@@ -171,6 +171,19 @@ async function buildDictionaryRows(surveyId) {
                 source: 'survey', short_name: q.short_name, label, type, section,
                 value_labels: q.question_type === 'multiple_choice' ? optionValueLabels(options) : '',
                 validation, skip, skip_to,
+            });
+        }
+
+        // "Other, specify" free text (dataExporter emits q_<short_name>_other).
+        const otherOption = (q.question_type === 'multiple_choice' || q.question_type === 'multi_select')
+            ? options.find(o => o.is_other) : null;
+        if (otherOption) {
+            push({
+                variable: `q_${q.short_name}_other`,
+                source: 'survey', short_name: q.short_name,
+                label: `${label} — free text when option ${otherOption.option_index} `
+                    + `"${clean(extractEnglish(otherOption.option_text_json))}" is selected`,
+                type: 'text', section, skip,
             });
         }
     }

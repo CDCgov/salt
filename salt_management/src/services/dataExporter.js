@@ -257,6 +257,20 @@ class DataExporter {
 
             UNION ALL
 
+            -- "Other, specify" free text, as q_<short_name>_other
+            SELECT
+                cs.survey_response_id,
+                cs.participant_id,
+                'q_' || sr.question_short_name || '_other' as variable,
+                NULL as numeric_value,
+                sr.response_other_text as text_value
+            FROM completed_surveys cs
+            JOIN survey_responses sr ON cs.id = sr.completed_survey_id
+            WHERE ${whereClause} AND sr.question_short_name IS NOT NULL
+              AND sr.response_other_text IS NOT NULL
+
+            UNION ALL
+
             -- Rapid test results
             SELECT
                 cs.survey_response_id,
@@ -565,6 +579,20 @@ class DataExporter {
 
             UNION ALL
 
+            -- "Other, specify" free text, as q_<short_name>_other
+            SELECT
+                cs.survey_response_id,
+                cs.participant_id,
+                'q_' || sr.question_short_name || '_other' as variable,
+                NULL as numeric_value,
+                sr.response_other_text as text_value
+            FROM completed_surveys cs
+            JOIN survey_responses sr ON cs.id = sr.completed_survey_id
+            WHERE ${whereClause} AND sr.question_short_name IS NOT NULL
+              AND sr.response_other_text IS NOT NULL
+
+            UNION ALL
+
             -- Rapid test results
             SELECT
                 cs.survey_response_id,
@@ -717,6 +745,15 @@ class DataExporter {
             const baseOrder = questionOrderMap['q_' + shortName] ?? 999999;
             for (const idx of optionIndices) {
                 questionOrderMap[`q_${shortName}_${idx}`] = baseOrder + idx / 10000;
+            }
+        }
+        // "Other" text columns (q_foo_other) go right after the question's own
+        // column(s), including any exploded multi-select columns. A real
+        // question that happens to be named foo_other keeps its own position.
+        for (const q of questionOrder) {
+            const otherColumn = `q_${q.short_name}_other`;
+            if (!(otherColumn in questionOrderMap)) {
+                questionOrderMap[otherColumn] = questionOrderMap['q_' + q.short_name] + 0.99999;
             }
         }
 

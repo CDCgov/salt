@@ -832,6 +832,7 @@
     <!-- Survey Multi-select -->
     <string name="survey_multiselect_exact">Seleccione exactamente %1$d opciones</string>
     <string name="survey_multiselect_max">Seleccione hasta %1$d opciones</string>
+    <string name="survey_other_specify">Por favor, especifique</string>
     <string name="survey_multiselect_min">Seleccione al menos %1$d opciones</string>
     <string name="survey_multiselect_range">Seleccione de %1$d a %2$d opciones</string>
 

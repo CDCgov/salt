@@ -253,8 +253,9 @@ router.post('/survey/upload', requireFacilityApiKey, async (req, res) => {
                             response_option_index,
                             response_option_text,
                             response_multi_indices,
-                            answer_type
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                            answer_type,
+                            response_other_text
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                         [
                             completedSurveyId,
                             questionInfo?.id || null,
@@ -268,7 +269,11 @@ router.post('/survey/upload', requireFacilityApiKey, async (req, res) => {
                             answer.optionText || null,
                             // For multi-select, store comma-separated indices
                             answer.answerType === 'multi_select' ? answer.answerValue : null,
-                            answer.answerType || 'unknown'
+                            answer.answerType || 'unknown',
+                            // Free text for the "other" option (choice questions only; blank -> null)
+                            (answer.answerType === 'multiple_choice' || answer.answerType === 'multi_select')
+                                && typeof answer.otherText === 'string' && answer.otherText.trim()
+                                ? answer.otherText.trim() : null
                         ]
                     );
                 }

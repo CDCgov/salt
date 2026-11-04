@@ -198,6 +198,29 @@ Selections** fields to limit how many options may be ticked.
 
 ---
 
+## "Other, specify" text
+
+An option on a multiple-choice or multi-select question can be marked
+**Other (free text)** in the survey editor. The text the participant types
+into its box is available as **`<short name>_other`** — for the question
+`q10`, that is `q10_other`. It works in every script: Skip Logic, Validation
+Script, Skip-To, Eligibility Script and the coupon count script.
+
+- `q10_other` is **text**, so compare it with quotes: `q10_other == 'Nurse'`.
+- It is **nothing (null)** when the other option isn't selected, or when the
+  participant left the box blank.
+- `q10` itself is unchanged: it is still the **option number** (from 0) for
+  multiple choice, or the set of option numbers for multi-select.
+
+Example: the other option is the sixth option (`5`) of `q10`.
+`q10 == 5 && q10_other == null` means the participant chose "Other" but typed
+nothing.
+
+Because `q10_other` is reserved for this, the editor won't let you give
+another question the Short Name `q10_other` when `q10` has an other option.
+
+---
+
 ## Common mistakes
 
 | Mistake | Fix |

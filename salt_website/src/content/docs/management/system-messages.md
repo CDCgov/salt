@@ -9,7 +9,7 @@ System messages are participant-facing texts that SALT displays at fixed points 
 
 ## Standard messages
 
-Every survey has the following five standard system messages:
+Every survey has the following six standard system messages:
 
 | Title | Message key | When it is shown |
 |-------|-------------|------------------|
@@ -18,6 +18,7 @@ Every survey has the following five standard system messages:
 | **Payment Confirmation Message** | `payment_confirmation` | Shown on the payment confirmation screen before the participant receives payment |
 | **Consent Agreement** | `consent_agreement` | Consent text and audio read to the participant before signature capture |
 | **Coupon Instructions** | `coupon_instructions` | Shown to the participant on the Referral Coupons screen, explaining how to use their coupons |
+| **Other, Specify Prompt** | `other_specify_prompt` | Label for the text box shown when a participant selects an option marked **Other (free text)**. If it has audio, the audio plays when the option is selected. If blank, the tablet shows its built-in "Please specify" (translated in English, Spanish, French, Armenian and Indonesian). |
 
 ## Rapid-test instructions
 

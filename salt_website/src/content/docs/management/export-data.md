@@ -36,6 +36,10 @@ The download includes all surveys, questions, rapid test results, lab results, p
 | `coupon_` | Coupon chain data: recruiter ID, coupon code used |
 | `sample_collected` | Whether a biological sample was collected |
 
+### "Other, specify" text
+
+For a question with an **Other (free text)** option (see [Survey Questions](/management/survey-questions/#other-specify-options)), the typed text is exported as `q_<short name>_other`, for example `q_occupation_other`. In wide format the column comes right after the question's own column, or after its per-option columns for a multi-select question. In long format it is its own variable. The column only appears when at least one participant typed text.
+
 ## Consent records
 
 Click **Download Consent PDF** to download a PDF containing all consent records. Consent records include the participant ID, facility, date, and any consent-related survey responses.

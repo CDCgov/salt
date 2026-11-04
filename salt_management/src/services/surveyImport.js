@@ -15,6 +15,8 @@
  * bound to whatever sqlite handle they own, so this module never opens its own.
  */
 
+const { isOtherFlag, validateOtherOptions, otherNameClash } = require('./otherOption');
+
 const SCHEMA_VERSION = 1;
 
 // Columns copied from the bundle's survey object. is_active / is_draft /
@@ -82,6 +84,20 @@ async function importSurveyBundle(dbx, bundle, opts = {}) {
     const srcOptions = Array.isArray(bundle.options) ? bundle.options : [];
     const srcMessages = Array.isArray(bundle.survey_messages) ? bundle.survey_messages : [];
     const srcTestConfigs = Array.isArray(bundle.test_configurations) ? bundle.test_configurations : [];
+
+    // "Other, specify" options: at most one per choice question, and the
+    // derived <short_name>_other names must not clash with real short names.
+    // Bundles without is_other import every option as a normal option.
+    const otherChecks = srcQuestions.map(q => {
+        const opts = srcOptions.filter(o => o.question_id === q.id);
+        const error = validateOtherOptions(q.question_type, opts);
+        if (error) throw validationError(`Question "${q.short_name}": ${error}`);
+        return { short_name: q.short_name, has_other: opts.some(o => isOtherFlag(o.is_other)) };
+    });
+    for (const q of otherChecks) {
+        const clash = otherNameClash(q, otherChecks.filter(o => o !== q));
+        if (clash) throw validationError(clash);
+    }
 
     const warnings = [];
 
@@ -164,9 +180,10 @@ async function importSurveyBundle(dbx, bundle, opts = {}) {
             const remappedQuestion = questionIdMap.get(o.question_id);
             if (!remappedQuestion) continue;
             await dbx.run(
-                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json)
-                 VALUES (?, ?, ?, ?)`,
-                [remappedQuestion, o.option_index, o.option_text_json, o.audio_files_json || '{}']
+                `INSERT INTO options (question_id, option_index, option_text_json, audio_files_json, is_other)
+                 VALUES (?, ?, ?, ?, ?)`,
+                [remappedQuestion, o.option_index, o.option_text_json, o.audio_files_json || '{}',
+                 isOtherFlag(o.is_other) ? 1 : 0]
             );
         }
 

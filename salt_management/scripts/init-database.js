@@ -132,6 +132,7 @@ CREATE TABLE IF NOT EXISTS options (
     option_index INTEGER,
     option_text_json TEXT NOT NULL,
     audio_files_json TEXT DEFAULT '{}',
+    is_other INTEGER NOT NULL DEFAULT 0, -- "other, specify" option (at most one per question)
     FOREIGN KEY (question_id) REFERENCES questions(id)
 );
 
@@ -253,6 +254,7 @@ CREATE TABLE IF NOT EXISTS survey_responses (
     response_option_text TEXT,
     response_multi_indices TEXT,
     answer_type TEXT NOT NULL,
+    response_other_text TEXT, -- free text for the question's "other" option
     FOREIGN KEY (completed_survey_id) REFERENCES completed_surveys(id) ON DELETE CASCADE,
     FOREIGN KEY (question_id) REFERENCES questions(id)
 );
@@ -603,6 +605,24 @@ function execAsync(db, sql) {
     });
 }
 
+// Columns added after a table was first created. CREATE TABLE IF NOT EXISTS
+// leaves existing tables alone, so add any that are missing. Only nullable or
+// defaulted columns belong here.
+const ADDED_COLUMNS = [
+    { table: 'options', column: 'is_other', definition: 'INTEGER NOT NULL DEFAULT 0' },
+    { table: 'survey_responses', column: 'response_other_text', definition: 'TEXT' }
+];
+
+async function ensureAddedColumns(db) {
+    for (const { table, column, definition } of ADDED_COLUMNS) {
+        const columns = await allAsync(db, `PRAGMA table_info(${table})`);
+        if (!columns.some(c => c.name === column)) {
+            await runAsync(db, `ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+            console.log(`Added column ${table}.${column}.`);
+        }
+    }
+}
+
 async function ensureDefaultAdmin(db) {
     const existing = await getAsync(db, 'SELECT COUNT(*) AS n FROM admin_users');
     if (existing && existing.n > 0) {
@@ -827,6 +847,7 @@ async function main() {
     try {
         await execAsync(db, SCHEMA_SQL);
         console.log('Schema applied.');
+        await ensureAddedColumns(db);
         await ensureDefaultAdmin(db);
         await ensureDemoFacility(db);
         await ensureHivLabTests(db);

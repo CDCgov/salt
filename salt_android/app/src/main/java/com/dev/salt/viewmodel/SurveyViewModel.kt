@@ -85,6 +85,12 @@ class SurveyViewModel(
     private var sections: List<com.dev.salt.data.Section> = emptyList()
     private var currentSection: com.dev.salt.data.Section? = null
 
+    // Option index of each question's "other, specify" option, keyed by
+    // Question.id (the per-language row id). Questions without one are absent.
+    private val otherOptionIndexByQuestionId: Map<Int, Int> by lazy {
+        database.surveyDao().getOtherOptions().associate { it.questionId to it.optionQuestionIndex }
+    }
+
     // Question navigation history - tracks the path user took through questions
     // This allows proper back navigation that respects skip-to jumps
     private val questionHistory = mutableListOf<Int>()
@@ -689,6 +695,11 @@ class SurveyViewModel(
             val av : Any? = if (ans[i].isMultiSelect) ans[i].getSelectedIndices()
                             else ans[i].getValue()
             context[qus[i].questionShortName] = av
+            // "Other, specify" text: <short_name>_other, null unless the
+            // other option is selected and the text isn't blank.
+            if (otherOptionIndexByQuestionId.containsKey(qus[i].id)) {
+                context[qus[i].questionShortName + "_other"] = selectedOtherText(qus[i], ans[i])
+            }
         }
         // You can add other global variables to the context if needed
         // context["userAge"] = 25 // Example
@@ -820,17 +831,69 @@ class SurveyViewModel(
         val option = options.find { it.id == optionId }
         val text = option?.text ?: return
         val optionIndex = option?.optionQuestionIndex
-        survey!!.answers[currentQuestionIndex].optionQuestionIndex = optionIndex
-        survey!!.answers[currentQuestionIndex].numericValue = optionIndex?.toDouble()
-        survey!!.answers[currentQuestionIndex].answerPrimaryLanguageText = text
+        // A new Answer object, so the StateFlow emits and the screen recomposes
+        // (needed now that the "other" option stays on the question).
+        // Choosing a different option discards any "other" text.
+        val current = survey!!.answers[currentQuestionIndex]
+        survey!!.answers[currentQuestionIndex] = current.copy(
+            optionQuestionIndex = optionIndex,
+            numericValue = optionIndex?.toDouble(),
+            answerPrimaryLanguageText = text,
+            otherText = if (option.isOther) current.otherText else null
+        )
         _currentQuestion.value = _currentQuestion.value?.copy(third = survey!!.answers[currentQuestionIndex] )
 
         // Save answer immediately to database (survives Activity/ViewModel recreation)
         saveAnswerToDatabase(survey!!.answers[currentQuestionIndex])
 
+        // The "other" option stays on the question so the participant can type
+        // the text; they continue with Next.
+        if (option.isOther) return
+
         viewModelScope.launch {
             loadNextQuestion()
         }
+    }
+
+    /**
+     * Stores the free text for the current question's "other" option. Called
+     * before navigating away. Blank text is stored as null, and so is any text
+     * when the other option isn't selected.
+     */
+    fun answerOtherText(text: String) {
+        if (survey == null || currentQuestionIndex !in survey!!.answers.indices) return
+        val question = _currentQuestion.value?.first ?: return
+        if (!otherOptionIndexByQuestionId.containsKey(question.id)) return
+        val answer = survey!!.answers[currentQuestionIndex]
+        answer.otherText = if (isOtherSelected(question, answer)) text.trim().ifEmpty { null } else null
+        _currentQuestion.value = _currentQuestion.value?.copy(third = answer)
+        saveAnswerToDatabase(answer)
+    }
+
+    private fun isOtherSelected(question: Question, answer: Answer): Boolean {
+        val otherIndex = otherOptionIndexByQuestionId[question.id] ?: return false
+        return if (question.questionType == "multi_select") {
+            answer.getSelectedIndices().contains(otherIndex)
+        } else {
+            answer.optionQuestionIndex == otherIndex
+        }
+    }
+
+    // The answer's other text if the question's other option is selected, else null.
+    private fun selectedOtherText(question: Question, answer: Answer): String? =
+        if (isOtherSelected(question, answer)) answer.otherText?.takeIf { it.isNotBlank() } else null
+
+    /**
+     * Label for the "other" text box: the survey's other_specify_prompt message
+     * in the survey language (falling back to English), or null to use the
+     * app's built-in string.
+     */
+    fun getOtherSpecifyPrompt(): com.dev.salt.data.SystemMessage? {
+        val dao = database.systemMessageDao()
+        val language = survey?.language ?: "en"
+        return dao.getSystemMessage("other_specify_prompt", language)
+            ?: dao.getSystemMessage("other_specify_prompt", "en")
+            ?: dao.getSystemMessage("other_specify_prompt", "English")
     }
 
     // NEW: Overloaded answerQuestion for text/numeric input
@@ -871,10 +934,16 @@ class SurveyViewModel(
             selectedIndices.add(optionIndex)
         }
         
+        // Unticking the "other" option discards its text.
+        val otherIndex = otherOptionIndexByQuestionId[currentQuestion.id]
+        val otherText = if (otherIndex != null && !selectedIndices.contains(otherIndex)) null
+                        else currentAnswer.otherText
+
         // Create a new Answer object with updated selections to ensure UI recomposition
         val updatedAnswer = currentAnswer.copy(
             isMultiSelect = true,
-            multiSelectIndices = selectedIndices.sorted().joinToString(",")
+            multiSelectIndices = selectedIndices.sorted().joinToString(","),
+            otherText = otherText
         )
         
         // Update the actual answer in the survey

@@ -242,7 +242,7 @@ function addQuestionHtml(q) {
             bodyHtml += '                    <div class="option-item">\n';
             bodyHtml += '                        <span class="option-index">' + optIdx + '</span>\n';
             const optPrimaryText = optTexts[surveyLanguages[0]] || optTexts[Object.keys(optTexts)[0]] || 'No text';
-            bodyHtml += '                        ' + h(optPrimaryText) + '\n';
+            bodyHtml += '                        ' + h(optPrimaryText) + (opt.is_other ? ' <em>(other, free text)</em>' : '') + '\n';
             bodyHtml += '                    </div>\n';
             });
         bodyHtml += '                </div>\n';
@@ -258,6 +258,10 @@ function addQuestionHtml(q) {
     }
     if (q.validation_script) {
         bodyHtml += '                    <span class="validation-tag">Validation: ' + h(q.validation_script) + '</span>\n';
+    }
+    if ((q.question_type === 'multiple_choice' || q.question_type === 'multi_select')
+        && q.options && q.options.some(o => o.is_other)) {
+        bodyHtml += '                    <span class="other-tag">Other text: ' + h(q.short_name) + '_other</span>\n';
     }
     bodyHtml += '                </div>\n';
     bodyHtml += '            </div>\n';
@@ -392,6 +396,7 @@ bodyHtml += '.option-item { padding: 0.25rem 0; }\n';
 bodyHtml += '.option-index { background: #ecf0f1; padding: 0.2rem 0.4rem; border-radius: 3px; margin-right: 0.5rem; }\n';
 bodyHtml += '.skip-logic-tag { background: #f39c12; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; margin-right: 0.5rem; font-size: 0.8rem; }\n';
 bodyHtml += '.validation-tag { background: #e74c3c; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; }\n';
+bodyHtml += '.other-tag { background: #8e44ad; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; margin-left: 0.5rem; font-size: 0.8rem; }\n';
 bodyHtml += '.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); }\n';
 bodyHtml += '.modal-content { background-color: #fefefe; margin: 5% auto; width: 80%; max-width: 600px; border-radius: 8px; }\n';
 bodyHtml += '.modal-header { padding: 1rem; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }\n';
@@ -527,7 +532,8 @@ bodyHtml += '        { key: "eligibility_not_eligible", title: "Ineligibility Me
 bodyHtml += '        { key: "staff_validation", title: "Staff Validation Message", description: "Shown when staff needs to validate completion" },\n';
 bodyHtml += '        { key: "payment_confirmation", title: "Payment Confirmation Message", description: "Shown on the payment confirmation screen before participant receives payment" },\n';
 bodyHtml += '        { key: "consent_agreement", title: "Consent Agreement", description: "Consent text and audio read to participant before signature capture" },\n';
-bodyHtml += '        { key: "coupon_instructions", title: "Coupon Instructions", description: "Shown to the participant on the Referral Coupons screen, explaining how to use their coupons" }\n';
+bodyHtml += '        { key: "coupon_instructions", title: "Coupon Instructions", description: "Shown to the participant on the Referral Coupons screen, explaining how to use their coupons" },\n';
+bodyHtml += '        { key: "other_specify_prompt", title: "Other, Specify Prompt", description: "Label for the free-text box shown when a participant selects an option marked Other (e.g. Please specify). Audio plays when the option is selected" }\n';
 bodyHtml += '    ];\n';
 bodyHtml += '    \n';
 bodyHtml += '    standardMessages.forEach(msgDef => {\n';
@@ -1031,7 +1037,7 @@ bodyHtml += '        const optTexts = typeof opt.option_text_json === "string" ?
 bodyHtml += '            JSON.parse(opt.option_text_json) : opt.option_text_json || {};\n';
 bodyHtml += '        const optAudio = typeof opt.audio_files_json === "string" ? \n';
 bodyHtml += '            JSON.parse(opt.audio_files_json) : opt.audio_files_json || {};\n';
-bodyHtml += '        addOptionWithData(optTexts, optAudio);\n';
+bodyHtml += '        addOptionWithData(optTexts, optAudio, !!opt.is_other);\n';
 bodyHtml += '    });\n';
 bodyHtml += '}\n';
 bodyHtml += '\n';
@@ -1039,7 +1045,7 @@ bodyHtml += 'function addOption() {\n';
 bodyHtml += '    addOptionWithData({});\n';
 bodyHtml += '}\n';
 bodyHtml += '\n';
-bodyHtml += 'function addOptionWithData(texts, audioData) {\n';
+bodyHtml += 'function addOptionWithData(texts, audioData, isOther) {\n';
 bodyHtml += '    const container = document.getElementById("optionsList");\n';
 bodyHtml += '    const optionDiv = document.createElement("div");\n';
 bodyHtml += '    const optionIndex = container.children.length;\n';
@@ -1062,10 +1068,20 @@ bodyHtml += '        html += \'  </div>\';\n';
 bodyHtml += '        html += \'  <input type="hidden" class="option-audio" data-lang="\' + escapeHtml(lang) + \'" id="audio_\' + escapeHtml(optId) + \'" value="\' + escapeHtml(audioData && audioData[lang] || "") + \'">\';\n';
 bodyHtml += '        html += \'</div>\';\n';
 bodyHtml += '    });\n';
+bodyHtml += '    html += \'<label style="display: block; margin-bottom: 0.5rem;" title="Selecting this option shows a free-text box on the tablet. The text is stored as short_name_other.">\';\n';
+bodyHtml += '    html += \'  <input type="checkbox" class="option-is-other" onchange="onOtherOptionToggle(this)"\' + (isOther ? " checked" : "") + \'> Other (free text)</label>\';\n';
 bodyHtml += '    html += \'<button type="button" onclick="removeOption(this)" class="btn btn-danger btn-sm">Remove Option</button>\';\n';
 bodyHtml += '    \n';
 bodyHtml += '    optionDiv.innerHTML = html;\n';
 bodyHtml += '    container.appendChild(optionDiv);\n';
+bodyHtml += '}\n';
+bodyHtml += '\n';
+bodyHtml += '// Only one option per question can be the "other" option.\n';
+bodyHtml += 'function onOtherOptionToggle(checkbox) {\n';
+bodyHtml += '    if (!checkbox.checked) return;\n';
+bodyHtml += '    document.querySelectorAll("#optionsList .option-is-other").forEach(cb => {\n';
+bodyHtml += '        if (cb !== checkbox) cb.checked = false;\n';
+bodyHtml += '    });\n';
 bodyHtml += '}\n';
 bodyHtml += '\n';
 bodyHtml += 'function removeOption(button) {\n';
@@ -1147,7 +1163,8 @@ bodyHtml += '            \n';
 bodyHtml += '            options.push({\n';
 bodyHtml += '                option_index: idx,\n';
 bodyHtml += '                text_json: optionTexts,\n';
-bodyHtml += '                audio_json: optionAudio\n';
+bodyHtml += '                audio_json: optionAudio,\n';
+bodyHtml += '                is_other: group.querySelector(".option-is-other")?.checked ? 1 : 0\n';
 bodyHtml += '            });\n';
 bodyHtml += '        });\n';
 bodyHtml += '    }\n';

@@ -103,7 +103,7 @@ router.get('/edit-data/:id(\\d+)', requireAdmin, async (req, res) => {
             `SELECT sr.id, sr.question_short_name, sr.question_index,
                     sr.response_value, sr.response_option_index,
                     sr.response_option_text, sr.response_multi_indices,
-                    sr.answer_type,
+                    sr.answer_type, sr.response_other_text,
                     q.id AS question_id, q.question_text_json,
                     q.question_type, q.min_selections, q.max_selections
              FROM survey_responses sr
@@ -123,7 +123,7 @@ router.get('/edit-data/:id(\\d+)', requireAdmin, async (req, res) => {
         if (questionIds.length) {
             const placeholders = questionIds.map(() => '?').join(',');
             const optRows = await allAsync(
-                `SELECT question_id, option_index, option_text_json
+                `SELECT question_id, option_index, option_text_json, is_other
                  FROM options
                  WHERE question_id IN (${placeholders})
                  ORDER BY question_id, option_index`,
@@ -131,7 +131,7 @@ router.get('/edit-data/:id(\\d+)', requireAdmin, async (req, res) => {
             );
             for (const o of optRows) {
                 (optionsByQuestion[o.question_id] = optionsByQuestion[o.question_id] || [])
-                    .push({ index: o.option_index, text: extractText(o.option_text_json) });
+                    .push({ index: o.option_index, text: extractText(o.option_text_json), isOther: !!o.is_other });
             }
         }
 
@@ -157,6 +157,7 @@ router.get('/edit-data/:id(\\d+)', requireAdmin, async (req, res) => {
                 responseValue: r.response_value,
                 responseOptionIndex: r.response_option_index,
                 responseOptionText: r.response_option_text,
+                otherText: r.response_other_text,
                 selectedIndices,
                 options: optionsByQuestion[r.question_id] || [],
                 minSelections: r.min_selections,
@@ -298,12 +299,13 @@ function projectRow(row, csById, labNameByTestId) {
             const at = (o && o.answer_type) || (n && n.answer_type);
             const fmt = (snap) => {
                 if (!snap) return '';
+                const other = snap.response_other_text ? ` (other: ${snap.response_other_text})` : '';
                 if (at === 'multiple_choice') {
                     if (snap.response_option_index == null) return '';
                     const txt = snap.response_option_text ? `: ${snap.response_option_text}` : '';
-                    return `${snap.response_option_index}${txt}`;
+                    return `${snap.response_option_index}${txt}${other}`;
                 }
-                if (at === 'multi_select') return snap.response_multi_indices || '';
+                if (at === 'multi_select') return (snap.response_multi_indices || '') + other;
                 return snap.response_value == null ? '' : String(snap.response_value);
             };
             result.oldValue = fmt(o);

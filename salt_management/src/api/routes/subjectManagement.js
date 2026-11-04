@@ -108,8 +108,11 @@ router.post('/admin/subjects/:id/restore', requireAdmin, async (req, res) => {
  * Body shape (varies by answer_type):
  *   numeric        : { value: <number-like string or number> }
  *   text           : { value: <string> }
- *   multiple_choice: { optionIndex: <int> }
- *   multi_select   : { optionIndices: <int[]> }   // sent as array of ints
+ *   multiple_choice: { optionIndex: <int>, otherText?: <string> }
+ *   multi_select   : { optionIndices: <int[]>, otherText?: <string> }   // sent as array of ints
+ *
+ * otherText is the free text for the question's "other" option. It is kept
+ * only while that option is selected; blank clears it. Omitted = unchanged.
  */
 router.put('/admin/subjects/:id/responses/:shortName', requireAdmin, async (req, res) => {
     try {
@@ -127,7 +130,8 @@ router.put('/admin/subjects/:id/responses/:shortName', requireAdmin, async (req,
         const responseRow = await getAsync(
             `SELECT id, completed_survey_id, question_id, question_index,
                     question_short_name, response_value, response_option_index,
-                    response_option_text, response_multi_indices, answer_type
+                    response_option_text, response_multi_indices, answer_type,
+                    response_other_text
              FROM survey_responses
              WHERE completed_survey_id = ? AND question_short_name = ?`,
             [id, shortName]
@@ -149,7 +153,7 @@ router.put('/admin/subjects/:id/responses/:shortName', requireAdmin, async (req,
         }
 
         const optionRows = await allAsync(
-            `SELECT option_index, option_text_json
+            `SELECT option_index, option_text_json, is_other
              FROM options
              WHERE question_id = ? ORDER BY option_index`,
             [question.id]
@@ -161,7 +165,8 @@ router.put('/admin/subjects/:id/responses/:shortName', requireAdmin, async (req,
             response_value: responseRow.response_value,
             response_option_index: responseRow.response_option_index,
             response_option_text: responseRow.response_option_text,
-            response_multi_indices: responseRow.response_multi_indices
+            response_multi_indices: responseRow.response_multi_indices,
+            response_other_text: null
         };
 
         // --- Validate + project the new value into the right column(s).
@@ -230,14 +235,29 @@ router.put('/admin/subjects/:id/responses/:shortName', requireAdmin, async (req,
             return res.status(400).json({ status: 'error', message: `Editing answer_type "${t}" is not supported` });
         }
 
+        // "Other" free text survives only while the other option is selected.
+        const otherOption = optionRows.find(o => o.is_other);
+        const otherSelected = otherOption && (t === 'multiple_choice'
+            ? updates.response_option_index === otherOption.option_index
+            : t === 'multi_select'
+                && updates.response_multi_indices.split(',').map(Number).includes(otherOption.option_index));
+        if (otherSelected) {
+            const raw = body.otherText !== undefined ? body.otherText : responseRow.response_other_text;
+            if (raw != null && typeof raw !== 'string') {
+                return res.status(400).json({ status: 'error', message: 'otherText must be a string' });
+            }
+            updates.response_other_text = raw && raw.trim() ? raw.trim() : null;
+        }
+
         await runAsync(
             `UPDATE survey_responses
              SET response_value = ?, response_option_index = ?,
-                 response_option_text = ?, response_multi_indices = ?
+                 response_option_text = ?, response_multi_indices = ?,
+                 response_other_text = ?
              WHERE id = ?`,
             [updates.response_value, updates.response_option_index,
              updates.response_option_text, updates.response_multi_indices,
-             responseRow.id]
+             updates.response_other_text, responseRow.id]
         );
 
         await logAudit(
@@ -278,7 +298,8 @@ router.post('/admin/subjects/:id/responses/:shortName/clear', requireAdmin, asyn
         const responseRow = await getAsync(
             `SELECT id, completed_survey_id, question_id, question_index,
                     question_short_name, response_value, response_option_index,
-                    response_option_text, response_multi_indices, answer_type
+                    response_option_text, response_multi_indices, answer_type,
+                    response_other_text
              FROM survey_responses
              WHERE completed_survey_id = ? AND question_short_name = ?`,
             [id, shortName]
@@ -290,7 +311,8 @@ router.post('/admin/subjects/:id/responses/:shortName/clear', requireAdmin, asyn
             responseRow.response_value === null &&
             responseRow.response_option_index === null &&
             responseRow.response_option_text === null &&
-            responseRow.response_multi_indices === null;
+            responseRow.response_multi_indices === null &&
+            responseRow.response_other_text === null;
         if (allNull) {
             return res.json({ status: 'success', message: 'Already missing', alreadyMissing: true });
         }
@@ -300,7 +322,8 @@ router.post('/admin/subjects/:id/responses/:shortName/clear', requireAdmin, asyn
              SET response_value = NULL,
                  response_option_index = NULL,
                  response_option_text = NULL,
-                 response_multi_indices = NULL
+                 response_multi_indices = NULL,
+                 response_other_text = NULL
              WHERE id = ?`,
             [responseRow.id]
         );
@@ -316,7 +339,8 @@ router.post('/admin/subjects/:id/responses/:shortName/clear', requireAdmin, asyn
                 response_value: null,
                 response_option_index: null,
                 response_option_text: null,
-                response_multi_indices: null
+                response_multi_indices: null,
+                response_other_text: null
             }
         );
 

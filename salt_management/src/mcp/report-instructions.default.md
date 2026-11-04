@@ -53,6 +53,8 @@ Variable naming (matches the data dictionary's `variable` column exactly):
 - `q_<short_name>` — a survey question. multiple_choice: numeric = option index, text = label.
   numeric: the number. multi_select is exploded into 0/1 indicator columns
   `q_<short_name>_<optionIndex>`.
+- `q_<short_name>_other` — free text typed for a question's "other, specify" option
+  (text only; blank unless that option was selected and the participant typed something).
 - `rapid_<test_id>_result` — rapid test result. `lab_<test_name>` — lab result.
 - `meta_*` (facility, language, timestamps…), `device_*`, `coupon_*`, `pay_*`.
 

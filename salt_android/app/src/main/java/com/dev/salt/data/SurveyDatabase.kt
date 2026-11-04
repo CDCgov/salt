@@ -83,7 +83,10 @@ data class Option(
     @ColumnInfo(name = "audio_file_name") var audioFileName: String,
     @ColumnInfo(name = "option_question_index") var optionQuestionIndex: Int, // New field
     @ColumnInfo(name = "language") var language: String, // New field
-    @ColumnInfo(name = "primary_language_text") var primaryLanguageText: String // New field
+    @ColumnInfo(name = "primary_language_text") var primaryLanguageText: String, // New field
+    // "Other, specify" option: selecting it shows a free-text box whose text is
+    // stored in Answer.otherText and exposed to JEXL as <short_name>_other.
+    @ColumnInfo(name = "is_other", defaultValue = "0") var isOther: Boolean = false
 )
 
 @Entity(tableName = "surveys")
@@ -171,7 +174,10 @@ data class Answer(
     @ColumnInfo(name = "is_numeric") var isNumeric: Boolean = false,
     @ColumnInfo(name = "numeric_value") var numericValue: Double? = null,
     @ColumnInfo(name = "is_multi_select") var isMultiSelect: Boolean = false,
-    @ColumnInfo(name = "multi_select_indices") var multiSelectIndices: String? = null // comma-separated indices
+    @ColumnInfo(name = "multi_select_indices") var multiSelectIndices: String? = null, // comma-separated indices
+    // Free text typed for the question's "other" option; null when that option
+    // isn't selected or the text was left blank.
+    @ColumnInfo(name = "other_text") var otherText: String? = null
 ) {
     fun getValue(returnIndex: Boolean = true): Any? {
         if(isNumeric){
@@ -380,6 +386,9 @@ interface SurveyDao {
 
     @Query("SELECT * FROM options WHERE question_id = :questionId")
     fun getOptionsForQuestion(questionId: Int): List<Option>
+
+    @Query("SELECT * FROM options WHERE is_other = 1")
+    fun getOtherOptions(): List<Option>
 
     @Insert
     fun insertQuestion(question: Question)
@@ -815,7 +824,7 @@ interface AppServerConfigDao {
     fun hasServerConfig(): Boolean
 }
 
-@Database(entities = [Section::class, Question::class, Option::class, Survey::class, Answer::class, User::class, SurveyUploadState::class, RecruitmentPaymentUploadState::class, SyncMetadata::class, SurveyConfig::class, SystemMessage::class, Coupon::class, FacilityConfig::class, SeedRecruitment::class, SubjectFingerprint::class, AppServerConfig::class, TestConfiguration::class, TestResult::class, LabTestConfiguration::class], version = 73, autoMigrations = [
+@Database(entities = [Section::class, Question::class, Option::class, Survey::class, Answer::class, User::class, SurveyUploadState::class, RecruitmentPaymentUploadState::class, SyncMetadata::class, SurveyConfig::class, SystemMessage::class, Coupon::class, FacilityConfig::class, SeedRecruitment::class, SubjectFingerprint::class, AppServerConfig::class, TestConfiguration::class, TestResult::class, LabTestConfiguration::class], version = 74, autoMigrations = [
     AutoMigration(from = 52, to = 53),
     AutoMigration(from = 65, to = 66),
     AutoMigration(from = 66, to = 67),
@@ -824,7 +833,8 @@ interface AppServerConfigDao {
     AutoMigration(from = 69, to = 70),
     AutoMigration(from = 70, to = 71),
     AutoMigration(from = 71, to = 72),
-    AutoMigration(from = 72, to = 73, spec = SurveyDatabase.Migration72To73::class)
+    AutoMigration(from = 72, to = 73, spec = SurveyDatabase.Migration72To73::class),
+    AutoMigration(from = 73, to = 74)
 ])
 abstract class SurveyDatabase : RoomDatabase() {
     /**

@@ -42,6 +42,8 @@ Click the delete icon next to a participant and confirm. The participant's statu
 
 Click the edit icon next to a participant to see their responses. Click the pencil icon next to any response to change its value. Enter the corrected value and provide a reason for the edit. The original value is preserved in the audit log.
 
+For a question with an **Other (free text)** option, the response also shows the typed text, as `Other: q_<short name>_other = <text>`. The edit dialog has an **Other text** field for these questions. The text is kept only if the other option is still selected after the edit. Clearing a response (setting it to missing) clears the other text too.
+
 ## Edit log
 
 Click **Download Edit Log** to download a CSV of all edits and deletions, including:

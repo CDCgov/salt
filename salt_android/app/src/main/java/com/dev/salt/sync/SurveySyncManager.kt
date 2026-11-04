@@ -307,6 +307,10 @@ class SurveySyncManager(private val context: Context) {
         }
     }
     
+    // options.is_other arrives as an SQLite integer (0/1); accept a JSON boolean too.
+    private fun isOtherOption(optionJson: JSONObject): Boolean =
+        optionJson.optInt("is_other", 0) == 1 || optionJson.optBoolean("is_other", false)
+
     private fun clearExistingData() {
         // Clear all questions and options using bulk delete
         database.runInTransaction {
@@ -548,7 +552,8 @@ class SurveySyncManager(private val context: Context) {
                                 audioFileName = audioFileName,
                                 optionQuestionIndex = optionJson.optInt("option_index", i),
                                 language = language,  // Use the actual language name
-                                primaryLanguageText = optionText
+                                primaryLanguageText = optionText,
+                                isOther = isOtherOption(optionJson)
                             )
                             surveyDao.insertOption(option)
                         }
@@ -564,7 +569,8 @@ class SurveySyncManager(private val context: Context) {
                             audioFileName = "",
                             optionQuestionIndex = optionJson.optInt("option_index", i),
                             language = "English",  // Default to English
-                            primaryLanguageText = optionText
+                            primaryLanguageText = optionText,
+                            isOther = isOtherOption(optionJson)
                         )
                         surveyDao.insertOption(option)
                     }

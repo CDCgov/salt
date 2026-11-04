@@ -682,6 +682,7 @@
     <string name="survey_multiselect_range">Sélectionnez de %1$d à %2$d options</string>
     <string name="survey_multiselect_min">Sélectionnez au moins %1$d options</string>
     <string name="survey_multiselect_max">Sélectionnez jusqu\'à %1$d options</string>
+    <string name="survey_other_specify">Veuillez préciser</string>
     <string name="survey_completed">Enquête terminée !</string>
 
     <!-- Staff Validation Screen strings -->

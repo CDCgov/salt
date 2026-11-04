@@ -682,6 +682,7 @@
     <string name="survey_multiselect_range">Pilih %1$d hingga %2$d opsi</string>
     <string name="survey_multiselect_min">Pilih minimal %1$d opsi</string>
     <string name="survey_multiselect_max">Pilih maksimal %1$d opsi</string>
+    <string name="survey_other_specify">Mohon sebutkan</string>
     <string name="survey_completed">Survei selesai!</string>
 
     <!-- Staff Validation Screen strings -->
