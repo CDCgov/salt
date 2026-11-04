@@ -255,7 +255,7 @@ fun InitialFingerprintSetupScreen(
                     // Fingerprint instruction image
                     Image(
                         painter = painterResource(id = R.drawable.fingerprint_instruction),
-                        contentDescription = "Fingerprint scanner instruction",
+                        contentDescription = stringResource(R.string.cd_fingerprint_scanner_instruction),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
@@ -311,7 +311,7 @@ fun InitialFingerprintSetupScreen(
                     modifier = Modifier.weight(1f),
                     enabled = !isCapturing && !isCreatingUser
                 ) {
-                    Text("Skip")
+                    Text(stringResource(R.string.common_skip))
                 }
 
                 // Complete setup button
@@ -329,14 +329,14 @@ fun InitialFingerprintSetupScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.status_creating_account))
                     } else {
-                        Text("Continue")
+                        Text(stringResource(R.string.common_continue))
                     }
                 }
             }
 
             // Info text about skipping
             Text(
-                text = "You can skip fingerprint setup and use password-only authentication. Fingerprint can be enabled later in settings.",
+                text = stringResource(R.string.fingerprint_setup_skip_info),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
