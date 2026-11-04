@@ -327,7 +327,9 @@ fun SurveyScreen(
                         val selectedIndices = answer?.getSelectedIndices() ?: emptyList()
                         selectedIndices.isNotEmpty()
                     }
-                    "numeric", "text" -> textInputValue.trim().isNotEmpty()
+                    // A lone "-" or "." passes the input filter but is not a number
+                    "numeric" -> textInputValue.trim().toDoubleOrNull() != null
+                    "text" -> textInputValue.trim().isNotEmpty()
                     else -> false
                 }
             } ?: false

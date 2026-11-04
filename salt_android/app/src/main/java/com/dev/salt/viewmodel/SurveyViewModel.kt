@@ -485,8 +485,20 @@ class SurveyViewModel(
         return resolved
     }
 
-    fun evaluateCurrentQuestionPreScript(): String{
-        val script = _currentQuestion?.value?.first?.preScript
+    fun evaluateCurrentQuestionPreScript(): String = evaluatePreScriptAt(currentQuestionIndex)
+
+    /**
+     * Evaluate the skip rule (pre_script) of the question at [index].
+     *
+     * Reads the question by index rather than from _currentQuestion: when
+     * leaving the eligibility section with consent, rapid tests or the
+     * eligibility debug dialog pending, updateCurrentQuestion() deliberately
+     * leaves _currentQuestion on the last eligibility question, so reading it
+     * would apply that question's rule to the first main-section question
+     * (DRC field report: Q10 skipped for MSM, shown for UDI).
+     */
+    private fun evaluatePreScriptAt(index: Int): String {
+        val script = questions.getOrNull(index)?.preScript
         if(script.isNullOrBlank()) {
             return "continue"
         }
@@ -527,7 +539,10 @@ class SurveyViewModel(
         val context = buildJexlContextWithValue()
         var result = true // Default action if no script or evaluation fails
         try {
-            val ret = evaluateJexlScript(script, context)
+            // throwErrors = true so a script ERROR (e.g. comparing with a skipped
+            // question's null value under strict JEXL) reaches the catch below and
+            // is distinguished from a script that cleanly returns false.
+            val ret = evaluateJexlScript(script, context, throwErrors = true)
             if(ret == null || ret == false) {
                 result = false
             } else{
@@ -545,8 +560,19 @@ class SurveyViewModel(
                 )
             }
         } catch (e: Exception) {
-            Log.e("JEXLError", "Error evaluating validationScript: ${e.message}")
-            result = true // Default action on error
+            // A broken script must not trap the participant (DRC field report:
+            // "Invalid Answer" for every value, Previous disabled). Accept the
+            // answer, consistent with how skip rules and skip-to handle errors.
+            Log.e("JEXLError", "Error evaluating validationScript '$script': ${e.message}")
+            result = true
+            if (isJexlDebugEnabled()) {
+                _jexlDebugRequest.value = JexlDebugRequest(
+                    statement = script,
+                    context = context,
+                    scriptType = "Validation - SCRIPT ERROR, answer accepted: ${e.message}",
+                    onContinue = { _jexlDebugRequest.value = null }
+                )
+            }
         }
         return result
     }
@@ -707,7 +733,7 @@ class SurveyViewModel(
     private fun advancePastHiddenQuestions() {
         val count = survey?.questions?.size ?: return
         while (currentQuestionIndex < count &&
-               evaluateCurrentQuestionPreScript() == "skip") {
+               evaluatePreScriptAt(currentQuestionIndex) == "skip") {
             currentQuestionIndex++
             updateCurrentQuestion()
         }
