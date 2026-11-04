@@ -112,6 +112,16 @@ class SurveyViewModel(
     // Flag to skip eligibility debug on re-entry (after dialog is dismissed)
     private var skipEligibilityDebug = false
 
+    // True when the eligibility script errored (rather than returning false).
+    // The participant is still treated as not eligible, but the UI shows a
+    // staff-facing error dialog so the broken script gets reported.
+    private val _eligibilityScriptError = MutableStateFlow(false)
+    val eligibilityScriptError: StateFlow<Boolean> = _eligibilityScriptError
+
+    fun clearEligibilityScriptError() {
+        _eligibilityScriptError.value = false
+    }
+
     /**
      * Check if JEXL debug mode is enabled.
      * Returns false if context is not available.
@@ -1005,7 +1015,13 @@ class SurveyViewModel(
 
             var eligible = true
             if (!eligibilityScript.isNullOrBlank()) {
-                val result = evaluateJexlScript(eligibilityScript, context)
+                val result = try {
+                    evaluateJexlScript(eligibilityScript, context, throwErrors = true)
+                } catch (e: Exception) {
+                    Log.e("JEXLError", "Error evaluating eligibilityScript '$eligibilityScript': ${e.message}")
+                    _eligibilityScriptError.value = true
+                    null
+                }
                 eligible = when (result) {
                     is Boolean -> result
                     is Number -> result.toInt() != 0

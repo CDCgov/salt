@@ -618,6 +618,8 @@
     <string name="eligibility_replay_audio">Rejouer le message audio</string>
     <string name="eligibility_attempts_remaining">Tentatives restantes : %1$d</string>
     <string name="eligibility_hand_back">Veuillez rendre la tablette au membre du personnel</string>
+    <string name="eligibility_script_error_title">Erreur de configuration de l\'enquête</string>
+    <string name="eligibility_script_error_message">L\'éligibilité n\'a pas pu être vérifiée en raison d\'un problème dans la configuration de l\'enquête. Veuillez rendre la tablette au membre du personnel.\n\nPersonnel : veuillez signaler ce problème à votre superviseur afin que l\'enquête puisse être corrigée.</string>
     <string name="eligibility_fingerprint_button">S\'authentifier avec l\'empreinte</string>
     <string name="eligibility_password_button">Utiliser le mot de passe</string>
     <string name="eligibility_scanning">Scan en cours…</string>

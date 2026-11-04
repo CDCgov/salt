@@ -515,6 +515,8 @@
     <string name="eligibility_replay_audio">Կրկնել ձայնային հաղորդագրությունը</string>
     <string name="eligibility_attempts_remaining">Մնացած փորձեր՝ %1$d</string>
     <string name="eligibility_hand_back">Խնդրում ենք պլանշետը հետ տալ անձնակազմին</string>
+    <string name="eligibility_script_error_title">Հարցման կարգավորման սխալ</string>
+    <string name="eligibility_script_error_message">Համապատասխանությունը հնարավոր չեղավ ստուգել հարցման կարգավորման խնդրի պատճառով։ Խնդրում ենք պլանշետը վերադարձնել աշխատակցին։\n\nԱշխատակից՝ խնդրում ենք այս մասին հայտնել ձեր ղեկավարին, որպեսզի հարցումը ուղղվի։</string>
     <string name="eligibility_fingerprint_button">Նույնականացվել մատնահետքով</string>
     <string name="eligibility_password_button">Օգտագործել գաղտնաբառ</string>
     <string name="eligibility_scanning">Սկանավորվում է...</string>

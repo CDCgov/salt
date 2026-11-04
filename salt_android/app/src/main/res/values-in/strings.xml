@@ -618,6 +618,8 @@
     <string name="eligibility_replay_audio">Putar Ulang Pesan Audio</string>
     <string name="eligibility_attempts_remaining">Sisa percobaan: %1$d</string>
     <string name="eligibility_hand_back">Harap serahkan kembali tablet kepada petugas</string>
+    <string name="eligibility_script_error_title">Kesalahan pengaturan survei</string>
+    <string name="eligibility_script_error_message">Kelayakan tidak dapat diperiksa karena ada masalah pada pengaturan survei. Silakan kembalikan tablet kepada petugas.\n\nPetugas: harap laporkan hal ini kepada supervisor Anda agar survei dapat diperbaiki.</string>
     <string name="eligibility_fingerprint_button">Autentikasi dengan Sidik Jari</string>
     <string name="eligibility_password_button">Gunakan Kata Sandi</string>
     <string name="eligibility_scanning">Memindai...</string>

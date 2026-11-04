@@ -618,6 +618,8 @@
     <string name="eligibility_replay_audio">Replay Audio Message</string>
     <string name="eligibility_attempts_remaining">Attempts remaining: %1$d</string>
     <string name="eligibility_hand_back">Please hand the tablet back to the staff member</string>
+    <string name="eligibility_script_error_title">Survey setup error</string>
+    <string name="eligibility_script_error_message">Eligibility could not be checked because of a problem in the survey setup. Please hand the tablet back to the staff member.\n\nStaff: please report this to your supervisor so the survey can be corrected.</string>
     <string name="eligibility_fingerprint_button">Authenticate with Fingerprint</string>
     <string name="eligibility_password_button">Use Password</string>
     <string name="eligibility_scanning">Scanning...</string>

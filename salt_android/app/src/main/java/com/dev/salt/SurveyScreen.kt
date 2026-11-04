@@ -170,6 +170,7 @@ fun SurveyScreen(
     // Observe eligibility check states
     val needsEligibilityCheck by viewModel.needsEligibilityCheck.collectAsState()
     val isEligible by viewModel.isEligible.collectAsState()
+    val eligibilityScriptError by viewModel.eligibilityScriptError.collectAsState()
 
     // Observe pending eligibility debug dialog
     val pendingEligibilityDebug by viewModel.pendingEligibilityDebug.collectAsState()
@@ -260,6 +261,20 @@ fun SurveyScreen(
                     onNavigateBack()
                 }
             )
+            // The eligibility script errored: the participant is still treated
+            // as not eligible, but tell staff so the survey setup gets fixed.
+            if (eligibilityScriptError) {
+                AlertDialog(
+                    onDismissRequest = { },
+                    title = { Text(stringResource(R.string.eligibility_script_error_title)) },
+                    text = { Text(stringResource(R.string.eligibility_script_error_message)) },
+                    confirmButton = {
+                        TextButton(onClick = { viewModel.clearEligibilityScriptError() }) {
+                            Text(stringResource(R.string.common_ok))
+                        }
+                    }
+                )
+            }
             return // Don't show the survey questions
         }
     }

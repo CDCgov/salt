@@ -658,6 +658,8 @@
     <string name="eligibility_attempts_remaining">Intentos restantes: %1$d</string>
     <string name="eligibility_fingerprint_button">Autenticar con huella dactilar</string>
     <string name="eligibility_hand_back">Por favor devuelva la tableta al miembro del personal</string>
+    <string name="eligibility_script_error_title">Error de configuración de la encuesta</string>
+    <string name="eligibility_script_error_message">No se pudo verificar la elegibilidad debido a un problema en la configuración de la encuesta. Por favor, devuelva la tableta al miembro del personal.\n\nPersonal: informe de esto a su supervisor para que se pueda corregir la encuesta.</string>
     <string name="eligibility_not_eligible_default">Gracias por su interés. Desafortunadamente, no cumple con los criterios de elegibilidad para esta encuesta.</string>
     <string name="eligibility_password_button">Usar contraseña</string>
     <string name="eligibility_replay_audio">Reproducir mensaje de audio</string>
