@@ -47,6 +47,8 @@ When editing a survey, the editor is divided into tabs:
 
 Set a survey's status to **Active** in the survey list or within the editor. Tablets will download the newly activated survey on their next sync.
 
+A survey whose scripts have **errors** cannot be activated. The message lists the errors; fix them in the editor, where **Check survey** shows them all. Warnings don't block activation. See [Checking your logic in the web app](/management/survey-logic/#checking-your-logic-in-the-web-app).
+
 When you activate a new survey version, tablets already in the field will pick it up on their next sync. Surveys collected with the old version are retained in the database with their original version identifier.
 
 ## Versioning
@@ -55,7 +57,7 @@ Survey names may include a version number (e.g. `Short MSM Survey v1`). If you i
 
 ## Importing a survey
 
-Click **Import Survey** to upload a previously exported survey JSON bundle. See [Import & Export Surveys](/management/import-export/) for details.
+Click **Import Survey** to upload a previously exported survey JSON bundle. The import always succeeds as a draft, and the message lists any script errors and warnings in it. See [Import & Export Surveys](/management/import-export/) for details.
 
 ## Deleting a survey
 

@@ -41,7 +41,7 @@ Click **Add New Test** or the edit icon to open the edit modal:
 | **Options** | For dropdown: the list of result options (e.g. Positive, Negative, Indeterminate) |
 | **Minimum / Maximum** | For numeric: the valid range |
 | **Units** | For numeric: the unit of measurement (e.g. cells/mm³) |
-| **Condition** | JEXL expression. This lab test is displayed only when the condition is true. Leave blank to always display. |
+| **Condition** | JEXL expression. This lab test is displayed only when the condition is true. Leave blank to always display. A multiple choice answer is the option's **text** here, not its number. The condition is checked against the active survey when you leave the box and when you save. |
 | **Display Order** | Order among lab tests in the entry interface |
 | **Active** | Uncheck to hide this test from the entry interface without deleting it |
 

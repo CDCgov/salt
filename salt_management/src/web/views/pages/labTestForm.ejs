@@ -109,7 +109,7 @@
                           name="jexl_condition"
                           rows="2"
                           placeholder="e.g., hiv_test_1 == 'positive'"><%= editTest ? (editTest.jexl_condition || '') : '' %></textarea>
-                <small>Enter a JEXL expression to conditionally show this test. Available variables: survey question short names, rapid test IDs (e.g., hiv_test_1). Leave blank to always show.</small>
+                <small>Enter a JEXL expression to conditionally show this test. Available variables: survey question short names, rapid test IDs (e.g., hiv_test_1). In this condition a multiple choice answer is the option's text, not its number. Leave blank to always show. The condition is checked against the active survey when you leave the box.</small>
             </div>
 
             <div class="form-group">
@@ -197,7 +197,11 @@
     }
 </style>
 
+<script src="/js/jexl-check.js"></script>
 <script>
+JexlCheck.attach(document.getElementById('jexl_condition'), function () {
+    return { field: 'jexl_condition', test_name: document.getElementById('test_name').value || 'this test' };
+}, { showOk: true });
 function toggleTypeFields() {
     const testType = document.getElementById('test_type').value;
     const numericFields = document.getElementById('numericFields');
@@ -282,6 +286,10 @@ document.getElementById('testForm').addEventListener('submit', async function(e)
         const result = await response.json();
 
         if (response.ok) {
+            const report = JexlCheck.summary(result.jexl_check);
+            if (report) {
+                alert('Saved. The condition was checked against the active survey:\n\n' + report);
+            }
             window.location.href = '/admin/lab-tests?success=' +
                 encodeURIComponent(isEdit ? 'Test updated successfully' : 'Test created successfully');
         } else {

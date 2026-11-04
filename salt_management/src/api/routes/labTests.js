@@ -3,6 +3,23 @@ const router = express.Router();
 const { body, validationResult } = require('express-validator');
 const { getAsync, allAsync, runAsync } = require('../../models/database');
 const { requireAdmin, requireStaffOrAdmin } = require('../../middleware/auth');
+const database = require('../../models/database');
+const { checkLabConditions, loadSurveyData } = require('../../services/jexlCheck');
+
+// Checks a lab test's JEXL condition against the active survey. Saves are
+// never blocked; the result is returned with the save response.
+async function labConditionReport(testId) {
+    try {
+        const lab = await getAsync('SELECT id, test_name, jexl_condition FROM lab_test_configurations WHERE id = ?', [testId]);
+        if (!lab || !lab.jexl_condition) return { errors: [], warnings: [], checked: true };
+        const active = await getAsync('SELECT id FROM surveys WHERE is_active = 1 ORDER BY id DESC LIMIT 1');
+        const data = active ? await loadSurveyData(database, active.id) : null;
+        return await checkLabConditions([lab], data);
+    } catch (err) {
+        console.error('Lab condition check failed:', err);
+        return null;
+    }
+}
 
 // Get all lab tests (admin only)
 router.get('/lab-tests', requireAdmin, async (req, res) => {
@@ -213,7 +230,8 @@ router.post('/lab-tests',
             res.status(201).json({
                 success: true,
                 message: 'Lab test created successfully',
-                testId: result.id
+                testId: result.id,
+                jexl_check: await labConditionReport(result.id)
             });
         } catch (error) {
             console.error('Error creating lab test:', error);
@@ -361,7 +379,8 @@ router.put('/lab-tests/:id',
 
             res.json({
                 success: true,
-                message: 'Lab test updated successfully'
+                message: 'Lab test updated successfully',
+                jexl_check: await labConditionReport(testId)
             });
         } catch (error) {
             console.error('Error updating lab test:', error);

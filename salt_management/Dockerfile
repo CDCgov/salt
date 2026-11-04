@@ -2,13 +2,21 @@
 #
 # Base: rocker/tidyverse — R + tidyverse pre-installed (needed for the
 # Quarto-based reports). Layered on top: Node.js 18 (the API/web server),
-# Quarto (report rendering), and the R packages reports depend on (RDS, DBI,
-# RSQLite, etc.).
+# Quarto (report rendering), the R packages reports depend on (RDS, DBI,
+# RSQLite, etc.), and a Java runtime for the JEXL script checker.
 #
 # The image runs HTTP-only on port 3000. TLS is the reverse proxy's job
 # (see setup-nginx.sh in this directory). All persistent state lives under
 # /app/data which is declared as a VOLUME; supply a bind mount or named
 # volume so the database and uploads survive container replacement.
+
+# Build stage: compiles the JEXL script checker (tools/jexl-check), which
+# parses survey scripts with the same JEXL library the tablet uses.
+FROM eclipse-temurin:17-jdk AS jexl-check
+WORKDIR /build
+COPY tools/jexl-check/JexlCheck.java ./
+COPY tools/jexl-check/lib/ ./lib/
+RUN mkdir -p build && javac --release 11 -cp "lib/*" -d build JexlCheck.java
 
 FROM rocker/tidyverse:latest
 
@@ -26,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libglpk40 \
         libxml2 \
         fonts-noto-core \
+        openjdk-17-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
 # Node.js 18 from NodeSource.
@@ -65,6 +74,11 @@ RUN npm ci --omit=dev
 COPY src/ ./src/
 COPY public/ ./public/
 COPY scripts/ ./scripts/
+
+# JEXL script checker: the tablet's JEXL jars plus the class compiled above.
+COPY tools/jexl-check/lib/ ./tools/jexl-check/lib/
+COPY tools/jexl-check/JexlCheck.java ./tools/jexl-check/
+COPY --from=jexl-check /build/build/ ./tools/jexl-check/build/
 
 # Pre-create the data subdirs so first-run permissions are sane.
 RUN mkdir -p \

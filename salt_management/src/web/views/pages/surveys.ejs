@@ -57,6 +57,28 @@
 </div>
 
 <script>
+// Plain-text summary of a JEXL check result, for alert() dialogs.
+function formatJexlCheck(check, max) {
+    if (!check) return '';
+    max = max || 15;
+    const lines = [];
+    const errors = check.errors || [];
+    const warnings = check.warnings || [];
+    if (errors.length) {
+        lines.push('Script errors (' + errors.length + '):');
+        errors.slice(0, max).forEach(function (i) { lines.push('• ' + i.message); });
+        if (errors.length > max) lines.push('… and ' + (errors.length - max) + ' more.');
+    }
+    if (warnings.length) {
+        if (lines.length) lines.push('');
+        lines.push('Script warnings (' + warnings.length + '):');
+        warnings.slice(0, max).forEach(function (i) { lines.push('• ' + i.message); });
+        if (warnings.length > max) lines.push('… and ' + (warnings.length - max) + ' more.');
+    }
+    if (lines.length) lines.push('', 'Open the survey editor and use "Check survey" to see them all.');
+    return lines.join('\\n');
+}
+
 async function activateSurvey(surveyId) {
     if (!confirm('Activate this survey? This will deactivate all other surveys.')) {
         return;
@@ -71,10 +93,12 @@ async function activateSurvey(surveyId) {
         const result = await response.json();
         
         if (response.ok) {
-            alert('Survey activated successfully');
+            const warnings = result.jexl_check && result.jexl_check.warnings ? result.jexl_check.warnings.length : 0;
+            alert('Survey activated successfully' + (warnings ? '\\n\\n' + formatJexlCheck({ warnings: result.jexl_check.warnings }, 5) : ''));
             location.reload();
         } else {
-            alert('Failed to activate survey: ' + result.error);
+            alert('Failed to activate survey: ' + result.error
+                + (result.jexl_check ? '\\n\\n' + formatJexlCheck(result.jexl_check) : ''));
         }
     } catch (error) {
         alert('Error: ' + error.message);
@@ -172,6 +196,10 @@ async function importSurvey(file) {
         let msg = \`Imported "\${result.name}" v\${result.version}.\`;
         if (result.warnings && result.warnings.length) {
             msg += '\\n\\nWarnings:\\n• ' + result.warnings.join('\\n• ');
+        }
+        const scriptReport = formatJexlCheck(result.jexl_check, 10);
+        if (scriptReport) {
+            msg += '\\n\\n' + scriptReport;
         }
         alert(msg);
         window.location.href = '/surveys/' + result.surveyId + '/edit';

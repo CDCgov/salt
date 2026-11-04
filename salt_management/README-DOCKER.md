@@ -63,7 +63,8 @@ Visit `http://localhost:3000`.
 | Node.js | 18.x (NodeSource) |
 | Quarto | 1.9.37 |
 | R packages | `RDS`, `DBI`, `RSQLite`, `httr`, `jsonlite`, `lubridate`, `scales`, `uuid` |
-| App | `src/`, `public/`, `scripts/init-database.js` |
+| Java | `openjdk-17-jre-headless`, for the JEXL script checker |
+| App | `src/`, `public/`, `scripts/`, `tools/jexl-check/` (compiled in a `jexl-check` build stage) |
 
 Image is ~2 GB unpacked, mostly due to R + Quarto.
 

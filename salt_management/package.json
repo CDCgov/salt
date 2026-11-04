@@ -7,7 +7,8 @@
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
     "init-db": "node scripts/init-database.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --test tests/*.test.js",
+    "check-surveys": "node scripts/check-survey-logic.js",
     "test:mcp": "bash scripts/run-mcp-tests.sh"
   },
   "dependencies": {

@@ -24,6 +24,8 @@ const { getAsync, allAsync, runAsync } = require('../../models/database');
 const { requireAdmin } = require('../../middleware/auth');
 const { logAudit } = require('../../services/auditService');
 const { importSurveyBundle, SCHEMA_VERSION } = require('../../services/surveyImport');
+const database = require('../../models/database');
+const { checkSurvey } = require('../../services/jexlCheck');
 const router = express.Router();
 
 function safeFilename(s) {
@@ -136,13 +138,23 @@ router.post('/admin/surveys/import', requireAdmin, async (req, res) => {
         console.error('Audit log for IMPORT_SURVEY failed:', auditErr);
     }
 
+    // Script check report. The import is a draft, so it isn't blocked;
+    // activation is blocked until the errors are fixed.
+    let jexlCheck = null;
+    try {
+        jexlCheck = await checkSurvey(database, result.surveyId);
+    } catch (checkErr) {
+        console.error('JEXL check after import failed:', checkErr);
+    }
+
     res.json({
         status: 'success',
         surveyId: result.surveyId,
         name: result.name,
         version: result.version,
         counts: result.counts,
-        warnings: result.warnings
+        warnings: result.warnings,
+        jexl_check: jexlCheck
     });
 });
 

@@ -153,6 +153,15 @@ A multi-select answer is the **set of options the participant ticked**. To test 
 - `2 =~ q`, option number 2 (the third option) was ticked.
 - `2 =~ q || 4 =~ q`, option 2 **or** option 4 was ticked.
 - `2 =~ q && 4 =~ q`, option 2 **and** option 4 were both ticked.
+- `q.contains(2)`, the same as `2 =~ q`.
+- `size(q)` or `q.size()`, how many options were ticked. `empty(q)`, none were.
+
+Two forms look right but are not:
+
+- `q == 2` is never true, because the answer is a list, not a single number.
+- `q =~ [2, 4]` (list on the right) is true when **every** ticked option is 2 or 4, and also when nothing was ticked. To test one option, put the number first: `2 =~ q`.
+
+These are the only functions you can call in a script: `=~`, `.contains()`, `.size()`, `size()` and `empty()`.
 
 The question edit modal also has **Minimum Selections** and **Maximum Selections** fields to limit how many options may be ticked.
 
@@ -180,7 +189,29 @@ Because `q10_other` is reserved for this, the editor will not let you give anoth
 | Treating Skip Logic as "show when" | It **hides** the question when true, write the skip-*when* condition. |
 | A typo in a Short Name, or wrong upper/lower case | Type Short Names exactly as set. |
 | Forgetting quotes around text | `nationality == 'Ugandan'`, not `nationality == Ugandan`. |
-| A broken Validation Script | It rejects every answer, test it before publishing. |
+| A broken Validation Script | Older tablets reject every answer. Use **Check survey** in the editor before publishing. |
+| `=` instead of `==` | `a = 1` changes the answer instead of comparing it. The checker rejects it. |
+| Comparing an answer that may have been skipped with `<`, `>`, `<=` or `>=` | A skipped answer is blank, and comparing a blank is an error on the tablet. Check it first: `x != null && x > 2`. |
+| Using a question asked later | It has no answer yet. Eligibility can only use eligibility-section questions. |
+
+---
+
+## Checking your logic in the web app
+
+The survey editor checks every script with the same JEXL library the tablet uses, so mistakes are caught before a survey reaches tablets.
+
+- **As you type:** when you leave a script box, problems appear under it.
+- **Check survey:** the button above the question list checks every script in the survey. Click a problem to open that question. The editor also runs this check when it opens and shows the list if anything is wrong.
+- **On save and import:** the save or import still goes through, and the message lists any problems.
+- **On activation:** a survey with **errors** cannot be activated. Warnings don't block it.
+
+**Errors** are scripts that cannot work: syntax errors, a Short Name that doesn't exist, `=` instead of `==`, `value` outside a Validation or Skip-To script, a function that isn't allowed, or a Skip-To target that is missing or not after the question.
+
+**Warnings** are scripts that run but probably don't do what you meant: `==` on a multi-select, an option number the question doesn't have, a question asked later, `<` or `>` on an answer that may have been skipped, `<` or `>` on "other" text, `.contains()` on a question that isn't multi-select, and question or option text missing in one of the survey's languages.
+
+Lab test conditions are checked against the active survey when you leave the condition box. In a lab test condition a multiple choice answer is the option's **text**, not its number.
+
+If Java is not installed on the server, scripts are not checked and the editor says so. Saving and activation still work.
 
 ---
 

@@ -4,7 +4,27 @@ const { getAsync, runAsync, allAsync } = require('../../models/database');
 const { requireAdmin } = require('../../middleware/auth');
 const { logAudit } = require('../../services/auditService');
 const { isOtherFlag, validateOtherOptions, otherNameClash } = require('../../services/otherOption');
+const database = require('../../models/database');
+const { checkSurvey, filterIssues } = require('../../services/jexlCheck');
 const router = express.Router();
+
+// JEXL check results to return with a save. Saves are never blocked by the
+// check (drafts are often half-finished), and a checker failure never fails
+// the save. `scope` is passed to filterIssues.
+async function jexlReport(surveyId, scope) {
+    try {
+        const full = await checkSurvey(database, surveyId);
+        if (!full) return null;
+        return {
+            ...filterIssues(full, scope),
+            survey_error_count: full.errors.length,
+            survey_warning_count: full.warnings.length
+        };
+    } catch (err) {
+        console.error('JEXL check failed:', err);
+        return null;
+    }
+}
 
 // All routes require admin authentication
 router.use(requireAdmin);
@@ -248,7 +268,8 @@ router.put('/:id', [
             res.json({ 
                 message: 'New survey version created successfully',
                 newSurveyId: newSurveyId,
-                version: newVersion
+                version: newVersion,
+                jexl_check: await jexlReport(newSurveyId, { fields: ['eligibility_script', 'coupon_count_script'] })
             });
             
         } else {
@@ -335,7 +356,10 @@ router.put('/:id', [
                 { name, description, languages }
             );
             
-            res.json({ message: 'Survey updated successfully' });
+            res.json({
+                message: 'Survey updated successfully',
+                jexl_check: await jexlReport(surveyId, { fields: ['eligibility_script', 'coupon_count_script'] })
+            });
         }
     } catch (error) {
         console.error('Error updating survey:', error);
@@ -455,7 +479,8 @@ router.post('/:surveyId/questions', [
         
         res.status(201).json({
             id: questionId,
-            message: 'Question added successfully'
+            message: 'Question added successfully',
+            jexl_check: await jexlReport(surveyId, { questionId })
         });
     } catch (error) {
         console.error('Error adding question:', error);
@@ -625,7 +650,10 @@ router.put('/:surveyId/questions/:questionId', [
             req.body
         );
         
-        res.json({ message: 'Question updated successfully' });
+        res.json({
+            message: 'Question updated successfully',
+            jexl_check: await jexlReport(surveyId, { questionId: Number(questionId) })
+        });
     } catch (error) {
         console.error('Error updating question:', error);
         res.status(500).json({ error: 'Failed to update question' });
@@ -906,6 +934,18 @@ router.post('/', [
 });
 
 // Activate a survey version (deactivates all others)
+// Check every script in a survey (the editor's "Check survey" button)
+router.get('/:id/check', async (req, res) => {
+    try {
+        const result = await checkSurvey(database, req.params.id);
+        if (!result) return res.status(404).json({ error: 'Survey not found' });
+        res.json(result);
+    } catch (error) {
+        console.error('Error checking survey:', error);
+        res.status(500).json({ error: 'Failed to check survey' });
+    }
+});
+
 router.post('/:id/activate', async (req, res) => {
     const surveyId = req.params.id;
     
@@ -917,6 +957,21 @@ router.post('/:id/activate', async (req, res) => {
         
         if (!survey) {
             return res.status(404).json({ error: 'Survey not found' });
+        }
+
+        // Block activation while the survey's scripts have errors, so broken
+        // logic never reaches tablets. Warnings don't block.
+        let check = null;
+        try {
+            check = await checkSurvey(database, surveyId);
+        } catch (err) {
+            console.error('JEXL check failed during activation:', err);
+        }
+        if (check && check.errors.length) {
+            return res.status(409).json({
+                error: `This survey has ${check.errors.length} script error(s). Fix them before activating.`,
+                jexl_check: check
+            });
         }
         
         // Deactivate all surveys
@@ -937,7 +992,7 @@ router.post('/:id/activate', async (req, res) => {
             { version: survey.version, name: survey.name }
         );
         
-        res.json({ message: 'Survey activated successfully' });
+        res.json({ message: 'Survey activated successfully', jexl_check: check });
     } catch (error) {
         console.error('Error activating survey:', error);
         res.status(500).json({ error: 'Failed to activate survey' });

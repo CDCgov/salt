@@ -23,6 +23,7 @@ salt_android/.idea/workspace.xml
 salt_android/.kotlin/
 salt_android/app/build/
 salt_android/build/
+salt_management/tools/jexl-check/build/
 
 # macOS
 .DS_Store
