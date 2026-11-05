@@ -40,8 +40,9 @@ var body = `
         </div>
 
         <div style="margin-bottom: 1rem;">
-            <label>Time (24-hour format):</label>
-            <input type="time" id="scheduleTime" style="width: 100%; padding: 0.5rem;">
+            <label>Time (24-hour, UTC):</label>
+            <input type="time" id="scheduleTime" oninput="updateScheduleLocalHint()" style="width: 100%; padding: 0.5rem;">
+            <small id="scheduleLocalHint" style="color: #666;"></small>
         </div>
 
         <div id="dayField" style="margin-bottom: 1rem; display: none;">
@@ -385,6 +386,7 @@ function scheduleReport(id) {
             document.getElementById('scheduleActive').checked = data.schedule.is_active;
 
             updateScheduleFields();
+            updateScheduleLocalHint();
 
             if (data.schedule.schedule_day !== null) {
                 document.getElementById('scheduleDay').value = data.schedule.schedule_day;
@@ -395,10 +397,22 @@ function scheduleReport(id) {
             document.getElementById('scheduleTime').value = '09:00';
             document.getElementById('scheduleActive').checked = true;
             updateScheduleFields();
+            updateScheduleLocalHint();
         }
     });
 
     document.getElementById('scheduleModal').style.display = 'block';
+}
+
+// Show the chosen UTC time in the viewer's own time zone.
+function updateScheduleLocalHint() {
+    const value = document.getElementById('scheduleTime').value;
+    const hint = document.getElementById('scheduleLocalHint');
+    const parts = value.split(':').map(Number);
+    if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) { hint.textContent = ''; return; }
+    const d = new Date();
+    d.setUTCHours(parts[0], parts[1], 0, 0);
+    hint.textContent = 'That is ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' your time.';
 }
 
 function updateScheduleFields() {
@@ -464,7 +478,9 @@ async function saveSchedule() {
         const data = await response.json();
 
         if (data.success) {
-            alert('Schedule saved successfully. Next run: ' + new Date(data.nextRun).toLocaleString());
+            alert(data.nextRun
+                ? 'Schedule saved. Next run: ' + new Date(data.nextRun).toLocaleString() + ' (your time)'
+                : 'Schedule saved. It is inactive, so it will not run.');
             closeScheduleModal();
             loadReports();
         } else {

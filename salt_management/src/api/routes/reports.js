@@ -3,6 +3,7 @@ const router = express.Router();
 const { requireAdmin } = require('../../middleware/auth');
 const { allAsync, getAsync, runAsync } = require('../../models/database');
 const ReportExecutor = require('../../services/reportExecutor');
+const reportScheduler = require('../../services/reportScheduler');
 const reportTemplates = require('../../services/reportTemplates');
 const path = require('path');
 const fs = require('fs').promises;
@@ -180,6 +181,10 @@ router.put('/admin/reports/:id', requireAdmin, async (req, res) => {
             params
         );
 
+        if (is_active !== undefined) {
+            await reportScheduler.syncReport(req.params.id);
+        }
+
         res.json({
             success: true,
             message: 'Report updated successfully'
@@ -203,6 +208,7 @@ router.delete('/admin/reports/:id', requireAdmin, async (req, res) => {
             'UPDATE reports SET is_active = 0 WHERE id = ?',
             [req.params.id]
         );
+        await reportScheduler.syncReport(req.params.id);
 
         res.json({
             success: true,
@@ -459,8 +465,25 @@ router.post('/admin/reports/:id/schedule', requireAdmin, async (req, res) => {
             });
         }
 
-        // Calculate next run time
-        const nextRun = calculateNextRun(schedule_type, schedule_time, schedule_day);
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(schedule_time)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Time must be HH:MM (24-hour, UTC)'
+            });
+        }
+
+        const day = schedule_type === 'daily' ? null : Number(schedule_day);
+        if (schedule_type === 'weekly' && !(Number.isInteger(day) && day >= 0 && day <= 6)) {
+            return res.status(400).json({ success: false, error: 'Day of week must be 0 (Sunday) to 6 (Saturday)' });
+        }
+        if (schedule_type === 'monthly' && !(Number.isInteger(day) && day >= 1 && day <= 31)) {
+            return res.status(400).json({ success: false, error: 'Day of month must be 1 to 31' });
+        }
+
+        const report = await getAsync('SELECT id FROM reports WHERE id = ? AND is_active = 1', [req.params.id]);
+        if (!report) {
+            return res.status(404).json({ success: false, error: 'Report not found' });
+        }
 
         // Check if schedule exists
         const existing = await getAsync(
@@ -473,18 +496,21 @@ router.post('/admin/reports/:id/schedule', requireAdmin, async (req, res) => {
             await runAsync(
                 `UPDATE report_schedules
                  SET schedule_type = ?, schedule_time = ?, schedule_day = ?,
-                     is_active = ?, next_run = ?
+                     is_active = ?
                  WHERE report_id = ?`,
-                [schedule_type, schedule_time, schedule_day, is_active ? 1 : 0, nextRun, req.params.id]
+                [schedule_type, schedule_time, day, is_active ? 1 : 0, req.params.id]
             );
         } else {
             // Create new schedule
             await runAsync(
-                `INSERT INTO report_schedules (report_id, schedule_type, schedule_time, schedule_day, is_active, next_run)
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [req.params.id, schedule_type, schedule_time, schedule_day, is_active ? 1 : 0, nextRun]
+                `INSERT INTO report_schedules (report_id, schedule_type, schedule_time, schedule_day, is_active)
+                 VALUES (?, ?, ?, ?, ?)`,
+                [req.params.id, schedule_type, schedule_time, day, is_active ? 1 : 0]
             );
         }
+
+        // Start, move or stop the report's job; null when the schedule is off.
+        const nextRun = await reportScheduler.syncReport(req.params.id);
 
         res.json({
             success: true,
@@ -510,6 +536,7 @@ router.delete('/admin/reports/:id/schedule', requireAdmin, async (req, res) => {
             'DELETE FROM report_schedules WHERE report_id = ?',
             [req.params.id]
         );
+        await reportScheduler.syncReport(req.params.id);
 
         res.json({
             success: true,
@@ -523,37 +550,5 @@ router.delete('/admin/reports/:id/schedule', requireAdmin, async (req, res) => {
         });
     }
 });
-
-/**
- * Calculate next run time based on schedule
- */
-function calculateNextRun(type, time, day) {
-    const now = new Date();
-    const [hour, minute] = time.split(':').map(Number);
-    const next = new Date();
-    next.setHours(hour, minute, 0, 0);
-
-    switch (type) {
-        case 'daily':
-            if (next <= now) {
-                next.setDate(next.getDate() + 1);
-            }
-            break;
-        case 'weekly':
-            next.setDate(next.getDate() + ((day - next.getDay() + 7) % 7));
-            if (next <= now) {
-                next.setDate(next.getDate() + 7);
-            }
-            break;
-        case 'monthly':
-            next.setDate(day);
-            if (next <= now) {
-                next.setMonth(next.getMonth() + 1);
-            }
-            break;
-    }
-
-    return next.toISOString();
-}
 
 module.exports = router;

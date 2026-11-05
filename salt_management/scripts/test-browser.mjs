@@ -127,6 +127,35 @@ try {
         modal.includes('AI report building is turned off') && await page.locator('#aiBuilderModal a[href="/admin/system"]').count() === 1);
     await shot('reports-dialog');
 
+    console.log('\n### Report schedule dialog');
+    const repId = sql(`INSERT INTO reports (name, qmd_content, created_by, created_at, updated_at)
+        VALUES ('Browser schedule test', 'x', 1, datetime('now'), datetime('now')); SELECT last_insert_rowid();`);
+    await page.goto(BASE + '/reports');
+    await page.click(`button[data-id="${repId}"]:has-text("Schedule")`);
+    await page.waitForSelector('#scheduleModal', { state: 'visible' });
+    ok('schedule dialog says the time is UTC', (await page.textContent('#scheduleModal')).includes('UTC'));
+    await page.fill('#scheduleTime', '13:45');
+    const localHint = await page.evaluate(() => { const d = new Date(); d.setUTCHours(13, 45, 0, 0); return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); });
+    ok('dialog shows the time in the viewer\'s zone', (await page.textContent('#scheduleLocalHint')) === `That is ${localHint} your time.`, await page.textContent('#scheduleLocalHint'));
+    await page.uncheck('#scheduleActive');
+    dialogs.length = 0;
+    await page.click('#scheduleModal button:has-text("Save Schedule")');
+    await page.waitForFunction(() => document.getElementById('scheduleModal').style.display === 'none');
+    ok('saving an inactive schedule says it will not run', dialogs.some(d => /inactive, so it will not run/.test(d)), dialogs.join('|'));
+    await page.click(`button[data-id="${repId}"]:has-text("Schedule")`);
+    await page.waitForFunction(() => document.getElementById('scheduleTime').value === '13:45');
+    ok('reopening keeps the saved time and hint', (await page.textContent('#scheduleLocalHint')).includes(localHint));
+    await page.check('#scheduleActive');
+    dialogs.length = 0;
+    await page.click('#scheduleModal button:has-text("Save Schedule")');
+    await page.waitForFunction(() => document.getElementById('scheduleModal').style.display === 'none');
+    ok('saving an active schedule shows the next run', dialogs.some(d => /^Schedule saved\. Next run: .+ \(your time\)$/.test(d)), dialogs.join('|'));
+    ok('next run stored for 13:45 UTC', /T13:45:00\.000Z$/.test(sql(`SELECT next_run FROM report_schedules WHERE report_id = ${repId}`)));
+    await page.waitForSelector(`text=Next:`);
+    ok('report list shows the next run', (await page.textContent('body')).includes('Next:'));
+    await shot('reports-schedule');
+    await page.evaluate((id) => fetch(`/api/admin/reports/${id}/schedule`, { method: 'DELETE', credentials: 'same-origin' }), repId);
+
     console.log('\n### Survey editor (items 1 and 4)');
     await page.goto(`${BASE}/surveys/${SID}/edit`);
     await page.click('button:has-text("New Question") >> nth=0');

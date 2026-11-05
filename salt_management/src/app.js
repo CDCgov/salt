@@ -135,7 +135,7 @@ const webSystemRoutes = require('./web/routes/system');
 const subjectManagementRoutes = require('./api/routes/subjectManagement');
 const surveyExportRoutes = require('./api/routes/surveyExport');
 
-// Initialize report scheduler
+// Report scheduler (started once the server is listening)
 const reportScheduler = require('./services/reportScheduler');
 
 // API Routes
@@ -222,6 +222,7 @@ function startServer() {
         console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
         console.log(`API endpoint: http://localhost:${PORT}/api`);
         console.log(`Web UI: http://localhost:${PORT}`);
+        reportScheduler.initialize();
     });
 }
 

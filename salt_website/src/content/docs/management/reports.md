@@ -38,8 +38,11 @@ Click the **Schedule** icon next to any report:
 | Field | Description |
 |-------|-------------|
 | **Schedule Type** | `Daily`, `Weekly`, or `Monthly` |
-| **Time** | Time of day to run (e.g. 09:00 AM) |
+| **Time** | Time of day to run, in UTC (24-hour, e.g. 09:00). The dialog shows the same time in your own time zone below the field. |
+| **Day** | Weekly: the day of the week. Monthly: the day of the month; a month without that day (for example the 31st in April) is skipped. |
 | **Active** | Toggle on or off without deleting |
+
+Scheduled runs appear in the run history with the type **scheduled**. If the server was off when a run was due, the report runs once when the server is back (or within the hour), rather than once for every run it missed.
 
 ## Run history
 
