@@ -224,6 +224,11 @@ services:
       # advertised to AI clients (claude.ai etc.), so it must be the public URL.
       # What AI assistants may do is set on the System page (/admin/system).
       MCP_PUBLIC_URL: "https://${DOMAIN}"
+    # Runs as a non-root user (see Dockerfile) that needs no Linux capabilities.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s
@@ -240,6 +245,10 @@ services:
 COMPOSE
 
 # ---- 6. Start container ---------------------------------------------------
+# The container runs as uid/gid 10001 ("salt"), not root, so it must own the
+# data folder. Also fixes data left root-owned by older images on upgrade.
+log "Giving $INSTALL_DIR/salt-data to the container user (10001:10001)..."
+chown -R 10001:10001 "$INSTALL_DIR/salt-data"
 log "Starting container..."
 (cd "$INSTALL_DIR" && docker compose up -d)
 

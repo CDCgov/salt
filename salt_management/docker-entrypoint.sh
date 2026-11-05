@@ -2,7 +2,11 @@
 #
 # SALT Management Server entrypoint
 #
+# Runs as the unprivileged "salt" user (uid/gid 10001), set in the Dockerfile.
+#
 # On every boot:
+#   0. Check the data folder is owned by that user (it was root-owned before
+#      the image stopped running as root) and say how to fix it if not.
 #   1. Ensure the data subdirs exist (host bind mounts may shadow the
 #      pre-created tree from the image).
 #   2. Auto-generate SESSION_SECRET if the operator didn't supply one.
@@ -16,6 +20,20 @@
 set -e
 
 DATA_ROOT=/app/data
+
+# --- Data folder ownership --------------------------------------------------
+# files/ (the APK download) is only read, so files an admin copies there as
+# root are fine; everything else the server writes to.
+NOT_OWNED="$(find "$DATA_ROOT" -path "$DATA_ROOT/files" -prune -o ! -user "$(id -u)" -print -quit 2>/dev/null || true)"
+if [ ! -w "$DATA_ROOT" ] || [ -n "$NOT_OWNED" ]; then
+    echo "[entrypoint] ERROR: the data folder is not owned by the server's user (uid $(id -u), gid $(id -g))." >&2
+    [ -n "$NOT_OWNED" ] && echo "[entrypoint]   For example: ${NOT_OWNED}" >&2
+    echo "[entrypoint] The container no longer runs as root. On the host, give the data folder to that user, e.g.:" >&2
+    echo "[entrypoint]   sudo chown -R $(id -u):$(id -g) /opt/salt/salt-data     # install.sh installs" >&2
+    echo "[entrypoint]   sudo chown -R $(id -u):$(id -g) ./salt-data             # docker compose from the repo" >&2
+    echo "[entrypoint] then start the container again. (install.sh does this automatically.)" >&2
+    exit 1
+fi
 
 mkdir -p \
     "$DATA_ROOT/database" \

@@ -18,6 +18,8 @@ services:
     ports:
       - "127.0.0.1:3000:3000"   # bind to loopback only — proxy fronts it
     volumes:
+      # Must be owned by uid/gid 10001 (the container's user):
+      #   mkdir -p salt-data && sudo chown -R 10001:10001 salt-data
       - ./salt-data:/app/data
     environment:
       NODE_ENV: production
@@ -25,6 +27,11 @@ services:
       # SESSION_SECRET auto-generates and persists if unset. Set it here if
       # you'd rather manage it via your own secret store.
       # SESSION_SECRET: ${SESSION_SECRET}
+    # Runs as a non-root user (see Dockerfile) that needs no Linux capabilities.
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
     healthcheck:
       test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
       interval: 30s

@@ -17,6 +17,7 @@ On any host with Docker installed, from a checkout of the `salt_management/` dir
 
 ```bash
 docker build -t salt-management .
+mkdir -p salt-data && sudo chown -R 10001:10001 salt-data
 docker run -d --name salt \
   -p 127.0.0.1:3000:3000 \
   -v "$PWD/salt-data:/app/data" \
@@ -25,9 +26,12 @@ docker run -d --name salt \
 sudo ./setup-nginx.sh your-domain.example.org admin@example.org
 ```
 
+The server runs as an unprivileged user (uid and gid 10001), never as root, so the `salt-data` folder must belong to that user. The one-command install does this for you. Docker Desktop on macOS and Windows handles ownership itself, so the `chown` isn't needed there.
+
 ### Docker Compose (existing reverse proxy)
 
 ```bash
+mkdir -p salt-data && sudo chown -R 10001:10001 salt-data
 docker compose up -d
 ```
 
@@ -46,10 +50,11 @@ Visit `http://localhost:3000`.
 
 | Layer | Version |
 |-------|---------|
-| Base | `rocker/tidyverse:latest` (R 4.x + tidyverse) |
-| Node.js | 18.x |
-| Quarto | 1.9.37 |
-| R packages | `RDS`, `DBI`, `RSQLite`, `httr`, `jsonlite`, `lubridate`, `scales`, `uuid` |
+| Base | `rocker/tidyverse:4.6.2` (R 4.6.2 + tidyverse), pinned to an exact image |
+| Node.js | 22.23.4 LTS, from the official Node image |
+| Quarto | 1.9.37, checked against its published checksum |
+| R packages | `RDS`, `DBI`, `RSQLite`, `httr`, `jsonlite`, `lubridate`, `scales`, `uuid`, from a dated CRAN snapshot |
+| User | Unprivileged `salt` user (uid 10001); the container never runs as root |
 | App | `src/`, `public/`, `scripts/init-database.js` |
 
 Image is approximately 2 GB unpacked, mostly due to R and Quarto.
@@ -112,6 +117,7 @@ Pull the latest source and rebuild:
 git pull
 docker build -t salt-management .
 docker stop salt && docker rm salt
+sudo chown -R 10001:10001 salt-data   # once, when upgrading from an image that ran as root
 docker run -d --name salt \
   -p 127.0.0.1:3000:3000 \
   -v "$PWD/salt-data:/app/data" \
@@ -120,6 +126,8 @@ docker run -d --name salt \
 ```
 
 The entrypoint re-runs `init-database.js`, which is idempotent, it adds any new tables introduced in the new schema but leaves existing data untouched.
+
+Images built before November 2026 ran as root, so an existing `salt-data` folder belongs to root. If the new container can't write to it, it stops at startup and prints the `chown` command to run. Re-running the one-command install fixes this automatically.
 
 ### Shell into the container
 

@@ -33,13 +33,20 @@ No image is published, so build it from a checkout of this repo's
 
 ```bash
 docker build -t salt-management .
+mkdir -p salt-data && sudo chown -R 10001:10001 salt-data   # the container's user
 docker run -d --name salt -p 127.0.0.1:3000:3000 -v "$PWD/salt-data:/app/data" --restart unless-stopped salt-management
 sudo ./setup-nginx.sh your-domain.example.org admin@example.org
 ```
 
+The server runs as the unprivileged user `salt` (uid/gid 10001), never as
+root, so the data folder must belong to 10001:10001. `install.sh` does this
+for you. (Docker Desktop on macOS and Windows maps ownership itself, so the
+`chown` isn't needed there.)
+
 ### Server only (you're providing your own TLS termination)
 
 ```bash
+mkdir -p salt-data && sudo chown -R 10001:10001 salt-data
 docker compose up -d
 ```
 
@@ -59,14 +66,20 @@ Visit `http://localhost:3000`.
 
 | Layer | Version |
 |---|---|
-| Base | `rocker/tidyverse:latest` (R 4.x + tidyverse) |
-| Node.js | 22.x LTS (NodeSource) |
-| Quarto | 1.9.37 |
-| R packages | `RDS`, `DBI`, `RSQLite`, `httr`, `jsonlite`, `lubridate`, `scales`, `uuid` |
+| Base | `rocker/tidyverse:4.6.2`, pinned by digest (R 4.6.2 + tidyverse) |
+| Node.js | 22.23.4 LTS, copied from the official `node:22.23.4-bookworm-slim` image (pinned by digest) |
+| Quarto | 1.9.37, checked against its published SHA-256 |
+| R packages | `RDS`, `DBI`, `RSQLite`, `httr`, `jsonlite`, `lubridate`, `scales`, `uuid`, from a dated CRAN snapshot (`CRAN_SNAPSHOT` in the Dockerfile) |
+| User | `salt` (uid/gid 10001); the container never runs as root. `docker-compose.yml` also drops all Linux capabilities and sets `no-new-privileges`. |
 | Java | `openjdk-17-jre-headless`, for the JEXL script checker |
 | App | `src/`, `public/`, `scripts/`, `tools/jexl-check/` (compiled in a `jexl-check` build stage) |
 
 Image is ~2 GB unpacked, mostly due to R + Quarto.
+
+To update a component, change its version and digest (or checksum, or
+snapshot date) in the Dockerfile. Get an image digest with
+`docker buildx imagetools inspect <image>:<tag>`; Quarto's checksums are in
+`quarto-<version>-checksums.txt` on its GitHub release.
 
 ## Persistent state
 
@@ -149,16 +162,23 @@ Pull the latest source and rebuild:
 git pull
 docker build -t salt-management .
 docker stop salt && docker rm salt
+sudo chown -R 10001:10001 salt-data   # needed once when upgrading from an image that ran as root
 docker run -d --name salt -p 127.0.0.1:3000:3000 -v "$PWD/salt-data:/app/data" --restart unless-stopped salt-management
 ```
 
 The entrypoint re-runs `init-database.js`, which is idempotent — it picks
 up any new tables added in the schema but leaves existing data alone.
 
+Images built before November 2026 ran as root, so an existing `salt-data`
+folder is owned by root. The new container stops at startup with the exact
+`chown` command if it can't write the data folder. Re-running `install.sh`
+fixes ownership automatically.
+
 ### Shell into the container
 
 ```bash
-docker exec -it salt bash
+docker exec -it salt bash            # as the server's user
+docker exec -it -u root salt bash    # as root, for system-level changes
 ```
 
 ## Reverse proxy details
