@@ -1,0 +1,120 @@
+<%- include('../partials/header') %>
+<%- include('../partials/nav') %>
+
+<div class="container">
+    <div class="card">
+        <h2 style="margin-bottom: 0.5rem;">System</h2>
+        <p style="color: #666; margin-bottom: 1.5rem;">Server-wide settings. Changes apply immediately, with no restart, and are recorded in the audit log.</p>
+
+        <h3 style="margin-bottom: 0.5rem;">AI assistant (MCP)</h3>
+        <p style="color: #666; margin-bottom: 1rem;">
+            Administrators can connect their own AI assistant (Claude, ChatGPT) to this server.
+            These switches control what a connected assistant can do. A change applies from the
+            assistant's next request. With both off, the server refuses AI connections.
+        </p>
+
+        <% settings.filter(s => s.key.startsWith('mcp_')).forEach(function(s) { %>
+            <div class="setting-row">
+                <label class="switch">
+                    <input type="checkbox" data-key="<%= s.key %>" <%= s.value ? 'checked' : '' %> onchange="saveSetting(this)">
+                    <span class="slider"></span>
+                </label>
+                <div>
+                    <div style="font-weight: 600;"><%= s.label %></div>
+                    <div style="color: #666; font-size: 0.9rem;"><%= s.description %></div>
+                    <div class="setting-meta" id="meta_<%= s.key %>">
+                        <% if (s.updated_at) { %>Last changed <%= s.updated_at %> UTC<%= s.updated_by ? ' by ' + s.updated_by : '' %><% } else { %>Default (<%= s.default ? 'on' : 'off' %>)<% } %>
+                    </div>
+                </div>
+            </div>
+        <% }); %>
+
+        <div style="margin: 1.5rem 0 1rem;">
+            <label style="font-weight: 600;">Connector URL for AI clients</label>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                <input id="mcpUrl" readonly value="<%= mcpConnectorUrl %>" style="flex: 1; padding: 0.5rem; font-family: monospace; border: 1px solid #ccc; border-radius: 6px;">
+                <button class="btn" type="button" onclick="copyUrl()">Copy</button>
+            </div>
+            <% if (!mcpPublicUrlSet) { %>
+                <div style="color: #856404; font-size: 0.9rem; margin-top: 0.25rem;">
+                    <code>MCP_PUBLIC_URL</code> is not set on the server, so this URL is taken from your browser's address.
+                    AI clients need the server's public HTTPS address.
+                </div>
+            <% } %>
+        </div>
+
+        <div class="setting-row" style="align-items: center;">
+            <div style="flex: 1;">
+                <div style="font-weight: 600;">Connected sessions: <span id="sessionCount"><%= activeSessions %></span></div>
+                <div style="color: #666; font-size: 0.9rem;">
+                    Turning a feature off doesn't sign anyone out. Revoking signs out every connected AI assistant now;
+                    each person has to connect and sign in again.
+                </div>
+            </div>
+            <button class="btn" type="button" style="background: #c0392b;" onclick="revokeAll()">Revoke all sessions</button>
+        </div>
+        <div id="sysMsg" style="margin-top: 1rem;"></div>
+    </div>
+</div>
+
+<style>
+    .setting-row { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 0; border-top: 1px solid #ecf0f1; }
+    .setting-meta { color: #999; font-size: 0.8rem; margin-top: 0.25rem; }
+    .switch { position: relative; display: inline-block; width: 46px; height: 26px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background: #ccc; border-radius: 26px; transition: .2s; }
+    .slider:before { content: ""; position: absolute; height: 20px; width: 20px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: .2s; }
+    .switch input:checked + .slider { background: #27ae60; }
+    .switch input:checked + .slider:before { transform: translateX(20px); }
+    .switch input:focus-visible + .slider { outline: 2px solid #3498db; outline-offset: 2px; }
+</style>
+
+<script>
+function showMessage(text, ok) {
+    const el = document.getElementById('sysMsg');
+    el.textContent = text;
+    el.className = 'alert ' + (ok ? 'alert-success' : 'alert-error');
+}
+
+async function saveSetting(input) {
+    const key = input.dataset.key;
+    const value = input.checked;
+    input.disabled = true;
+    try {
+        const r = await fetch('/api/admin/system/settings', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key, value })
+        });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error || 'Failed to save');
+        document.getElementById('meta_' + key).textContent = 'Changed just now';
+        showMessage('Saved. ' + (value ? 'Turned on.' : 'Turned off.'), true);
+    } catch (e) {
+        input.checked = !value;
+        showMessage(e.message, false);
+    } finally {
+        input.disabled = false;
+    }
+}
+
+async function revokeAll() {
+    if (!confirm('Sign out every connected AI assistant now?')) return;
+    try {
+        const r = await fetch('/api/admin/system/mcp/revoke-sessions', { method: 'POST' });
+        const d = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(d.error || 'Failed to revoke');
+        document.getElementById('sessionCount').textContent = '0';
+        showMessage('Revoked ' + d.revoked + ' session(s).', true);
+    } catch (e) {
+        showMessage(e.message, false);
+    }
+}
+
+function copyUrl() {
+    const input = document.getElementById('mcpUrl');
+    input.select();
+    navigator.clipboard ? navigator.clipboard.writeText(input.value) : document.execCommand('copy');
+}
+</script>
+
+<%- include('../partials/footer') %>

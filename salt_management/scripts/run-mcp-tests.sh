@@ -1,11 +1,22 @@
 #!/bin/bash
 #
-# run-mcp-tests.sh — run the MCP integration harness against a throwaway copy of
-# the database, then restore it. Starts a dedicated server on a test port with
-# MCP enabled, runs scripts/test-mcp.mjs, and cleans everything up.
+# run-mcp-tests.sh — run the server integration harnesses against a throwaway
+# copy of the database, then restore it. Starts a dedicated server on a test
+# port, runs the harnesses, and cleans everything up.
 #
-# Usage: bash scripts/run-mcp-tests.sh
-# Exit code propagates from the harness (0 = all passed).
+#   scripts/test-mcp.mjs              MCP report tools + OAuth
+#   scripts/test-mcp-survey.mjs       MCP survey and lab test tools (plan item 2)
+#   scripts/test-mcp-settings.mjs     System page and MCP switches (item 3)
+#   scripts/test-other-specify.mjs    "other, specify" options on the server (item 4)
+#   scripts/test-survey-copy.mjs      web "copy survey" / "new version" keep everything
+#   scripts/test-browser.mjs          pages in real Chrome (only with BROWSER=1 or BROWSER=only)
+#
+# Usage: bash scripts/run-mcp-tests.sh           # npm run test:integration (or test:mcp)
+#        BROWSER=1 bash scripts/run-mcp-tests.sh  # also the browser test
+#        BROWSER=only bash scripts/run-mcp-tests.sh  # npm run test:browser
+# The browser test uses Playwright (dev dependency) with the installed Chrome;
+# set PW_CHANNEL=chromium to use Playwright's own browser instead.
+# Needs the sqlite3 command-line tool. Exit code 0 = everything passed.
 
 set -u
 cd "$(dirname "$0")/.."
@@ -53,19 +64,24 @@ for i in $(seq 1 30); do
     if [[ $i -eq 30 ]]; then echo "[test] server did not start; log:"; cat "$LOG"; exit 2; fi
 done
 
-echo "[test] running harness"
-BASE="http://localhost:$PORT" node scripts/test-mcp.mjs
-RC=$?
+RC=0
+run() {   # run <label> <script>
+    echo "[test] running $1"
+    BASE="http://localhost:$PORT" node "$2"
+    local rc=$?
+    [[ $RC -eq 0 ]] && RC=$rc
+}
 
-echo "[test] running survey / lab test tools harness"
-BASE="http://localhost:$PORT" node scripts/test-mcp-survey.mjs
-RC2=$?
-[[ $RC -eq 0 ]] && RC=$RC2
-
-echo "[test] running System page / MCP switches harness"
-BASE="http://localhost:$PORT" node scripts/test-mcp-settings.mjs
-RC3=$?
-[[ $RC -eq 0 ]] && RC=$RC3
+if [[ "${BROWSER:-}" != "only" ]]; then
+    run "MCP report tools / OAuth harness" scripts/test-mcp.mjs
+    run "MCP survey / lab test tools harness" scripts/test-mcp-survey.mjs
+    run "System page / MCP switches harness" scripts/test-mcp-settings.mjs
+    run "other, specify harness" scripts/test-other-specify.mjs
+    run "survey copy harness" scripts/test-survey-copy.mjs
+fi
+if [[ -n "${BROWSER:-}" ]]; then
+    run "browser test (Chrome)" scripts/test-browser.mjs
+fi
 
 echo "[test] server startup failures: $(grep -ciE 'cannot find module|EADDRINUSE|listen|unhandled' "$LOG" || true)"
 exit $RC

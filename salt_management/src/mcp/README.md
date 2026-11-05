@@ -134,9 +134,11 @@ Rules:
 
 ## Tests
 
-`npm run test:mcp` (`scripts/run-mcp-tests.sh`) starts a server on a throwaway copy of the database
-and runs `scripts/test-mcp.mjs` (reports, OAuth) and `scripts/test-mcp-survey.mjs` (survey and lab
-test tools).
+`npm run test:integration` (alias `test:mcp`; `scripts/run-mcp-tests.sh`) starts a server on a
+throwaway copy of the database and runs `scripts/test-mcp.mjs` (reports, OAuth),
+`scripts/test-mcp-survey.mjs` (survey and lab test tools), `scripts/test-mcp-settings.mjs`
+(System page switches), `scripts/test-other-specify.mjs` and `scripts/test-survey-copy.mjs`.
+`npm run test:browser` runs `scripts/test-browser.mjs` in Chrome through Playwright.
 
 ## Discovery endpoints (when enabled)
 
