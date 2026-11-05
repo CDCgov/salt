@@ -2,8 +2,10 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const rateLimit = require('express-rate-limit');
 const { body, validationResult } = require('express-validator');
-const { getAsync, runAsync } = require('../../models/database');
+const { getAsync, runAsync, dbPath } = require('../../models/database');
 const { ROLES, getRoleDisplayName } = require('../../constants/roles');
+const { logAudit } = require('../../services/auditService');
+const { newPasswordProblem, removeInitialPasswordFile } = require('../../services/firstLogin');
 const router = express.Router();
 
 // Brute-force guard on the admin login. Keyed by client IP (app.js sets
@@ -66,12 +68,11 @@ router.post('/login', loginLimiter, [
         req.session.userRole = user.role;
         req.session.fullName = user.full_name;
 
-        // Determine redirect URL based on role
-        let redirectUrl = '/';
-        if (user.role === ROLES.LAB_STAFF) {
-            redirectUrl = '/lab-entry';
-        } else if (user.role === ROLES.ADMINISTRATOR) {
-            redirectUrl = '/';  // Dashboard for administrators
+        // Determine redirect URL based on role; a one-time password must be
+        // replaced before anything else (see services/firstLogin.js).
+        let redirectUrl = homeFor(user.role);
+        if (user.must_change_password) {
+            redirectUrl = '/change-password';
         }
 
         res.json({
@@ -88,6 +89,57 @@ router.post('/login', loginLimiter, [
         });
     } catch (error) {
         console.error('Login error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+function homeFor(role) {
+    return role === ROLES.LAB_STAFF ? '/lab-entry' : '/';
+}
+
+// Same guard as login: only failed attempts count.
+const changePasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    skipSuccessfulRequests: true,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many attempts. Please try again later.' }
+});
+
+// Change your own password. Also the only thing an account with a one-time
+// password may do (requireAuth sends it here), so this checks the session
+// itself rather than using requireAuth.
+router.post('/change-password', changePasswordLimiter, async (req, res) => {
+    if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Authentication required' });
+    }
+    const { current_password: currentPassword, new_password: newPassword } = req.body || {};
+    try {
+        const user = await getAsync('SELECT * FROM admin_users WHERE id = ? AND is_active = 1', [req.session.userId]);
+        if (!user) return res.status(401).json({ error: 'Authentication required' });
+
+        const ok = typeof currentPassword === 'string' && await bcrypt.compare(currentPassword, user.password_hash);
+        if (!ok) return res.status(400).json({ error: 'The current password is incorrect.' });
+        const problem = newPasswordProblem(newPassword, currentPassword);
+        if (problem) return res.status(400).json({ error: problem });
+
+        const hash = await bcrypt.hash(newPassword, 10);
+        if ('must_change_password' in user) {
+            await runAsync(
+                "UPDATE admin_users SET password_hash = ?, must_change_password = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                [hash, user.id]
+            );
+        } else {
+            await runAsync("UPDATE admin_users SET password_hash = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?", [hash, user.id]);
+        }
+        removeInitialPasswordFile(dbPath, user.username);
+        await logAudit(user.id, 'change_password', 'admin_user', user.id, null,
+            { forced: !!user.must_change_password });
+
+        res.json({ message: 'Password changed', redirectUrl: homeFor(user.role) });
+    } catch (error) {
+        console.error('Change password error:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

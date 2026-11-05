@@ -118,9 +118,7 @@ Audio recording requires an **HTTPS** connection. The browser's MediaRecorder AP
 ### Reset the admin password
 
 ```bash
-docker exec -it salt sqlite3 /app/data/database/salt.db \
-  "DELETE FROM admin_users WHERE username='admin';"
-docker exec salt node scripts/init-database.js
+docker exec salt node scripts/reset-admin-password.js admin
 ```
 
-This recreates the `admin` / `admin123` account. Log in and change the password immediately.
+This prints a new one-time password for the `admin` account (and reactivates it if it was deactivated). Log in with it and choose a new password.

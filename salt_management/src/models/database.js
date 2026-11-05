@@ -54,6 +54,7 @@ const allAsync = (sql, params = []) => {
 
 module.exports = {
     db,
+    dbPath,
     runAsync,
     getAsync,
     allAsync

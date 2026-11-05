@@ -138,12 +138,10 @@ docker exec -it salt bash
 ### Reset the admin password
 
 ```bash
-docker exec -it salt sqlite3 /app/data/database/salt.db \
-  "DELETE FROM admin_users WHERE username='admin';"
-docker exec salt node scripts/init-database.js
+docker exec salt node scripts/reset-admin-password.js admin
 ```
 
-The init script re-creates the `admin` / `admin123` row.
+This prints a new one-time password for the account (and reactivates or creates it). The next login must choose a new password.
 
 ## Reverse proxy
 

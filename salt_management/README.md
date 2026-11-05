@@ -25,8 +25,8 @@ npm install
 npm start
 
 # 5. Open browser to http://localhost:3000
-# 6. Login with default credentials: admin / admin123
-#    IMPORTANT: Change password immediately after first login
+# 6. Log in as "admin" with the one-time password printed by step 4
+#    (also in data/initial-admin-password); you then choose your own
 ```
 
 ## Prerequisites
@@ -170,11 +170,17 @@ For production deployments, HTTPS is strongly recommended:
 
 ### Step 2: Initial Login
 
-Default credentials:
-- **Username**: `admin`
-- **Password**: `admin123`
+On a new database, the first start creates an `admin` account with a random
+one-time password. It is printed in the startup output and saved to
+`data/initial-admin-password` (readable only by the server's user).
 
-**⚠️ IMPORTANT**: Change this password immediately after first login!
+- **Username**: `admin`
+- **Password**: the one-time password
+
+The first login goes straight to **Choose a New Password** (at least 12
+characters); nothing else is available until it is changed, and the saved file
+is then deleted. To give an account a new one-time password later, run
+`node scripts/reset-admin-password.js admin`.
 
 ### Step 3: Change Default Password
 

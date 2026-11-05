@@ -5,11 +5,11 @@ description: Configure your first facility, connect a tablet, and collect your f
 
 This guide walks you through the minimum steps to go from a fresh SALT installation to collecting your first survey response.
 
-## 1. Log in and change the default password
+## 1. Log in and choose your password
 
-Browse to your server URL and sign in as `admin` / `admin123`.
+Browse to your server URL and sign in as `admin` with the one-time password the installer printed.
 
-Go to **Users** in the navigation and change the admin password immediately.
+SALT asks you to choose your own password (at least 12 characters) before anything else.
 
 ## 2. Review your facilities
 

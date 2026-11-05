@@ -18,14 +18,14 @@ const { mcpGroups } = require('../services/systemSettings');
 const AUTH_CODE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const PENDING_TTL_MS = 10 * 60 * 1000;   // how long a consent screen stays valid
 
-// Only active administrators may connect the SALT MCP server.
+// Only active administrators may connect the SALT MCP server, and not while
+// they still have to replace a one-time password.
 async function activeAdmin(userId) {
     if (!userId) return null;
-    const u = await getAsync(
-        'SELECT id, username, role, is_active FROM admin_users WHERE id = ?',
-        [userId]
-    );
-    return (u && u.is_active && u.role === ROLES.ADMINISTRATOR) ? u : null;
+    const u = await getAsync('SELECT * FROM admin_users WHERE id = ?', [userId]);
+    return (u && u.is_active && u.role === ROLES.ADMINISTRATOR && !u.must_change_password)
+        ? { id: u.id, username: u.username, role: u.role, is_active: u.is_active }
+        : null;
 }
 
 // SDK OAuth error classes (ESM). Loaded once in mountOAuth(); used so the SDK's
@@ -210,7 +210,7 @@ const provider = {
 
 // ---- consent page (self-contained; reuses POST /api/auth/login) -----------
 
-// view: 'login' | 'not_admin' | 'consent' | 'off' | 'none'
+// view: 'login' | 'not_admin' | 'change_password' | 'consent' | 'off' | 'none'
 // groups: the System page switches ({ reports, surveys }), for the consent text.
 function consentPage({ view, username, returnUrl, pending, groups = {} }) {
     let body;
@@ -253,6 +253,9 @@ function consentPage({ view, username, returnUrl, pending, groups = {} }) {
     } else if (view === 'not_admin') {
         body = `<p>Signed in as <strong>${escapeHtml(username)}</strong>.</p>
            <p>Connecting an AI assistant to SALT requires an active administrator account.</p>`;
+    } else if (view === 'change_password') {
+        body = `<p>Signed in as <strong>${escapeHtml(username)}</strong> with a one-time password.</p>
+           <p><a href="/change-password">Choose your own password</a>, then start the connection again from your AI assistant.</p>`;
     } else if (view === 'login') {
         const next = isLocalAuthorizePath(returnUrl) ? returnUrl : null;
         body = `<p>Sign in to your SALT administrator account to connect.</p>
@@ -316,8 +319,11 @@ async function mountOAuth(app, { baseUrl }) {
         if (!userId) {
             return res.send(consentPage({ view: 'login', returnUrl }));
         }
-        const u = await getAsync('SELECT username FROM admin_users WHERE id = ?', [userId]);
+        const u = await getAsync('SELECT * FROM admin_users WHERE id = ?', [userId]);
         const username = u ? u.username : '';
+        if (u && u.must_change_password) {
+            return res.send(consentPage({ view: 'change_password', username }));
+        }
         const admin = await activeAdmin(userId);
         if (!admin) {
             return res.send(consentPage({ view: 'not_admin', username }));

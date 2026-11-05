@@ -10,6 +10,7 @@
 #   scripts/test-other-specify.mjs    "other, specify" options on the server (item 4)
 #   scripts/test-survey-copy.mjs      web "copy survey" / "new version" keep everything
 #   scripts/test-report-schedule.mjs  scheduled reports run, follow edits, catch up missed runs
+#   scripts/test-first-login.mjs      one-time password: forced change before anything else
 #   scripts/test-browser.mjs          pages in real Chrome (only with BROWSER=1 or BROWSER=only)
 #
 # Usage: bash scripts/run-mcp-tests.sh           # npm run test:integration (or test:mcp)
@@ -51,6 +52,11 @@ trap cleanup EXIT
 
 echo "[test] backing up $DB"
 cp -f "$DB" "$BACKUP" || { echo "cannot back up DB"; exit 2; }
+
+# Bring the copy's schema up to date, as `npm start` and the Docker entrypoint do.
+echo "[test] running init-database.js on the test database"
+node scripts/init-database.js > /tmp/salt_mcp_test_init.log 2>&1 \
+    || { echo "init-database.js failed:"; cat /tmp/salt_mcp_test_init.log; exit 2; }
 
 # Report building is off by default; the harnesses need both tool groups on.
 echo "[test] turning on both MCP switches in the test database"
@@ -99,6 +105,7 @@ if [[ "${BROWSER:-}" != "only" ]]; then
     run "other, specify harness" scripts/test-other-specify.mjs
     run "survey copy harness" scripts/test-survey-copy.mjs
     run "report schedule harness" scripts/test-report-schedule.mjs
+    run "first login harness" scripts/test-first-login.mjs
 fi
 if [[ -n "${BROWSER:-}" ]]; then
     run "browser test (Chrome)" scripts/test-browser.mjs

@@ -48,6 +48,7 @@ salt_management/data/reports/
 salt_management/data/files/
 salt_management/data/database/*.backup*
 salt_management/data/.session-secret
+salt_management/data/initial-admin-password
 .env
 .env.local
 salt_management/data/database/*.db

@@ -17,6 +17,7 @@ const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const { importSurveyBundle } = require('../src/services/surveyImport');
+const { generateInitialPassword, writeInitialPasswordFile } = require('../src/services/firstLogin');
 
 const dbPath = process.env.SALT_DB_PATH
     || path.join(__dirname, '..', 'data', 'database', 'salt.db');
@@ -318,7 +319,8 @@ CREATE TABLE IF NOT EXISTS admin_users (
     is_active BOOLEAN DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_login DATETIME,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    must_change_password INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS audit_log (
@@ -618,7 +620,8 @@ function execAsync(db, sql) {
 // defaulted columns belong here.
 const ADDED_COLUMNS = [
     { table: 'options', column: 'is_other', definition: 'INTEGER NOT NULL DEFAULT 0' },
-    { table: 'survey_responses', column: 'response_other_text', definition: 'TEXT' }
+    { table: 'survey_responses', column: 'response_other_text', definition: 'TEXT' },
+    { table: 'admin_users', column: 'must_change_password', definition: 'INTEGER NOT NULL DEFAULT 0' }
 ];
 
 async function ensureAddedColumns(db) {
@@ -637,13 +640,21 @@ async function ensureDefaultAdmin(db) {
         console.log('Admin users already present, skipping default admin creation.');
         return;
     }
-    const hash = await bcrypt.hash('admin123', 10);
+    // No built-in default: a random one-time password, changed at first login.
+    const password = generateInitialPassword();
+    const hash = await bcrypt.hash(password, 10);
     await runAsync(
         db,
-        'INSERT OR IGNORE INTO admin_users (username, password_hash, role) VALUES (?, ?, ?)',
+        'INSERT OR IGNORE INTO admin_users (username, password_hash, role, must_change_password) VALUES (?, ?, ?, 1)',
         ['admin', hash, 'administrator']
     );
-    console.log('Default admin user created (username: admin, password: admin123). Change this on first login.');
+    const file = writeInitialPasswordFile(dbPath, 'admin', password);
+    console.log('================================================================');
+    console.log('First administrator created. Log in and choose a new password:');
+    console.log('  username: admin');
+    console.log(`  password: ${password}`);
+    console.log(`(Also saved to ${file}, which is deleted once the password is changed.)`);
+    console.log('================================================================');
 }
 
 async function ensureDemoFacility(db) {

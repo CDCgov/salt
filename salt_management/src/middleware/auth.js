@@ -6,12 +6,26 @@ const requireAuth = async (req, res, next) => {
     // Check session authentication for web UI
     if (req.session && req.session.userId) {
         try {
-            const user = await getAsync(
-                'SELECT id, username, email, full_name, role FROM admin_users WHERE id = ? AND is_active = 1',
+            // SELECT * so a database without must_change_password yet still works.
+            const row = await getAsync(
+                'SELECT * FROM admin_users WHERE id = ? AND is_active = 1',
                 [req.session.userId]
             );
-            if (user) {
-                req.user = user;
+            if (row && row.must_change_password) {
+                // First login with a one-time password: nothing but
+                // /change-password (and logout) until it is changed.
+                if (req.originalUrl.startsWith('/api')) {
+                    return res.status(403).json({
+                        error: 'You must choose a new password first.',
+                        code: 'PASSWORD_CHANGE_REQUIRED',
+                        redirectUrl: '/change-password'
+                    });
+                }
+                return res.redirect('/change-password');
+            }
+            if (row) {
+                const { id, username, email, full_name, role } = row;
+                req.user = { id, username, email, full_name, role };
                 return next();
             }
         } catch (error) {

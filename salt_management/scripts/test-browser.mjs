@@ -235,6 +235,39 @@ try {
     await page.goto(BASE + '/mcp-consent');
     ok('consent page renders', (await page.textContent('h1')).includes('Connect your AI assistant to SALT'));
 
+    console.log('\n### First login with a one-time password');
+    const firstUser = 'zz_first_' + process.pid, firstPw = 'abcd-efgh-jkmn-pqrs', firstNew = 'Zz-chosen-' + Date.now();
+    sql(`INSERT OR REPLACE INTO admin_users (username, password_hash, role, is_active, must_change_password)
+         VALUES ('${firstUser}', '${await bcrypt.hash(firstPw, 10)}', 'administrator', 1, 1)`);
+    const firstCtx = await browser.newContext({ viewport: { width: 1200, height: 900 } });
+    const first = await firstCtx.newPage();
+    first.on('console', m => { if (m.type() === 'error') consoleErrors.push(`${first.url()} :: ${m.text()}`); });
+    first.on('pageerror', e => consoleErrors.push(`${first.url()} :: PAGEERROR ${e.message}`));
+    try {
+        await first.goto(BASE + '/login');
+        ok('login page has no default password hint', !(await first.content()).includes('admin123'));
+        await first.fill('input[name=username]', firstUser);
+        await first.fill('input[name=password]', firstPw);
+        await Promise.all([first.waitForURL('**/change-password'), first.click('button[type=submit]')]);
+        ok('one-time password login lands on Choose a New Password', (await first.textContent('h2')).includes('Choose a New Password'));
+        await first.goto(BASE + '/surveys');
+        ok('other pages send it back there', first.url().endsWith('/change-password'), first.url());
+        await first.fill('#current_password', firstPw);
+        await first.fill('#new_password', firstNew);
+        await first.fill('#confirm_password', firstNew + 'x');
+        await first.click('#changePasswordForm button[type=submit]');
+        await first.waitForSelector('#passwordError', { state: 'visible' });
+        ok('mismatched new passwords are caught on the page', (await first.textContent('#passwordError')).includes('do not match'));
+        await first.fill('#confirm_password', firstNew);
+        if (SHOTS) await first.screenshot({ path: `${SHOTS}/change-password.png`, fullPage: true });
+        await Promise.all([first.waitForURL(u => !u.pathname.startsWith('/change-password')), first.click('#changePasswordForm button[type=submit]')]);
+        ok('after saving, the dashboard opens', new URL(first.url()).pathname === '/', first.url());
+        ok('flag cleared', sql(`SELECT must_change_password FROM admin_users WHERE username = '${firstUser}'`) === '0');
+    } finally {
+        await firstCtx.close();
+        sql(`DELETE FROM admin_users WHERE username = '${firstUser}'`);
+    }
+
     const unexpected = consoleErrors.filter(e => !EXPECTED_CONSOLE.some(re => re.test(e)));
     ok('no unexpected console errors', unexpected.length === 0, unexpected.join('\n'));
 } catch (err) {

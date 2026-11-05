@@ -45,7 +45,7 @@
 #   8. Wait for /health to respond on 127.0.0.1:<port>
 #   9. Configure ufw to allow 22, 80, 443 (if ufw is active)
 #  10. Run setup-nginx.sh (TLS via Let's Encrypt)
-#  11. Print a summary with the URL, default credentials, and the demo
+#  11. Print a summary with the URL, the first admin's one-time password, and the demo
 #      facility API key (pulled from container logs)
 
 set -euo pipefail
@@ -301,6 +301,16 @@ fi
 # ---- 10. Summary ----------------------------------------------------------
 DEMO_KEY="$(docker logs salt-management 2>&1 | grep -oE 'salt_[a-f0-9-]{36}' | head -1 || true)"
 
+# A fresh database gets an "admin" account with a random one-time password,
+# saved in salt-data/initial-admin-password until it is changed at first login.
+PW_FILE="$INSTALL_DIR/salt-data/initial-admin-password"
+for _ in $(seq 1 30); do [[ -f "$PW_FILE" ]] && break; sleep 2; done
+if [[ -f "$PW_FILE" ]]; then
+    ADMIN_LOGIN="admin / $(sed -n 's/^password: //p' "$PW_FILE")   (one-time: you choose a new one at first login)"
+else
+    ADMIN_LOGIN="unchanged (existing admin accounts were kept)"
+fi
+
 cat <<DONE
 
 ================================================================
@@ -312,7 +322,7 @@ Data volume      : $INSTALL_DIR/salt-data
 Container        : salt-management (restart=unless-stopped)
 Compose file     : $COMPOSE_FILE
 
-Default admin    : admin / admin123      ← CHANGE IMMEDIATELY
+First admin      : $ADMIN_LOGIN
 Demo facility    : ${DEMO_KEY:-"(see: docker logs salt-management | grep API)"}
 AI assistant     : connect a client to https://$DOMAIN/mcp. Survey editing is on and
                    report building is off by default; change them under System.

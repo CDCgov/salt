@@ -19,8 +19,9 @@ curl -fsSL https://raw.githubusercontent.com/cdcgov/salt/main/salt_management/in
 `install.sh` installs Docker, clones the repo, builds the image, starts the
 container with a persistent volume + auto-restart, opens the firewall, runs
 `setup-nginx.sh` for Let's Encrypt TLS, and prints the demo facility's API
-key on success. Browse to `https://your-domain.example.org` and log in as
-`admin` / `admin123` (change the password immediately).
+key and the `admin` account's one-time password on success. Browse to
+`https://your-domain.example.org`, log in with it, and choose your own
+password (required before anything else).
 
 Flags: `--install-dir`, `--image IMAGE`, `--upstream PORT`,
 `--repo URL`, `--branch NAME`, `--skip-firewall`, `--skip-nginx`. Run
@@ -120,7 +121,11 @@ All optional.
 
 On a fresh database the init script creates:
 
-- **Default admin user**: `admin` / `admin123` — **change this immediately**.
+- **First admin user**: `admin` with a random one-time password, printed in
+  the container logs (`docker logs salt-management`) and saved to
+  `salt-data/initial-admin-password` (readable only by the container user).
+  The first login must choose a new password, which also deletes that file.
+  There is no built-in default password.
 - **Demo facility** with a random API key (printed in the container logs;
   use it on a tablet to register against this facility).
 - **Three HIV lab tests**: HIV Confirmatory (dropdown), CD4 Count (numeric,
@@ -230,8 +235,7 @@ No restart needed — it's served straight off the volume.
 
 **Reset the admin password**
 ```bash
-docker exec -it salt sqlite3 /app/data/database/salt.db \
-  "DELETE FROM admin_users WHERE username='admin';"
-docker exec salt node scripts/init-database.js
+docker exec salt node scripts/reset-admin-password.js admin
 ```
-The init script will re-create the `admin` / `admin123` row.
+Prints a new one-time password for that account (and reactivates or creates
+it); the next login must choose a new password.

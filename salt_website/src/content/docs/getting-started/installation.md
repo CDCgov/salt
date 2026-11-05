@@ -30,20 +30,20 @@ The script:
 4. Starts the container with a persistent volume and automatic restart
 5. Opens the firewall (ports 80 and 443)
 6. Runs `setup-nginx.sh` to configure nginx with Let's Encrypt TLS
-7. Prints the demo facility API key when complete
+7. Prints the demo facility API key and the first administrator's one-time password when complete
 
 When the script finishes, browse to `https://your-domain.example.org` and sign in as:
 
 - **Username**: `admin`
-- **Password**: `admin123`
+- **Password**: the one-time password the script printed
 
-**Change this password immediately** via Users → Edit.
+You are asked to choose your own password (at least 12 characters) before you can do anything else. If you lose the one-time password, it is also in `/opt/salt/salt-data/initial-admin-password` until it has been changed.
 
 ## What ships on first boot
 
 The first boot seeds the database with:
 
-- Default admin user (`admin` / `admin123`)
+- An `admin` user with a random one-time password (there is no default password)
 - A **Demo Facility** with a random API key (shown in the container logs, use it to register a tablet)
 - Three HIV lab tests: HIV Confirmatory (dropdown), CD4 Count (numeric), HIV Viral Load (numeric)
 - **Short MSM Survey**: a complete, ready-to-run link-tracing survey, seeded active

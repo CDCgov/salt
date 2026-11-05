@@ -37,6 +37,7 @@
 const express = require('express');
 const { requireAdmin } = require('../../middleware/auth');
 const { allAsync, getAsync } = require('../../models/database');
+const { MIN_PASSWORD_LENGTH } = require('../../services/firstLogin');
 const router = express.Router();
 
 // Login page
@@ -45,6 +46,24 @@ router.get('/login', (req, res) => {
         return res.redirect('/');
     }
     res.render('pages/login', { title: 'Login', error: null });
+});
+
+// Choose a new password. Required after logging in with a one-time password
+// (requireAuth redirects here), and available to anyone signed in.
+router.get('/change-password', async (req, res) => {
+    if (!req.session.userId) {
+        return res.redirect('/login');
+    }
+    const user = await getAsync('SELECT * FROM admin_users WHERE id = ? AND is_active = 1', [req.session.userId]);
+    if (!user) {
+        return res.redirect('/login');
+    }
+    res.render('pages/changePassword', {
+        title: 'Choose a New Password',
+        username: user.username,
+        forced: !!user.must_change_password,
+        minLength: MIN_PASSWORD_LENGTH
+    });
 });
 
 // Tablet download page (public, no authentication required)

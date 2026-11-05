@@ -29,8 +29,9 @@ curl -fsSL https://raw.githubusercontent.com/cdcgov/salt/main/salt_management/in
 
 That single command installs Docker, builds and starts the SALT server, opens
 the firewall, and provisions HTTPS with a Let's Encrypt certificate. When it
-finishes, browse to `https://your-domain.example.org` and sign in as
-`admin` / `admin123` — then change that password immediately.
+finishes, it prints a one-time password for the `admin` account. Browse to
+`https://your-domain.example.org`, sign in with it, and choose your own
+password (you're asked to before anything else).
 
 Already have a host with Docker, or need a non-default setup (your own TLS
 termination, a prebuilt image, or local testing)? See
