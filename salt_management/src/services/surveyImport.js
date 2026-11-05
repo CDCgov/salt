@@ -17,6 +17,7 @@
  */
 
 const { isOtherFlag, validateOtherOptions, otherNameClash } = require('./otherOption');
+const { reservedShortNameError } = require('./builtinVariables');
 
 const SCHEMA_VERSION = 1;
 
@@ -69,24 +70,11 @@ function validateBundle(bundle) {
     if (srcQuestions.length === 0) {
         throw validationError('Bundle has no questions');
     }
-    // `value` is a reserved short_name — it is the JEXL variable bound to the
-    // current answer in validation_script / skip_to_script, so a question
-    // named `value` would shadow it.
-    if (srcQuestions.some(q => q.short_name === 'value')) {
-        throw validationError(
-            'A question uses the reserved short_name "value". Rename it — '
-            + '"value" is the JEXL variable bound to the current answer in '
-            + 'validation and skip-to scripts.'
-        );
-    }
-    // `facility_coupons` is reserved — it is the facility coupon ceiling bound
-    // in the coupon_count_script context.
-    if (srcQuestions.some(q => q.short_name === 'facility_coupons')) {
-        throw validationError(
-            'A question uses the reserved short_name "facility_coupons". Rename it — '
-            + '"facility_coupons" is the JEXL variable bound to the facility coupon '
-            + 'ceiling in the coupon count script.'
-        );
+    // Built-in JEXL variables (`value`, `facility_coupons`, anything starting
+    // with "_") would be shadowed by a question with the same name.
+    for (const q of srcQuestions) {
+        const reserved = reservedShortNameError(q.short_name);
+        if (reserved) throw validationError(`${reserved}. Rename the question.`);
     }
     // Scripts refer to questions by short_name, so two questions sharing one
     // would make every reference ambiguous.

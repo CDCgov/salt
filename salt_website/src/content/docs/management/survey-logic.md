@@ -61,6 +61,24 @@ When you name a question in a condition, you get the participant's answer to tha
 
 ---
 
+## Facility and seed variables
+
+Besides your questions' Short Names, every condition can use three built-in variables. Their names start with `_`:
+
+| Variable | What it holds | Example |
+|---|---|---|
+| `_facility_name` | The name of the tablet's facility, exactly as it appears on the **Facilities** page | `_facility_name == 'Clinic A'` |
+| `_facility_id` | The facility's **ID** from the Facilities page | `_facility_id == 3` |
+| `_is_seed` | `true` if the participant came without a referral coupon (a seed), `false` if they brought one | `_is_seed`, or `!_is_seed` for recruits |
+
+They work everywhere: skip logic, validation, skip-to, eligibility and coupon count scripts, and lab test conditions. For example, `_is_seed && age < 18` is true for seeds under 18, and `_facility_name =~ ['Clinic A', 'Clinic B']` is true at either clinic.
+
+- **Prefer `_facility_id` for logic that must keep working.** If a facility is renamed, or its name is typed slightly differently, a condition using `_facility_name` silently stops matching. The ID never changes.
+- **Short Names cannot start with `_`**, so a question can never hide these variables.
+- **Update the tablets first.** Tablets running an older version of the SALT app don't know these variables, and a condition that uses one fails there. Make sure every tablet has the current app before activating a survey that uses them.
+
+---
+
 ## Writing conditions
 
 A condition compares values and produces a yes/no (true/false) result.

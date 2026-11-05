@@ -39,8 +39,9 @@ Never claim a survey is ready without a clean `check_survey`.
   with optional `min_selections` / `max_selections`), `numeric`, `text`, and
   `info` (a screen with no answer).
 - **Short names** are the variable names used in scripts and exports. Letters,
-  numbers and underscores, starting with a letter or underscore; unique in the
-  survey; case-sensitive. `value` and `facility_coupons` are reserved. Prefer
+  numbers and underscores, starting with a letter; unique in the survey;
+  case-sensitive. `value`, `facility_coupons` and every name starting with `_`
+  are reserved. Prefer
   short, meaningful names that match the paper questionnaire's codes.
 - **Question text** is Markdown. Keep it short and plain; it is read aloud.
 - **Order**: questions run in `question_index` order. A script can only use
@@ -70,6 +71,12 @@ What an answer looks like in a script:
 - **"Other, specify"**: if a question has an option with `is_other`, its free
   text is `<short_name>_other` (text, or null when that option isn't chosen or the
   box was left blank). `<short_name>_other` is reserved as a short name.
+- **Built-in variables**, available in every script and lab test condition:
+  `_facility_name` (the tablet's facility name, text), `_facility_id` (the
+  facility's ID, a number; prefer it, since it survives renames) and `_is_seed`
+  (true when the participant came without a referral coupon). Example:
+  `_is_seed && age < 18`. Older tablet apps don't define them, so remind the
+  user to update tablets before activating a survey that uses them.
 - **Not answered** (skipped, or asked later): null. `==` and `!=` against null are
   fine, but `<`, `>`, `<=`, `>=` against null is an **error** on the tablet. If the
   question may have been skipped, check first: `x != null && x > 2`.

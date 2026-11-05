@@ -21,7 +21,7 @@ data class LabTestEvaluationResult(
 data class JexlContextDebugInfo(
     val surveyAnswers: Map<String, Any>,
     val rapidTestResults: Map<String, String>,
-    val combinedContext: Map<String, Any>
+    val combinedContext: Map<String, Any?>
 )
 
 /**
@@ -46,7 +46,7 @@ object LabTestJexlEvaluator {
     ): JexlContextDebugInfo {
         val surveyAnswers = mutableMapOf<String, Any>()
         val rapidTestResults = mutableMapOf<String, String>()
-        val combinedContext = mutableMapOf<String, Any>()
+        val combinedContext = mutableMapOf<String, Any?>()
 
         // 1. Get survey answers using question short names
         val answers = database.surveyDao().getAnswersBySurveyId(surveyId)
@@ -99,6 +99,11 @@ object LabTestJexlEvaluator {
             Log.d(TAG, "Rapid test result: ${testResult.testId} = ${testResult.result}")
         }
 
+        // 3. Built-in variables (_facility_name, _facility_id, _is_seed)
+        combinedContext.putAll(
+            com.dev.salt.builtinJexlVariables(database.facilityConfigDao().getFacilityConfig(), survey?.referralCouponCode)
+        )
+
         Log.d(TAG, "Combined context has ${combinedContext.size} entries: ${combinedContext.keys}")
 
         return JexlContextDebugInfo(
@@ -115,7 +120,7 @@ object LabTestJexlEvaluator {
      * @param context The combined context map
      * @return Pair of (shouldShow: Boolean, evaluationResult: Any?)
      */
-    fun evaluateCondition(condition: String?, context: Map<String, Any>): Pair<Boolean, Any?> {
+    fun evaluateCondition(condition: String?, context: Map<String, Any?>): Pair<Boolean, Any?> {
         // If no condition, always show
         // Also check for literal string "null" which can occur from JSONObject.optString bug
         if (condition.isNullOrBlank() || condition == "null") {

@@ -82,6 +82,23 @@ private val jexlEngine by lazy {
 
 
 /**
+ * Built-in JEXL variables available to every survey script and lab test
+ * condition. Their names start with "_", which the server reserves (no
+ * question short name may start with "_"); the server's JEXL checker
+ * (salt_management/src/services/builtinVariables.js) lists the same names.
+ *
+ * - `_facility_name`: this tablet's facility name (null before setup)
+ * - `_facility_id`: this tablet's facility id on the server (null before setup)
+ * - `_is_seed`: true when the participant came without a referral coupon
+ */
+fun builtinJexlVariables(facility: com.dev.salt.data.FacilityConfig?, referralCouponCode: String?): Map<String, Any?> =
+    mapOf(
+        "_facility_name" to facility?.facilityName,
+        "_facility_id" to facility?.facilityId,
+        "_is_seed" to referralCouponCode.isNullOrBlank()
+    )
+
+/**
  * Evaluates a JEXL (Java Expression Language) script string against a given data context.
  *
  * This function can be used to execute simple logical statements or expressions defined

@@ -13,6 +13,7 @@ import com.dev.salt.data.Survey
 import com.dev.salt.data.Answer
 import com.dev.salt.data.saveSurvey
 import com.dev.salt.evaluateJexlScript
+import com.dev.salt.builtinJexlVariables
 import com.dev.salt.upload.SurveyUploadManager
 import com.dev.salt.upload.SurveyUploadWorkManager
 import com.dev.salt.upload.UploadResult
@@ -77,6 +78,9 @@ class SurveyViewModel(
     private val couponGenerator = CouponGenerator(database.couponDao(), database.surveyDao())
     //public var currentQuestion: Pair<Question, List<Option>>? = null//StateFlow<Pair<Question, List<Option>>?> = _currentQuestion
     public var survey : Survey? = null
+
+    // For the built-in JEXL variables (_facility_name, _facility_id).
+    private val facilityConfig by lazy { database.facilityConfigDao().getFacilityConfig() }
     public var questions: List<Question> = emptyList()
     //public var answers: MutableList<String?> = MutableList<String?>(0, { null })
     public var currentQuestionIndex = -1
@@ -701,8 +705,7 @@ class SurveyViewModel(
                 context[qus[i].questionShortName + "_other"] = selectedOtherText(qus[i], ans[i])
             }
         }
-        // You can add other global variables to the context if needed
-        // context["userAge"] = 25 // Example
+        context.putAll(builtinJexlVariables(facilityConfig, survey!!.referralCouponCode))
         Log.d("SurveyViewModel", "JEXL context built with ${context.size} variables")
         return context
     }

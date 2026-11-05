@@ -24,6 +24,7 @@
     <table>
         <thead>
             <tr>
+                <th title="Use as _facility_id in survey logic">ID</th>
                 <th>Name</th>
                 <th>Location</th>
                 <th>Tablet Setup</th>
@@ -37,6 +38,7 @@
         <tbody>
             ${facilities.map(facility => `
                 <tr>
+                    <td>${h(facility.id)}</td>
                     <td>${h(facility.name)}</td>
                     <td>${h(facility.location || '-')}</td>
                     <td>
@@ -80,7 +82,7 @@
                     </td>
                 </tr>
             `).join('')}
-            ${facilities.length === 0 ? '<tr><td colspan="8" style="text-align: center;">No facilities registered</td></tr>' : ''}
+            ${facilities.length === 0 ? '<tr><td colspan="9" style="text-align: center;">No facilities registered</td></tr>' : ''}
         </tbody>
     </table>
 </div>

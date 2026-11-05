@@ -24,6 +24,7 @@ const { isOtherFlag, validateOtherOptions, otherNameClash } = require('./otherOp
 const { importSurveyBundle, replaceSurveyContents } = require('./surveyImport');
 const { buildSurveyBundle } = require('./surveyBundle');
 const { checkSurvey, filterIssues } = require('./jexlCheck');
+const { reservedShortNameError } = require('./builtinVariables');
 
 class EditError extends Error {
     constructor(status, message) {
@@ -34,12 +35,6 @@ class EditError extends Error {
 
 const QUESTION_TYPES = ['multiple_choice', 'numeric', 'text', 'multi_select', 'info'];
 const SHORT_NAME_RE = /^[a-zA-Z_][a-zA-Z0-9_]*$/;
-const RESERVED_NAMES = {
-    // The JEXL variable bound to the current answer in validation and skip-to scripts.
-    value: '"value" is a reserved name and cannot be used as a short name',
-    // The facility's coupon ceiling, bound in the coupon_count_script context.
-    facility_coupons: '"facility_coupons" is a reserved name and cannot be used as a short name'
-};
 
 // The standard system message keys (the list in surveyEditorSimple.ejs is the
 // authoritative source; keep in step). Rapid tests add <testId>_rapid_test_instruction.
@@ -131,9 +126,10 @@ async function jexlReport(surveyId, scope) {
 
 function checkShortName(shortName) {
     if (typeof shortName !== 'string' || !SHORT_NAME_RE.test(shortName)) {
-        throw new EditError(400, 'Short name must start with a letter or underscore, and contain only letters, numbers, and underscores');
+        throw new EditError(400, 'Short name must start with a letter, and contain only letters, numbers, and underscores');
     }
-    if (RESERVED_NAMES[shortName]) throw new EditError(400, RESERVED_NAMES[shortName]);
+    const reserved = reservedShortNameError(shortName);
+    if (reserved) throw new EditError(400, reserved);
 }
 
 // The survey's questions other than `excludeId`, with whether each has an

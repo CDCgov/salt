@@ -140,7 +140,7 @@ bodyHtml += '    <h3>Eligibility and Coupon Settings</h3>\n';
 bodyHtml += '    <div style="margin-bottom: 1rem;">\n';
 bodyHtml += '        <label><strong>Eligibility Script (JEXL Expression):</strong></label>\n';
 bodyHtml += '        <textarea id="eligibilityScript" style="width: 100%; min-height: 60px; padding: 0.5rem; font-family: monospace;">' + h(survey.eligibility_script || '') + '</textarea>\n';
-bodyHtml += '        <small style="color: #666;">This script runs after the eligibility section. Example: consent == "1" && age >= 18 && age <= 65</small>\n';
+bodyHtml += '        <small style="color: #666;">This script runs after the eligibility section. Example: consent == "1" && age >= 18 && age <= 65. Every script can also use <code>_facility_name</code>, <code>_facility_id</code> and <code>_is_seed</code> (participant came without a coupon).</small>\n';
 bodyHtml += '    </div>\n';
 bodyHtml += '    <div style="margin-bottom: 1rem;">\n';
 bodyHtml += '        <label><strong>Coupon Count Script (JEXL Expression, optional):</strong></label>\n';

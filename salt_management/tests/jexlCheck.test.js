@@ -13,6 +13,8 @@ const { spawnSync } = require('child_process');
 
 const { checkSurveyData, checkLabConditions, _internal } = require('../src/services/jexlCheck');
 const { parseScripts, checkerInfo, stop } = require('../src/services/jexlParser');
+const { BUILTIN_VARIABLES, reservedShortNameError } = require('../src/services/builtinVariables');
+const { validateBundle } = require('../src/services/surveyImport');
 
 test.after(() => stop());
 
@@ -56,6 +58,13 @@ test('checker engine settings match the tablet', { skip: !fs.existsSync(UTIL_KT)
             assert.match(util, new RegExp(`\\.${name}\\(false\\)`), `tablet JexlFeatures should set ${name}(false)`);
         }
     }
+});
+
+test('tablet defines the same built-in variables as the checker', { skip: !fs.existsSync(UTIL_KT) && 'salt_android not present' }, () => {
+    const util = fs.readFileSync(UTIL_KT, 'utf8');
+    const fn = util.slice(util.indexOf('fun builtinJexlVariables'), util.indexOf(')\n', util.indexOf('mapOf(', util.indexOf('fun builtinJexlVariables'))));
+    const tablet = [...fn.matchAll(/"(_\w+)" to /g)].map(m => m[1]).sort();
+    assert.deepEqual(tablet, Object.keys(BUILTIN_VARIABLES).sort());
 });
 
 // ---------------------------------------------------------------------------
@@ -168,6 +177,43 @@ test('"value" only where it is set; facility_coupons only in the coupon script',
     }));
     expectIssue(res, 'error', /Skip logic \(friends\): "value" is only set in validation and skip-to scripts/);
     expectIssue(res, 'error', /Eligibility script: Unknown variable "facility_coupons"/);
+});
+
+test('built-in variables work in every script, with suggestions for typos', async () => {
+    const data = survey({
+        questions: {
+            kp: { validation_script: '_is_seed || value != 2' },
+            friends: { skip_to_script: '_facility_id == 3', skip_to_target: 'last' },
+            hivresult: { pre_script: "!_is_seed && _facility_name == 'Clinic A'" }
+        },
+        survey: {
+            eligibility_script: "age1 >= 15 && (_is_seed == 1 || _facility_name =~ ['Clinic A', 'Clinic B'])",
+            coupon_count_script: '_is_seed ? facility_coupons : 2'
+        }
+    });
+    const res = await checkSurveyData(data);
+    assert.deepEqual(messages(res), []);
+    data.testIds = [];
+    const lab = await checkLabConditions([{ id: 1, test_name: 'Seeds only', jexl_condition: '_is_seed && _facility_id != null' }], data);
+    assert.deepEqual(messages(lab), []);
+    const typo = await checkSurveyData(survey({ survey: { eligibility_script: '_is_sed' } }));
+    expectIssue(typo, 'error', /Unknown variable "_is_sed".*Did you mean "_is_seed"/);
+});
+
+test('short names starting with "_" and the built-in names are reserved', () => {
+    assert.match(reservedShortNameError('_is_seed'), /cannot start with "_"/);
+    assert.match(reservedShortNameError('_my_question'), /cannot start with "_"/);
+    assert.match(reservedShortNameError('value'), /reserved/);
+    assert.match(reservedShortNameError('facility_coupons'), /reserved/);
+    assert.equal(reservedShortNameError('is_seed'), null);
+    assert.equal(reservedShortNameError('age_1'), null);
+    const bundle = {
+        schema_version: require('../src/services/surveyImport').SCHEMA_VERSION,
+        survey: { name: 'x' },
+        sections: [{ section_type: 'eligibility', section_index: 0 }, { section_type: 'main', section_index: 1 }],
+        questions: [{ short_name: '_facility_name', question_type: 'text', question_index: 0, section_index: 0, question_text_json: EN('?') }]
+    };
+    assert.throws(() => validateBundle(bundle), /cannot start with "_"/);
 });
 
 test('method calls outside the allowed list are errors', async () => {

@@ -11,6 +11,7 @@ Facilities represent the health sites where data collection takes place. Each fa
 
 The facilities page shows all registered facilities with:
 
+- **ID**: the facility's number, used as `_facility_id` in [survey logic](../survey-logic/#facility-and-seed-variables). It never changes, even if the facility is renamed.
 - **Name**: the facility's display name
 - **Location**: geographic location or site description
 - **Setup**: whether the facility has been set up on at least one tablet

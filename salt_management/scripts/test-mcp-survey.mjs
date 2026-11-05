@@ -133,6 +133,8 @@ const PNG = Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0
     ok('duplicate short name refused', r.isError && /already uses the short name/.test(r.text), r.text);
     r = await call(c, 'add_question', { surveyId: C, question: { short_name: 'value', question_type: 'text', question_text_json: txt('x') } });
     ok('reserved short name refused', r.isError && /reserved/.test(r.text), r.text);
+    r = await call(c, 'add_question', { surveyId: C, question: { short_name: '_facility_name', question_type: 'text', question_text_json: txt('x') } });
+    ok('short name starting with "_" refused', r.isError && /cannot start with "_"/.test(r.text), r.text);
     r = await call(c, 'add_question', { surveyId: C, question: { short_name: 'zz_q1_other', question_type: 'text', question_text_json: txt('x') } });
     ok('<short>_other name refused', r.isError && /reserved for the "other" text/.test(r.text), r.text);
     r = await call(c, 'add_question', { surveyId: C, question: { short_name: 'zz_two', question_type: 'multiple_choice', question_text_json: txt('x'),

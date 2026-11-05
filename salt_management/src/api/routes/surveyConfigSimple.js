@@ -6,6 +6,7 @@ const { logAudit } = require('../../services/auditService');
 const database = require('../../models/database');
 const { checkSurvey } = require('../../services/jexlCheck');
 const editing = require('../../services/surveyEditing');
+const { reservedShortNameError } = require('../../services/builtinVariables');
 const { jexlReport } = editing;
 const router = express.Router();
 
@@ -197,14 +198,12 @@ router.put('/:id', [
 router.post('/:surveyId/questions', [
     body('question_index').isInt(),
     body('short_name').notEmpty().trim()
-        .matches(/^[a-zA-Z_][a-zA-Z0-9_]*$/).withMessage('Short name must start with a letter or underscore, and contain only letters, numbers, and underscores')
+        .matches(/^[a-zA-Z_][a-zA-Z0-9_]*$/).withMessage('Short name must start with a letter, and contain only letters, numbers, and underscores')
         .custom((v) => {
-            // `value` is reserved — it is the JEXL variable bound to the
-            // current answer in validation and skip-to scripts.
-            // `facility_coupons` is reserved — it is the facility's coupon
-            // ceiling, bound in the coupon_count_script context.
-            if (v === 'value') throw new Error('"value" is a reserved name and cannot be used as a short name');
-            if (v === 'facility_coupons') throw new Error('"facility_coupons" is a reserved name and cannot be used as a short name');
+            // `value`, `facility_coupons` and names starting with "_" are
+            // built-in JEXL variables (see services/builtinVariables.js).
+            const reserved = reservedShortNameError(v);
+            if (reserved) throw new Error(reserved);
             return true;
         }),
     body('question_text_json').isObject(),
@@ -245,14 +244,12 @@ router.post('/:surveyId/questions', [
 router.put('/:surveyId/questions/:questionId', [
     body('question_index').optional().isInt(),
     body('short_name').optional().trim()
-        .matches(/^[a-zA-Z_][a-zA-Z0-9_]*$/).withMessage('Short name must start with a letter or underscore, and contain only letters, numbers, and underscores')
+        .matches(/^[a-zA-Z_][a-zA-Z0-9_]*$/).withMessage('Short name must start with a letter, and contain only letters, numbers, and underscores')
         .custom((v) => {
-            // `value` is reserved — it is the JEXL variable bound to the
-            // current answer in validation and skip-to scripts.
-            // `facility_coupons` is reserved — it is the facility's coupon
-            // ceiling, bound in the coupon_count_script context.
-            if (v === 'value') throw new Error('"value" is a reserved name and cannot be used as a short name');
-            if (v === 'facility_coupons') throw new Error('"facility_coupons" is a reserved name and cannot be used as a short name');
+            // `value`, `facility_coupons` and names starting with "_" are
+            // built-in JEXL variables (see services/builtinVariables.js).
+            const reserved = reservedShortNameError(v);
+            if (reserved) throw new Error(reserved);
             return true;
         }),
     body('question_text_json').optional({ nullable: true, checkFalsy: true }).isObject(),

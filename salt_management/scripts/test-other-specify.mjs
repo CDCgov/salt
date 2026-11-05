@@ -69,6 +69,8 @@ r = await api('POST', `/api/admin/survey-config/${SID}/questions`, q(2, 'num', '
 check('reject other on numeric', r.status === 400 && /Only multiple choice/.test(r.json.error), r.json);
 r = await api('POST', `/api/admin/survey-config/${SID}/questions`, q(2, 'gender_other', 'text', []));
 check('reject short_name = derived name', r.status === 400 && /reserved/.test(r.json.error), r.json);
+r = await api('POST', `/api/admin/survey-config/${SID}/questions`, q(2, '_is_seed', 'text', []));
+check('reject short_name starting with "_" (built-in variables)', r.status === 400 && /cannot start with "_"/.test(r.json.errors?.[0]?.msg), r.json);
 r = await api('POST', `/api/admin/survey-config/${SID}/questions`, q(2, 'plain', 'multiple_choice', [opt(0, 'P'), opt(1, 'Q')]));
 check('create MC without other', r.status === 201, r.json);
 const plainId = r.json.id;

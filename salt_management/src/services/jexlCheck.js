@@ -13,6 +13,8 @@
  *   - <short_name>_other for questions with an "other" option
  *   - `value` in validation and skip-to scripts (the current answer)
  *   - `facility_coupons` in the coupon count script
+ *   - the built-ins _facility_name, _facility_id and _is_seed everywhere
+ *     (services/builtinVariables.js)
  *   - lab test conditions: answered questions' short_names and rapid test ids
  * Multiple choice answers are the 0-based option number, multi-select answers
  * are a list of option numbers. In lab test conditions a multiple choice
@@ -25,6 +27,7 @@
 
 const { parseScripts, unavailableMessage } = require('./jexlParser');
 const { isOtherFlag, OTHER_SUFFIX } = require('./otherOption');
+const { BUILTIN_VARIABLES } = require('./builtinVariables');
 
 const ALLOWED_CALLS = new Set(['.contains', '.size', 'size', 'empty']);
 const ALLOWED_CALLS_TEXT = '=~, .contains(), .size(), size() and empty()';
@@ -201,7 +204,7 @@ function suggestName(name, known) {
  */
 function scriptContext(model, kind, field, owner) {
     const hasValue = kind === 'question' && field !== 'pre_script';
-    const extra = new Set();
+    const extra = new Set(Object.keys(BUILTIN_VARIABLES));
     if (hasValue) extra.add('value');
     if (kind === 'coupon') extra.add('facility_coupons');
     return { kind, field, owner, hasValue, extra };

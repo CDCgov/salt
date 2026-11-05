@@ -76,6 +76,29 @@ that question:
 
 ---
 
+## Facility and seed variables
+
+Every script (skip logic, validation, skip-to, eligibility, coupon count) and
+every lab test condition can also use three built-in variables:
+
+| Variable | Value | Example |
+|---|---|---|
+| `_facility_name` | the tablet's facility name, as on the Facilities page (null before tablet setup) | `_facility_name == 'Clinic A'` |
+| `_facility_id` | the facility's ID, shown on the Facilities page (null before tablet setup) | `_facility_id == 3` |
+| `_is_seed` | `true` when the participant came without a referral coupon, else `false` | `_is_seed`, `!_is_seed` |
+
+- `_facility_id` survives a facility rename; `_facility_name` silently stops
+  matching if the name changes or is mistyped.
+- Short names cannot start with `_` (reserved for built-ins), so questions
+  never shadow them.
+- Tablets on an older app don't define them and fail scripts that use them:
+  update every tablet before activating a survey that relies on them.
+- Defined on the tablet in `Util.kt` `builtinJexlVariables`; the server's
+  checker lists them in `src/services/builtinVariables.js` (a unit test keeps
+  the two in step).
+
+---
+
 ## Writing conditions
 
 A condition compares values and produces a yes/no (true/false) result.

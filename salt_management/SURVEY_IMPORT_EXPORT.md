@@ -358,7 +358,8 @@ The request is rejected with `400` if:
 - `sections` doesn't have exactly one `eligibility` and one `main` section, or
   has a section of any other type.
 - Two questions share a `short_name`, or a question uses the reserved
-  `value` or `facility_coupons`.
+  `value` or `facility_coupons`, or a `short_name` starting with `_`
+  (reserved for built-in variables such as `_is_seed`).
 - An option has `is_other = 1` on a question that is not `multiple_choice` or
   `multi_select`.
 - A question has more than one `is_other` option.
