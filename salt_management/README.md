@@ -112,19 +112,18 @@ Create a `.env` file in the `salt_management/` directory:
 PORT=3000
 NODE_ENV=production
 
-# Database
-DATABASE_PATH=./data/database/salt.db
-
-# Session Security
-SESSION_SECRET=your-random-secret-here-change-this
-
-# HTTPS Configuration (optional)
-HTTPS_ENABLED=false
-SSL_CERT_PATH=/path/to/certificate.pem
-SSL_KEY_PATH=/path/to/private-key.pem
+# Session Security (optional)
+# SESSION_SECRET=
 ```
 
-**Important**: Change `SESSION_SECRET` to a random string in production.
+`SESSION_SECRET` signs login cookies. Leave it unset and the server generates
+a random one on first start and keeps it in `data/.session-secret` (readable
+only by the server's user), as the Docker image does. To set your own, use a
+long random value, for example from `openssl rand -hex 32`. There is no
+built-in default.
+
+The database is always `data/database/salt.db`. HTTPS is handled by the
+reverse proxy (nginx), not by the server itself; see `setup-nginx.sh`.
 
 ### Port Configuration
 

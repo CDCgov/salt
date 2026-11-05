@@ -80,8 +80,9 @@ app.use('/js/dompurify', express.static(path.join(__dirname, '..', 'node_modules
 app.use('/files', express.static(path.join(__dirname, '..', 'data', 'files')));
 
 // Session configuration for web UI
+const { getSessionSecret } = require('./services/sessionSecret');
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'salt-management-secret-key-change-in-production',
+    secret: getSessionSecret(),
     resave: false,
     saveUninitialized: false,
     cookie: {
