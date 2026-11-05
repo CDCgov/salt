@@ -16,6 +16,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const uuid = require('uuid');
 const { buildDictionaryRows } = require('./dataDictionary');
+const { childProcessEnv } = require('./childProcessEnv');
 
 const MAX_LEVELS = 20;               // table() at/below this many distinct values, else summary()
 // Very large backstop on profile text (not a content limit). Override via env.
@@ -136,7 +137,8 @@ for (col in names(wide)) {
                 cwd: workDir,
                 timeout: 600000,                 // 10 min backstop
                 maxBuffer: 16 * 1024 * 1024,
-                env: { ...process.env, LANG: 'en_US.UTF-8' },
+                // Same reduced environment as report rendering (see childProcessEnv.js).
+                env: childProcessEnv({ LANG: 'en_US.UTF-8' }),
             }, (error, stdout, stderr) => {
                 let out = stdout || '';
                 if (error && !out) out = `# Profiler error\n${stderr || error.message}\n`;

@@ -169,6 +169,25 @@ const callJson = async (c, name, args = {}) => {
     ok('legacy render produced html/pdf/docx', types.includes('html') && types.includes('pdf') && types.includes('docx'));
     ok('legacy render produced NO md', !types.includes('md'), types);
 
+    // Report R code must not see the server's secrets (childProcessEnv.js).
+    section('ReportExecutor — R does not inherit server secrets');
+    const leak = 'zz-leak-check-' + Date.now();
+    const savedEnv = { SESSION_SECRET: process.env.SESSION_SECRET, SALT_TEST_API_KEY: process.env.SALT_TEST_API_KEY, MCP_PUBLIC_URL: process.env.MCP_PUBLIC_URL };
+    Object.assign(process.env, { SESSION_SECRET: leak, SALT_TEST_API_KEY: leak, MCP_PUBLIC_URL: 'https://' + leak });
+    const envQmd = `---\ntitle: Env\nformat: html\n---\n\n\`\`\`{r}\n#| echo: false\nv <- Sys.getenv(c("SESSION_SECRET","SALT_TEST_API_KEY","MCP_PUBLIC_URL","PATH","HOME"))\ncat(paste0("ENV[", names(v), "]=", v, collapse = "\\n"))\n\`\`\`\n`;
+    const envRep = (await runAsync("INSERT INTO reports (name,qmd_content,created_by,created_at,updated_at) VALUES ('ZZ Env',?,1,datetime('now'),datetime('now'))", [envQmd])).id;
+    let envRun;
+    try { envRun = await new ReportExecutor().executeReport(envRep, 'manual', 1); }
+    finally { for (const [k, v] of Object.entries(savedEnv)) { if (v === undefined) delete process.env[k]; else process.env[k] = v; } }
+    const envHtml = await getAsync("SELECT file_path FROM report_outputs WHERE run_id=? AND file_type='html'", [envRun]);
+    const envText = envHtml ? require('fs').readFileSync(envHtml.file_path, 'utf8') : '';
+    ok('env report rendered', envText.includes('ENV[PATH]='), envText.slice(0, 200));
+    ok('R does not see SESSION_SECRET, API keys or MCP settings', !envText.includes(leak));
+    ok('R still gets PATH and HOME', /ENV\[PATH\]=\S/.test(envText) && /ENV\[HOME\]=\S/.test(envText));
+    // Remove this render's output folder (data/reports/runs/<runId>).
+    const envDir = envHtml && require('path').dirname(envHtml.file_path);
+    if (envDir && require('path').basename(envDir) === envRun) require('fs').rmSync(envDir, { recursive: true, force: true });
+
     // --------------------------------------------------------- OAuth flow
     section('OAuth 2.1 flow (+ consent + error paths)');
     // temp admin

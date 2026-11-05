@@ -3,6 +3,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const uuid = require('uuid');
 const { runAsync, getAsync } = require('../models/database');
+const { childProcessEnv } = require('./childProcessEnv');
 
 class ReportExecutor {
     constructor() {
@@ -263,7 +264,8 @@ class ReportExecutor {
                     // exec() buffers stdout/stderr in memory; the 1 MB default
                     // would ENOBUFS-kill a long, chatty render. 64 MB headroom.
                     maxBuffer: 64 * 1024 * 1024,
-                    env: { ...process.env, LANG: 'en_US.UTF-8' }
+                    // No server secrets: report R code is user-written (see childProcessEnv.js).
+                    env: childProcessEnv({ LANG: 'en_US.UTF-8' })
                 },
                 (error, stdout, stderr) => {
                     logs += stdout;
