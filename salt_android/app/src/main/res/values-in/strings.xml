@@ -899,4 +899,6 @@
     <string name="dev_settings_upload_success_msg">Log pengembangan berhasil diunggah</string>
     <string name="dev_settings_server_error">Kesalahan server %1$d: %2$s</string>
     <string name="dev_settings_unknown_error">Kesalahan tidak diketahui</string>
+    <string name="app_update_needed_title">Perbarui aplikasi SALT</string>
+    <string name="app_update_needed_message">Tablet ini menggunakan aplikasi SALT versi %1$s, tetapi server memerlukan versi %2$s atau yang lebih baru. Beberapa fitur survei mungkin tidak berfungsi dengan benar sampai aplikasi diperbarui. Minta administrator Anda untuk memasang pembaruan dari %3$s</string>
 </resources>

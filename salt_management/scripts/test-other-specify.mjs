@@ -57,6 +57,13 @@ const created = await api('POST', '/api/admin/survey-config', { name: 'Other tes
 const SID = created.json.id;
 check('create survey', created.status === 201 || created.status === 200, created.json);
 
+// --- the tablet's post-login version check gets the required app version
+{
+    const vr = await fetch(`${BASE}/api/sync/survey/version`, { headers: { 'X-API-Key': API_KEY } });
+    const vj = await vr.json();
+    check('version check returns the required tablet app version', vr.status === 200 && vj.data.min_app_version_code === 4 && vj.data.min_app_version === '1.4', vj);
+}
+
 // --- editor routes
 let r = await api('POST', `/api/admin/survey-config/${SID}/questions`, q(0, 'gender', 'multiple_choice', [opt(0, 'Male'), opt(1, 'Female'), opt(2, 'Other', true)]));
 check('create MC with other', r.status === 201, r.json);

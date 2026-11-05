@@ -899,4 +899,6 @@
     <string name="dev_settings_upload_success_msg">Development logs uploaded successfully</string>
     <string name="dev_settings_server_error">Server error %1$d: %2$s</string>
     <string name="dev_settings_unknown_error">Unknown error</string>
+    <string name="app_update_needed_title">Update the SALT app</string>
+    <string name="app_update_needed_message">This tablet has SALT app version %1$s, but the server needs version %2$s or newer. Some survey features may not work correctly until the app is updated. Ask your administrator to install the update from %3$s</string>
 </resources>

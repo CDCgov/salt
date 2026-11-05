@@ -897,4 +897,6 @@
     <string name="dev_settings_upload_success_msg">Registros de desarrollo subidos exitosamente</string>
     <string name="dev_settings_server_error">Error del servidor %1$d: %2$s</string>
     <string name="dev_settings_unknown_error">Error desconocido</string>
+    <string name="app_update_needed_title">Actualice la aplicación SALT</string>
+    <string name="app_update_needed_message">Esta tableta tiene la versión %1$s de la aplicación SALT, pero el servidor necesita la versión %2$s o posterior. Algunas funciones de la encuesta pueden no funcionar correctamente hasta que se actualice la aplicación. Pida a su administrador que instale la actualización desde %3$s</string>
 </resources>

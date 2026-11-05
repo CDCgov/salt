@@ -2,6 +2,7 @@ const express = require('express');
 const crypto = require('crypto');
 const { getAsync, allAsync } = require('../../models/database');
 const { requireFacilityApiKey } = require('../../web/middleware/auth');
+const { MIN_TABLET_VERSION_CODE, MIN_TABLET_VERSION_NAME } = require('../../services/tabletVersion');
 const router = express.Router();
 
 /**
@@ -140,7 +141,9 @@ router.get('/survey/version', requireFacilityApiKey, async (req, res) => {
                 updated_at: activeSurvey.updated_at,
                 last_modified: lastUpdated, // Timestamp in milliseconds
                 is_mandatory_update: false,
-                min_app_version: '1.0.0'
+                // Oldest tablet app this server needs; older tablets show an update message.
+                min_app_version: MIN_TABLET_VERSION_NAME,
+                min_app_version_code: MIN_TABLET_VERSION_CODE
             }
         });
 

@@ -899,4 +899,6 @@
     <string name="dev_settings_upload_success_msg">Journaux de développement téléversés avec succès</string>
     <string name="dev_settings_server_error">Erreur du serveur %1$d : %2$s</string>
     <string name="dev_settings_unknown_error">Erreur inconnue</string>
+    <string name="app_update_needed_title">Mettez à jour l\'application SALT</string>
+    <string name="app_update_needed_message">Cette tablette a la version %1$s de l\'application SALT, mais le serveur nécessite la version %2$s ou plus récente. Certaines fonctions de l\'enquête peuvent ne pas fonctionner correctement tant que l\'application n\'est pas mise à jour. Demandez à votre administrateur d\'installer la mise à jour depuis %3$s</string>
 </resources>

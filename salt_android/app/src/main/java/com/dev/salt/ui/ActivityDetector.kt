@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -24,9 +26,12 @@ fun ActivityDetector(
     val context = LocalContext.current
     val userDao = remember { SurveyDatabase.getInstance(context).userDao() }
 
-    LaunchedEffect(sessionManager.sessionState.value.isActive) {
+    // Observe the session so the effect below re-runs when it becomes active.
+    val sessionState by sessionManager.sessionState.collectAsState()
+
+    LaunchedEffect(sessionState.isActive) {
         // Update activity time when session becomes active or user activity is detected
-        if (sessionManager.sessionState.value.isActive) {
+        if (sessionState.isActive) {
             val currentUser = sessionManager.getCurrentUser()
             if (currentUser != null) {
                 withContext(Dispatchers.IO) {

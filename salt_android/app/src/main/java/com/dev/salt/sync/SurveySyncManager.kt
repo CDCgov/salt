@@ -2,6 +2,7 @@ package com.dev.salt.sync
 
 import android.content.Context
 import android.util.Base64
+import com.dev.salt.BuildConfig
 import com.dev.salt.logging.AppLogger as Log
 import com.dev.salt.data.*
 import kotlinx.coroutines.Dispatchers
@@ -31,9 +32,14 @@ private fun JSONObject.getStringOrNull(key: String): String? =
 /**
  * Result of checking for survey updates with detailed status information.
  */
+/** The oldest tablet app the server needs (null when the server doesn't say). */
+data class MinAppVersion(val code: Int, val name: String) {
+    val isNewerThanThisApp: Boolean get() = code > BuildConfig.VERSION_CODE
+}
+
 sealed class SurveyCheckResult {
-    object NeedsUpdate : SurveyCheckResult()
-    object UpToDate : SurveyCheckResult()
+    data class NeedsUpdate(val minAppVersion: MinAppVersion? = null) : SurveyCheckResult()
+    data class UpToDate(val minAppVersion: MinAppVersion? = null) : SurveyCheckResult()
     /** Network unreachable - normal for offline operation, not alarming */
     object Unreachable : SurveyCheckResult()
     /** Actual error - connection refused, auth failure, server error - indicates a problem */
@@ -198,11 +204,14 @@ class SurveySyncManager(private val context: Context) {
                     val serverChecksum = data.optString("checksum", "")
                     val syncMetadata = syncMetadataDao.getSyncMetadata()
                     val localChecksum = syncMetadata?.surveyChecksum ?: ""
+                    // Servers before min_app_version_code don't send it.
+                    val minAppVersion = data.optInt("min_app_version_code", 0).takeIf { it > 0 }
+                        ?.let { MinAppVersion(it, data.optString("min_app_version", it.toString())) }
 
                     return@withContext if (serverChecksum.isNotEmpty() && serverChecksum != localChecksum) {
-                        SurveyCheckResult.NeedsUpdate
+                        SurveyCheckResult.NeedsUpdate(minAppVersion)
                     } else {
-                        SurveyCheckResult.UpToDate
+                        SurveyCheckResult.UpToDate(minAppVersion)
                     }
                 } else {
                     return@withContext SurveyCheckResult.Error("Server returned error status")

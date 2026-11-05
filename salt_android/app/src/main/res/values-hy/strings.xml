@@ -806,4 +806,6 @@
     <string name="dev_settings_upload_success_msg">Մշակման մատյանները հաջողությամբ վերբեռնվեցին</string>
     <string name="dev_settings_server_error">Սերվերի սխալ %1$d՝ %2$s</string>
     <string name="dev_settings_unknown_error">Անհայտ սխալ</string>
+    <string name="app_update_needed_title">Թարմացրեք SALT հավելվածը</string>
+    <string name="app_update_needed_message">Այս պլանշետում տեղադրված է SALT հավելվածի %1$s տարբերակը, սակայն սերվերին անհրաժեշտ է %2$s կամ ավելի նոր տարբերակ։ Հարցման որոշ գործառույթներ կարող են ճիշտ չաշխատել, քանի դեռ հավելվածը չի թարմացվել։ Խնդրեք ձեր ադմինիստրատորին տեղադրել թարմացումը %3$s հասցեից</string>
 </resources>

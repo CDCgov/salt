@@ -65,6 +65,14 @@ description: Common problems and solutions for the SALT tablet app and managemen
 2. If the administrator password is unknown, another administrator must reset it via **Manage Users → Edit User**.
 3. If all administrator passwords are lost, the database must be reset. Contact the server administrator to re-run the tablet setup.
 
+### "Update the SALT app" message after login
+
+**Symptom**: After logging in, the tablet says its SALT app version is older than the server needs.
+
+**Cause**: The server has been updated and relies on features of a newer tablet app. The tablet keeps working after you tap **OK**, but some survey features may not work correctly until it is updated.
+
+**Solution**: Install the current app from the address shown in the message (the server's `/tablet` page), following [Tablet Setup](../../tablet/setup/). Installing over the existing app keeps the tablet's data. The message stops once the tablet has the version the server needs. It only appears when the tablet can reach the server.
+
 ---
 
 ## Management server

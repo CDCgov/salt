@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import com.dev.salt.sync.SurveySyncManager
 import com.dev.salt.sync.SurveyCheckResult
+import com.dev.salt.sync.MinAppVersion
 import com.dev.salt.util.hasActiveNetwork
 import com.dev.salt.viewmodel.LoginViewModel
 import com.dev.salt.viewmodel.UserRole
@@ -45,6 +46,8 @@ fun LoginScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     // Status text shown during post-login sync (facility/survey checks + download).
     var syncStatus by remember { mutableStateOf<String?>(null) }
+    // Set when the server needs a newer app: shown before continuing past login.
+    var appUpdateNeeded by remember { mutableStateOf<Pair<MinAppVersion, () -> Unit>?>(null) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -58,6 +61,7 @@ fun LoginScreen(
         // Navigate immediately - don't block on sync
         coroutineScope.launch {
             var syncMessage: SyncMessage? = null
+            var minAppVersion: MinAppVersion? = null
 
             // Option 1: no network at all means we skip the server calls
             // entirely and go straight to offline mode (avoids the ~15s
@@ -87,6 +91,11 @@ fun LoginScreen(
                 syncStatus = context.getString(R.string.login_sync_survey_check)
                 val surveySyncManager = SurveySyncManager(context)
                 val checkResult = surveySyncManager.checkForSurveyUpdateWithStatus()
+                minAppVersion = when (checkResult) {
+                    is SurveyCheckResult.NeedsUpdate -> checkResult.minAppVersion
+                    is SurveyCheckResult.UpToDate -> checkResult.minAppVersion
+                    else -> null
+                }
 
                 syncMessage = when (checkResult) {
                     is SurveyCheckResult.NeedsUpdate -> {
@@ -121,8 +130,36 @@ fun LoginScreen(
                 syncMessage = SyncMessage(context.getString(R.string.sync_status_error, errorMsg), isError = true)
             }
 
-            onLoginSuccess(role, syncMessage)
+            val needed = minAppVersion
+            if (needed != null && needed.isNewerThanThisApp) {
+                Log.w("LoginScreen", "Server needs app version ${needed.name} (${needed.code}); this app is ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+                val message = syncMessage
+                appUpdateNeeded = needed to { onLoginSuccess(role, message) }
+            } else {
+                onLoginSuccess(role, syncMessage)
+            }
         }
+    }
+
+    appUpdateNeeded?.let { (needed, proceed) ->
+        val serverUrl = remember {
+            SurveyDatabase.getInstance(context).appServerConfigDao().getServerConfig()?.serverUrl?.trimEnd('/') ?: ""
+        }
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.app_update_needed_title)) },
+            text = {
+                Text(stringResource(R.string.app_update_needed_message, BuildConfig.VERSION_NAME, needed.name, "$serverUrl/tablet"))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    appUpdateNeeded = null
+                    proceed()
+                }) {
+                    Text(stringResource(R.string.common_ok))
+                }
+            }
+        )
     }
 
 
