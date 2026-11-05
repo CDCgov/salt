@@ -24,7 +24,7 @@ app.use(helmet({
             // used by the Reports, Report History, Report Editor and Export pages.
             styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
             fontSrc: ["'self'", "data:", "https://cdnjs.cloudflare.com"],
-            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+            scriptSrc: ["'self'", "'unsafe-inline'"],
             scriptSrcAttr: ["'unsafe-inline'"],
             mediaSrc: ["'self'", "blob:", "data:"],
             connectSrc: ["'self'", "blob:", "data:"],
