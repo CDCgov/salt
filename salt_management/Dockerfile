@@ -1,7 +1,7 @@
 # SALT Management Server image
 #
 # Base: rocker/tidyverse — R + tidyverse pre-installed (needed for the
-# Quarto-based reports). Layered on top: Node.js 18 (the API/web server),
+# Quarto-based reports). Layered on top: Node.js 22 (the API/web server),
 # Quarto (report rendering), the R packages reports depend on (RDS, DBI,
 # RSQLite, etc.), and a Java runtime for the JEXL script checker.
 #
@@ -37,8 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         openjdk-17-jre-headless \
     && rm -rf /var/lib/apt/lists/*
 
-# Node.js 18 from NodeSource.
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+# Node.js 22 (LTS) from NodeSource. sqlite3 6 needs Node 20.17 or newer.
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && rm -rf /var/lib/apt/lists/*
 

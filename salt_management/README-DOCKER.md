@@ -60,7 +60,7 @@ Visit `http://localhost:3000`.
 | Layer | Version |
 |---|---|
 | Base | `rocker/tidyverse:latest` (R 4.x + tidyverse) |
-| Node.js | 18.x (NodeSource) |
+| Node.js | 22.x LTS (NodeSource) |
 | Quarto | 1.9.37 |
 | R packages | `RDS`, `DBI`, `RSQLite`, `httr`, `jsonlite`, `lubridate`, `scales`, `uuid` |
 | Java | `openjdk-17-jre-headless`, for the JEXL script checker |

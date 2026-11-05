@@ -10,7 +10,7 @@ The SALT Management Server is the central backend for the SALT (System Assisted 
 
 ```bash
 # 1. Install prerequisites
-# - Node.js 14+ (https://nodejs.org/)
+# - Node.js 20.17+ (https://nodejs.org/; 22 LTS recommended)
 # - SQLite3 (usually pre-installed on macOS/Linux)
 # - R 4.0+ (https://cran.r-project.org/) - for data analysis
 # - Quarto (https://quarto.org/docs/get-started/) - for reports
