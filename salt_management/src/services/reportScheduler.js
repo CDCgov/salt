@@ -63,7 +63,6 @@ class ReportScheduler {
         const job = cron.schedule(cronPattern, async () => {
             await this.executeScheduledReport(schedule);
         }, {
-            scheduled: true,
             timezone: 'UTC'
         });
 
@@ -244,7 +243,7 @@ class ReportScheduler {
     removeJob(scheduleId) {
         const job = this.jobs.get(scheduleId);
         if (job) {
-            job.stop();
+            job.destroy();
             this.jobs.delete(scheduleId);
             console.log(`Removed scheduled job: ${scheduleId}`);
         }
@@ -255,7 +254,7 @@ class ReportScheduler {
      */
     stopAll() {
         for (const [scheduleId, job] of this.jobs) {
-            job.stop();
+            job.destroy();
         }
         this.jobs.clear();
         console.log('All scheduled jobs stopped');
