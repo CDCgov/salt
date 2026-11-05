@@ -21,7 +21,7 @@ cd salt_management
 # 3. Install dependencies
 npm install
 
-# 4. Start the server
+# 4. Start the server (creates data/database/salt.db on first run)
 npm start
 
 # 5. Open browser to http://localhost:3000
@@ -93,6 +93,13 @@ npm start
 ```
 
 Server will start on **http://localhost:3000** by default.
+
+Both commands first run `scripts/init-database.js` (also available as
+`npm run init-db`). On the first run it creates `data/database/salt.db` with
+the full schema, the default admin, a demo facility and the sample surveys; on
+later runs it only adds tables or columns that a newer version needs, and
+leaves existing data alone. Starting `node src/app.js` directly without a
+database stops with a message instead of creating an empty one.
 
 ## Configuration
 

@@ -4,7 +4,9 @@
   "description": "SALT Management Server - Administrative interface for SALT survey system",
   "main": "src/app.js",
   "scripts": {
+    "prestart": "node scripts/init-database.js",
     "start": "node src/app.js",
+    "predev": "node scripts/init-database.js",
     "dev": "nodemon src/app.js",
     "init-db": "node scripts/init-database.js",
     "test": "node --test tests/*.test.js",

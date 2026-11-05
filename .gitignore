@@ -47,7 +47,8 @@ salt_management/data/exports/
 salt_management/data/reports/
 salt_management/data/files/
 salt_management/data/database/*.backup*
-salt_management/data/database/salt.db
+salt_management/data/database/*.db
+salt_management/data/database/*.db-*
 salt_management/salt.db
 
 # Test files
