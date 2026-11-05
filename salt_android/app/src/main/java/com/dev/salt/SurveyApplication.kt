@@ -10,7 +10,6 @@ import kotlin.concurrent.read
 import kotlin.io.path.exists
 import java.io.File
 import java.io.FileOutputStream
-import net.sqlcipher.database.SQLiteDatabase
 import com.dev.salt.logging.AppLogger
 
 class SurveyApplication : Application() {
@@ -26,7 +25,7 @@ class SurveyApplication : Application() {
         Log.e("SurveyApplication", "onCreate called")
 
         // Initialize SQLCipher
-        SQLiteDatabase.loadLibs(this)
+        System.loadLibrary("sqlcipher")
         Log.d("SurveyApplication", "SQLCipher initialized")
         
         setupGlobalExceptionHandler()

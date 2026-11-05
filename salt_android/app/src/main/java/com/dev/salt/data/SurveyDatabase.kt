@@ -2,8 +2,7 @@ package com.dev.salt.data
 import androidx.room.*
 import androidx.room.OnConflictStrategy
 import java.util.UUID
-import net.sqlcipher.database.SQLiteDatabase
-import net.sqlcipher.database.SupportFactory
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import com.dev.salt.security.DatabaseKeyManager
 
 @Entity(tableName = "sync_metadata")
@@ -879,7 +878,7 @@ abstract class SurveyDatabase : RoomDatabase() {
         private fun buildDatabase(context: android.content.Context): SurveyDatabase {
             // Get or create the encryption key
             val passphrase = DatabaseKeyManager.getDatabasePassphrase(context)
-            val factory = SupportFactory(passphrase)
+            val factory = SupportOpenHelperFactory(passphrase)
             
             return androidx.room.Room.databaseBuilder(
                 context.applicationContext,

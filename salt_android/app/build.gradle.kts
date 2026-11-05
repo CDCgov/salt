@@ -16,7 +16,7 @@ if (signingPropertiesFile.exists()) {
 
 android {
     namespace = "com.dev.salt"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.dev.salt"
@@ -95,8 +95,10 @@ dependencies {
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$room_version")
     
-    // SQLCipher for database encryption
-    implementation("net.zetetic:android-database-sqlcipher:4.5.4")
+    // SQLCipher for database encryption. sqlcipher-android replaces the
+    // discontinued android-database-sqlcipher; both use the SQLCipher 4 file
+    // format, so existing databases open unchanged.
+    implementation("net.zetetic:sqlcipher-android:4.20.0")
     implementation("androidx.sqlite:sqlite-ktx:2.4.0")
 
 
