@@ -47,6 +47,7 @@ export default defineConfig({
             { label: 'AI Assistant (MCP)', slug: 'management/ai-report-builder' },
             { label: 'Export Data', slug: 'management/export-data' },
             { label: 'Edit Data', slug: 'management/edit-data' },
+            { label: 'System', slug: 'management/system' },
           ],
         },
         {

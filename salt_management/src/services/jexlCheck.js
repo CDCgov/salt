@@ -449,6 +449,11 @@ async function checkSurveyData(data) {
     const checked = await runScripts(model, surveyScripts(model), collector);
     checkSkipTargets(model, collector);
     checkTranslations(model, collector);
+    // A blank eligibility script lets everyone through; usually an oversight.
+    if (!String(model.survey.eligibility_script || '').trim()) {
+        collector.issue('warning', 'eligibility_script', null,
+            'There is no eligibility script, so every participant is eligible. Add one unless that is intended.');
+    }
     return result(collector, checked);
 }
 

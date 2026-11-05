@@ -18,15 +18,19 @@ summaries, and the reports you generate. Reports are normally aggregate-only, bu
 included in a report (including any individual-level detail) is shared with the AI service you
 connect, so design your reports accordingly.
 
-## Enabling it (administrator / ops)
+## Turning it on and off
 
-The feature is **on by default**. The main thing to set is the server's public URL so AI clients
-can connect (and to disable it, set `MCP_ENABLED=false`):
+What a connected assistant may do is set on the [System](/management/system/) page, with two
+switches: **AI report building** (off by default) and **AI survey and lab test editing** (on by
+default). Changes apply immediately. With both off, AI assistants can't connect.
+
+The one server setting is the public URL, so AI clients can connect:
 
 ```bash
 MCP_PUBLIC_URL=https://your-salt-host.example.org   # the public HTTPS URL of this server
-# MCP_ENABLED=false                                 # only if you want to turn it off
 ```
+
+The installer sets it to `https://<your domain>`.
 
 The server must be reachable over **HTTPS at a public URL** so the AI client can connect.
 Sessions expire automatically: an access token lasts 30 minutes (refreshed silently) and every

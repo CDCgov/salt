@@ -24,6 +24,7 @@ const { getReportInstructions } = require('../services/reportInstructions');
 const { logAudit } = require('../services/auditService');
 const reportTemplates = require('../services/reportTemplates');
 const { registerSurveyTools } = require('./surveyTools');
+const { groupRegistrar } = require('./toolGroups');
 
 // Example report templates are managed by the shared reportTemplates service
 // (seeded from src/mcp/templates-default into the data volume; the web report
@@ -102,8 +103,12 @@ function markRenderEnd(userId) {
 
 // ---- tool registration ----------------------------------------------------
 
-function registerTools(server) {
-    server.registerTool('list_surveys', {
+function registerTools(mcpServer, groups = { reports: true, surveys: true }) {
+    // Each group registers only when its System page switch is on.
+    const shared = groupRegistrar(mcpServer, 'any', groups);
+    const server = groupRegistrar(mcpServer, 'reports', groups);
+
+    shared.registerTool('list_surveys', {
         title: 'List surveys',
         description: 'List surveys with completed-response counts and date range. is_active = 1 is the live survey that tablets download; it can be read but not edited (use copy_survey).',
         inputSchema: {},
@@ -362,7 +367,7 @@ function registerTools(server) {
         }, null, 2));
     });
 
-    registerSurveyTools(server);
+    registerSurveyTools(groupRegistrar(mcpServer, 'surveys', groups));
 }
 
 module.exports = { registerTools, seedTemplates, _internals: { getProfile, profileCache } };

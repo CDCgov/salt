@@ -733,18 +733,20 @@ class DataExporter {
             WHERE short_name IS NOT NULL
             ORDER BY question_index
         `);
+        // Each q_ column sorts by (question position, owning question,
+        // sub-position), so a question's own columns — the answer, exploded
+        // multi-select options q_foo_<i>, and "other" text q_foo_other — stay
+        // together even when questions from different surveys share a position.
         const questionOrderMap = {};
         questionOrder.forEach((q, index) => {
-            questionOrderMap['q_' + q.short_name] = q.question_index ?? index;
+            questionOrderMap['q_' + q.short_name] = { base: q.question_index ?? index, group: q.short_name, sub: 0 };
         });
-        // Add fractional order entries for exploded multi-select columns so
-        // q_foo_0, q_foo_1, q_foo_2 stay grouped at the original q_foo
-        // position and are ordered by option_index (handles two-digit indices
-        // correctly, unlike a plain lexicographic fallback).
+        // Exploded multi-select columns, ordered by option_index (handles
+        // two-digit indices correctly, unlike a plain lexicographic fallback).
         for (const [shortName, optionIndices] of Object.entries(multiSelectMeta)) {
-            const baseOrder = questionOrderMap['q_' + shortName] ?? 999999;
+            const base = questionOrderMap['q_' + shortName]?.base ?? 999999;
             for (const idx of optionIndices) {
-                questionOrderMap[`q_${shortName}_${idx}`] = baseOrder + idx / 10000;
+                questionOrderMap[`q_${shortName}_${idx}`] = { base, group: shortName, sub: 1 + idx / 10000 };
             }
         }
         // "Other" text columns (q_foo_other) go right after the question's own
@@ -753,9 +755,10 @@ class DataExporter {
         for (const q of questionOrder) {
             const otherColumn = `q_${q.short_name}_other`;
             if (!(otherColumn in questionOrderMap)) {
-                questionOrderMap[otherColumn] = questionOrderMap['q_' + q.short_name] + 0.99999;
+                questionOrderMap[otherColumn] = { ...questionOrderMap['q_' + q.short_name], sub: 2 };
             }
         }
+        const NO_ORDER = { base: 999999, group: '', sub: 0 };
 
         // Pivot to wide format
         const wideData = {};
@@ -806,9 +809,9 @@ class DataExporter {
                 if (prefixA === prefixB) {
                     // For question columns, use display_order instead of alphabetical
                     if (prefixA === 'q_') {
-                        const orderA = questionOrderMap[a] ?? 999999;
-                        const orderB = questionOrderMap[b] ?? 999999;
-                        return orderA - orderB;
+                        const oa = questionOrderMap[a] ?? NO_ORDER;
+                        const ob = questionOrderMap[b] ?? NO_ORDER;
+                        return (oa.base - ob.base) || oa.group.localeCompare(ob.group) || (oa.sub - ob.sub);
                     }
                     return a.localeCompare(b);
                 }

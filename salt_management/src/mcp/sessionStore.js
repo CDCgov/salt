@@ -12,7 +12,7 @@
  */
 
 const crypto = require('crypto');
-const { runAsync, getAsync } = require('../models/database');
+const { runAsync, getAsync, allAsync } = require('../models/database');
 
 const ACCESS_TTL_SECONDS = parseInt(process.env.MCP_ACCESS_TTL_SECONDS || '1800', 10);    // 30 min
 const SESSION_MAX_SECONDS = parseInt(process.env.MCP_SESSION_MAX_SECONDS || '21600', 10); // 6 h hard cap
@@ -141,6 +141,19 @@ async function revokeAllForUser(userId) {
     await runAsync('UPDATE mcp_sessions SET revoked = 1 WHERE user_id = ?', [userId]);
 }
 
+/** Sessions that are not revoked and not past the absolute cap. */
+async function countActiveSessions() {
+    const rows = await allAsync('SELECT absolute_expires_at FROM mcp_sessions WHERE revoked = 0');
+    return rows.filter(r => !past(r.absolute_expires_at)).length;
+}
+
+/** Revoke every session (the System page's kill switch). Returns how many were active. */
+async function revokeAllSessions() {
+    const active = await countActiveSessions();
+    await runAsync('UPDATE mcp_sessions SET revoked = 1 WHERE revoked = 0');
+    return active;
+}
+
 module.exports = {
     ACCESS_TTL_SECONDS,
     SESSION_MAX_SECONDS,
@@ -151,4 +164,6 @@ module.exports = {
     refreshSession,
     revokeToken,
     revokeAllForUser,
+    countActiveSessions,
+    revokeAllSessions,
 };

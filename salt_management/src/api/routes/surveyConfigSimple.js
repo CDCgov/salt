@@ -359,7 +359,10 @@ router.post('/', [
         const newVersion = 1;
         
         const surveyLanguages = languages || '["en"]';
-        const eligibilityScript = 'consent == "1" && age >= 18 && age <= 65';
+        // Blank: a new survey has no eligibility questions yet, so any script
+        // would refer to questions that don't exist. The checker warns until
+        // one is written.
+        const eligibilityScript = null;
         const eligibilityMessageJson = null;
         const fingerprintEnabled = 0;
         const reEnrollmentDays = 90;

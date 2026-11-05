@@ -23,14 +23,30 @@ const DEFAULT_FILE = path.join(__dirname, '..', 'mcp', 'report-instructions.defa
 // Short, forceful directive advertised as the MCP server's `instructions`. Kept
 // separate from (and shorter than) the full guidance so it is unmissable: it
 // compels the agent to fetch the full instructions before doing any analysis.
-const BOOTSTRAP_INSTRUCTIONS =
-    'You are connected to the SALT server (MCP): reports, survey editing, and lab tests. ' +
+const REPORT_BOOTSTRAP =
     'For report work, your FIRST action MUST be to call the `get_report_instructions` tool and ' +
     'follow what it returns — do this before reading data, writing any R/Quarto, or calling any ' +
     'other report tool. It contains the data contract, exact variable naming, data-cleaning rules, ' +
-    'available R packages, and output requirements; without it the analysis will be wrong. ' +
+    'available R packages, and output requirements; without it the analysis will be wrong.';
+const SURVEY_BOOTSTRAP =
     'For creating or editing surveys or lab tests, your FIRST action MUST be to call ' +
     '`get_survey_authoring_guide` and follow it: survey logic has rules that are easy to get wrong.';
+
+/**
+ * The MCP server's advertised instructions, naming only the tool groups that
+ * are switched on (System page), so the AI isn't told about tools it can't use.
+ */
+function buildBootstrapInstructions({ reports = true, surveys = true } = {}) {
+    const offered = [reports && 'reports', surveys && 'survey and lab test editing'].filter(Boolean);
+    return [
+        `You are connected to the SALT server (MCP): ${offered.join(', and ')}.`,
+        reports ? REPORT_BOOTSTRAP : 'Report building is turned off on this server.',
+        surveys ? SURVEY_BOOTSTRAP : 'Survey and lab test editing is turned off on this server.'
+    ].join(' ');
+}
+
+// With every group on (kept for callers that don't know the switches).
+const BOOTSTRAP_INSTRUCTIONS = buildBootstrapInstructions();
 
 /** Path to the editable instructions file (env-overridable). */
 function instructionsFilePath() {
@@ -74,4 +90,4 @@ function getReportInstructions() {
     return loadTemplate().replace(/\{\{SURVEY\}\}/g, 'a SALT survey');
 }
 
-module.exports = { getReportInstructions, instructionsFilePath, ensureSeeded, DEFAULT_FILE, BOOTSTRAP_INSTRUCTIONS };
+module.exports = { getReportInstructions, instructionsFilePath, ensureSeeded, DEFAULT_FILE, BOOTSTRAP_INSTRUCTIONS, buildBootstrapInstructions };

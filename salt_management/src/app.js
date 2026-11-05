@@ -20,7 +20,10 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
-            styleSrc: ["'self'", "'unsafe-inline'"],
+            // cdnjs serves the Font Awesome icons (stylesheet + its web fonts)
+            // used by the Reports, Report History, Report Editor and Export pages.
+            styleSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+            fontSrc: ["'self'", "data:", "https://cdnjs.cloudflare.com"],
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
             scriptSrcAttr: ["'unsafe-inline'"],
             mediaSrc: ["'self'", "blob:", "data:"],
@@ -128,6 +131,7 @@ const webLabTestManagementRoutes = require('./web/routes/labTestManagement');
 const webDataExportRoutes = require('./web/routes/dataExport');
 const webReportsRoutes = require('./web/routes/reports');
 const webEditDataRoutes = require('./web/routes/editData');
+const webSystemRoutes = require('./web/routes/system');
 const subjectManagementRoutes = require('./api/routes/subjectManagement');
 const surveyExportRoutes = require('./api/routes/surveyExport');
 
@@ -168,6 +172,7 @@ app.use('/', webLabTestManagementRoutes);
 app.use('/', webDataExportRoutes);
 app.use('/', webReportsRoutes);
 app.use('/', webEditDataRoutes);
+app.use('/', webSystemRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -220,9 +225,9 @@ function startServer() {
     });
 }
 
-// Mount the optional MCP report-builder server (opt-in via MCP_ENABLED), then
-// register the catch-all handlers and start listening. MCP failures never block
-// the rest of the server.
+// Mount the MCP server (its features are switched on and off on the System
+// page), then register the catch-all handlers and start listening. MCP
+// failures never block the rest of the server.
 require('./mcp').init(app)
     .catch(err => console.error('[mcp] init failed, continuing without MCP:', err))
     .finally(() => { registerFallbackHandlers(); startServer(); });

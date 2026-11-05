@@ -244,7 +244,7 @@ function addQuestionHtml(q) {
             bodyHtml += '                    <div class="option-item">\n';
             bodyHtml += '                        <span class="option-index">' + optIdx + '</span>\n';
             const optPrimaryText = optTexts[surveyLanguages[0]] || optTexts[Object.keys(optTexts)[0]] || 'No text';
-            bodyHtml += '                        ' + h(optPrimaryText) + (opt.is_other ? ' <em>(other, free text)</em>' : '') + '\n';
+            bodyHtml += '                        ' + h(optPrimaryText) + (opt.is_other ? ' <em style="margin-left: 0.35rem;">(other, free text)</em>' : '') + '\n';
             bodyHtml += '                    </div>\n';
             });
         bodyHtml += '                </div>\n';

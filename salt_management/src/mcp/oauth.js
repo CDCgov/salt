@@ -13,6 +13,7 @@
 const { runAsync, getAsync } = require('../models/database');
 const sessionStore = require('./sessionStore');
 const { ROLES } = require('../constants/roles');
+const { mcpGroups } = require('../services/systemSettings');
 
 const AUTH_CODE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 const PENDING_TTL_MS = 10 * 60 * 1000;   // how long a consent screen stays valid
@@ -209,20 +210,27 @@ const provider = {
 
 // ---- consent page (self-contained; reuses POST /api/auth/login) -----------
 
-// view: 'login' | 'not_admin' | 'consent' | 'none'
-function consentPage({ view, username, returnUrl, pending }) {
+// view: 'login' | 'not_admin' | 'consent' | 'off' | 'none'
+// groups: the System page switches ({ reports, surveys }), for the consent text.
+function consentPage({ view, username, returnUrl, pending, groups = {} }) {
     let body;
-    if (view === 'consent') {
+    if (view === 'off') {
+        body = `<p>AI assistants can't connect to this SALT server: an administrator has turned off both
+           AI report building and AI survey editing (System page in the SALT web app).</p>`;
+    } else if (view === 'consent') {
         const name = pending.clientName || 'An application';
         let host = pending.redirectUri;
         try { host = new URL(pending.redirectUri).host; } catch { /* keep raw */ }
         body = `<p>Signed in as <strong>${escapeHtml(username)}</strong>.</p>
-           <p><strong>${escapeHtml(name)}</strong> is asking to use SALT as you: build reports, and edit inactive surveys and lab tests.</p>
-           <p>If you allow it, it can read the survey data dictionary and summaries, and create
+           <p><strong>${escapeHtml(name)}</strong> is asking to use SALT as you: ${
+              [groups.reports && 'build reports', groups.surveys && 'edit inactive surveys and lab tests'].filter(Boolean).join(', and ')}.</p>
+           ${groups.reports ? `<p>If you allow it, it can read the survey data dictionary and summaries, and create
               and run reports. Reports run R code against the survey data, so the application
               can access individual participant records, though the AI is instructed to avoid
               any access to individual level data. Only allow tools that your study's data
-              agreements permit to process this data.</p>
+              agreements permit to process this data.</p>` : ''}
+           ${groups.surveys ? `<p>It can read every survey and create and change inactive surveys and lab tests.
+              It can't change or activate the active survey. Lab test changes reach every facility.</p>` : ''}
            <p>You will be returned to <strong>${escapeHtml(host)}</strong>.</p>
            <div class="row">
              <button class="btn allow" id="allow" type="button">Allow</button>
@@ -314,9 +322,13 @@ async function mountOAuth(app, { baseUrl }) {
         if (!admin) {
             return res.send(consentPage({ view: 'not_admin', username }));
         }
+        const groups = await mcpGroups();
+        if (!groups.reports && !groups.surveys) {
+            return res.send(consentPage({ view: 'off', username }));
+        }
         const pending = req.session.mcpPending;
         if (pending && pending.userId === admin.id && Date.now() - pending.createdAt < PENDING_TTL_MS) {
-            return res.send(consentPage({ view: 'consent', username, pending }));
+            return res.send(consentPage({ view: 'consent', username, pending, groups }));
         }
         // Signed in but no pending request (e.g. arrived from the login step).
         if (returnUrl && isLocalAuthorizePath(returnUrl)) return res.redirect(returnUrl);
@@ -342,6 +354,10 @@ async function mountOAuth(app, { baseUrl }) {
         }
         if (body.decision !== 'allow') {
             return res.json({ redirect: redirectWith(pending.redirectUri, { error: 'access_denied', state: pending.state }) });
+        }
+        const groups = await mcpGroups();
+        if (!groups.reports && !groups.surveys) {
+            return res.status(403).json({ error: 'AI assistants are turned off on this server (System page).' });
         }
         const code = await issueAuthorizationCode(pending);
         return res.json({ redirect: redirectWith(pending.redirectUri, { code, state: pending.state }) });

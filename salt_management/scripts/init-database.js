@@ -485,6 +485,14 @@ CREATE TABLE IF NOT EXISTS oauth_auth_codes (
     expires_at DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+-- Server-wide settings changed from the System page (src/services/systemSettings.js).
+CREATE TABLE IF NOT EXISTS system_settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_by INTEGER,
+    updated_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS mcp_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,

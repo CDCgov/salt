@@ -5,15 +5,25 @@ assistant (claude.ai, Claude Code, Claude Desktop) work with this SALT instance 
 subscription: build and render Quarto reports, and create and edit inactive surveys and lab
 tests. No participant rows leave the server.
 
-Everything lives under `src/mcp/` and is **on by default**; set `MCP_ENABLED` to a falsy value
-(`false`/`0`/`no`/`off`) to disable, in which case the module mounts nothing and the rest of the
-server is unaffected.
+Everything lives under `src/mcp/` and is always mounted. What it offers is controlled at runtime
+by two switches on the System page (`/admin/system`, stored by `src/services/systemSettings.js`):
+`mcp_reports_enabled` (report tools, default **off**) and `mcp_survey_editing_enabled` (survey and
+lab test tools, default **on**). There is no environment variable for this.
+
+- Each request (`server.js`) reads the switches and registers only the groups that are on
+  (`toolGroups.js`); the advertised instructions name only those groups. `list_surveys` is shared
+  and offered when either is on. Each tool also re-checks its switch when called.
+- With both off, `/mcp` answers every request with a JSON-RPC error (HTTP 403) and the consent
+  page (`/mcp-consent`) refuses to connect new clients.
+- Switching off doesn't revoke tokens; the System page's **Revoke all sessions** does
+  (`sessionStore.revokeAllSessions()`).
 
 ## Layout
 
 | File | Responsibility |
 | --- | --- |
-| `index.js` | `init(app)` gate (checks `MCP_ENABLED`) |
+| `index.js` | `init(app)`: mounts the server |
+| `toolGroups.js` | Registers each tool group only when its System page switch is on; call-time re-check |
 | `server.js` | `mountMcp(app)`: Streamable HTTP MCP endpoint at `/mcp` (stateless), bearer auth |
 | `tools.js` | The report tools (wrap existing services); profile cache + render rate-limit; registers `surveyTools.js` |
 | `surveyTools.js` | The survey and lab test tools (wrap `surveyEditing`, `labTestEditing`, `surveyBundle`, `jexlCheck`) |
@@ -35,7 +45,6 @@ The MCP SDK is ESM; this is a CommonJS codebase, so the SDK is loaded via dynami
 
 | Var | Default | Meaning |
 | --- | --- | --- |
-| `MCP_ENABLED` | `true` (on) | Master switch; set to `false`/`0`/`no`/`off` to disable |
 | `MCP_PUBLIC_URL` | `http://localhost:$PORT` | Public HTTPS base URL (OAuth issuer + resource id) |
 | `MCP_ACCESS_TTL_SECONDS` | `1800` | Access-token lifetime |
 | `MCP_SESSION_MAX_SECONDS` | `21600` | Absolute session cap (6h); refresh refused past it |

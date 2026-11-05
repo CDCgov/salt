@@ -2,19 +2,21 @@ const express = require('express');
 const router = express.Router();
 const { requireAdmin } = require('../../middleware/auth');
 const { getAsync } = require('../../models/database');
+const systemSettings = require('../../services/systemSettings');
 
 /**
  * Reports list page
  * GET /reports
  */
-router.get('/reports', requireAdmin, (req, res) => {
+router.get('/reports', requireAdmin, async (req, res) => {
     // The MCP connector URL advertised in the "AI Report Builder" dialog. Prefer
     // the configured public URL (the OAuth issuer); fall back to this request's host.
     const base = (process.env.MCP_PUBLIC_URL || `${req.protocol}://${req.get('host')}`).replace(/\/$/, '');
     res.render('pages/reports', {
         title: 'Reports',
         user: req.user,
-        mcpEnabled: String(process.env.MCP_ENABLED).toLowerCase() === 'true',
+        // The real state of the System page switch (MCP is always mounted).
+        mcpEnabled: await systemSettings.get('mcp_reports_enabled').catch(() => false),
         mcpConnectorUrl: `${base}/mcp`
     });
 });

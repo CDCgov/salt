@@ -133,6 +133,8 @@ Example: on `tsevno`, asked only of people who have never tested for HIV, the Sk
 
 The **Eligibility Script**, in the Eligibility Settings card, runs once after the eligibility questions. If it is **true**, the participant is eligible and continues; if false, they are shown the ineligibility message and the survey ends.
 
+A new survey starts with no Eligibility Script, which means **every participant is eligible**. **Check survey** warns about this until you write one.
+
 It can use the Short Name of any eligibility question. The CRANE MSM survey uses:
 
 ```

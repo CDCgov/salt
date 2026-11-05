@@ -36,8 +36,13 @@ trap cleanup EXIT
 echo "[test] backing up $DB"
 cp -f "$DB" "$BACKUP" || { echo "cannot back up DB"; exit 2; }
 
-echo "[test] starting server on :$PORT (MCP enabled)"
-MCP_ENABLED=true PORT=$PORT MCP_PUBLIC_URL=http://localhost:$PORT NODE_ENV=development \
+# Report building is off by default; the harnesses need both tool groups on.
+echo "[test] turning on both MCP switches in the test database"
+node -e "const s=require('./src/services/systemSettings');(async()=>{await s.set('mcp_reports_enabled',true);await s.set('mcp_survey_editing_enabled',true);process.exit(0)})().catch(e=>{console.error(e);process.exit(1)})" \
+    || { echo "cannot set MCP switches"; exit 2; }
+
+echo "[test] starting server on :$PORT"
+PORT=$PORT MCP_PUBLIC_URL=http://localhost:$PORT NODE_ENV=development \
     node src/app.js > "$LOG" 2>&1 &
 echo $! > "$PIDFILE"
 
@@ -56,6 +61,11 @@ echo "[test] running survey / lab test tools harness"
 BASE="http://localhost:$PORT" node scripts/test-mcp-survey.mjs
 RC2=$?
 [[ $RC -eq 0 ]] && RC=$RC2
+
+echo "[test] running System page / MCP switches harness"
+BASE="http://localhost:$PORT" node scripts/test-mcp-settings.mjs
+RC3=$?
+[[ $RC -eq 0 ]] && RC=$RC3
 
 echo "[test] server startup failures: $(grep -ciE 'cannot find module|EADDRINUSE|listen|unhandled' "$LOG" || true)"
 exit $RC

@@ -2,8 +2,10 @@
  * server.js — mounts the SALT MCP server (reports, survey editing, lab tests)
  * onto the existing Express app.
  *
- * Self-contained: everything lives under src/mcp/, gated by MCP_ENABLED, and is
- * mounted with a single call from app.js. The MCP SDK is ESM, so it is loaded
+ * Self-contained: everything lives under src/mcp/ and is mounted with a single
+ * call from app.js. Which tools are offered is controlled per request by the
+ * System page switches (services/systemSettings.js); with every switch off,
+ * /mcp refuses all requests. The MCP SDK is ESM, so it is loaded
  * via dynamic import() from this CommonJS module.
  *
  * Transport: Streamable HTTP in stateless mode (a fresh McpServer + transport
@@ -14,6 +16,9 @@
 
 const { verifyAccessToken } = require('./sessionStore');
 const { registerTools } = require('./tools');
+const { mcpGroups } = require('../services/systemSettings');
+
+const ALL_OFF_MESSAGE = 'The SALT MCP server is turned off: an administrator has switched off both AI report building and AI survey editing (System page in the SALT web app).';
 
 const SERVER_INFO = { name: 'salt', version: '0.2.0' };
 
@@ -58,13 +63,22 @@ async function mountMcp(app) {
 
     // Stateless handler: new server + transport per request.
     app.post('/mcp', jsonParser, bearer, async (req, res) => {
+        // The switches as they are now; a change applies from the next request.
+        const groups = await mcpGroups();
+        if (!groups.reports && !groups.surveys) {
+            return res.status(403).json({
+                jsonrpc: '2.0', error: { code: -32000, message: ALL_OFF_MESSAGE },
+                id: (req.body && req.body.id) ?? null,
+            });
+        }
         const server = new McpServer(SERVER_INFO, {
             capabilities: { tools: {} },
             // Short bootstrap that forces the agent to fetch the full guidance
-            // (get_report_instructions / get_survey_authoring_guide) first.
-            instructions: require('../services/reportInstructions').BOOTSTRAP_INSTRUCTIONS,
+            // (get_report_instructions / get_survey_authoring_guide) first,
+            // naming only the groups that are on.
+            instructions: require('../services/reportInstructions').buildBootstrapInstructions(groups),
         });
-        registerTools(server);
+        registerTools(server, groups);
 
         const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
         res.on('close', () => { transport.close(); server.close(); });

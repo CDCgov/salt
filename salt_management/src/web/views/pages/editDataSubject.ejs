@@ -247,7 +247,7 @@ function openEditor(item) {
         wrap.style.marginTop = '0.5rem';
         wrap.innerHTML = `<label>Other text (<code>q_${escapeHtml(item.shortName)}_other</code>, kept only when option
             ${escapeHtml(otherOption.index)} is selected)<br>
-            <input type="text" id="editOtherText" style="width: 100%;"></label>`;
+            <input type="text" id="editOtherText" style="width: 100%; padding: 0.4rem; margin-top: 0.25rem; border: 1px solid #ccc; border-radius: 4px;"></label>`;
         body.appendChild(wrap);
         document.getElementById('editOtherText').value = item.otherText ?? '';
     }

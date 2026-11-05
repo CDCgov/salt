@@ -198,18 +198,38 @@ const callJson = async (c, name, args = {}) => {
     const lr = await fetch(BASE + '/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: 'zz_mcp_admin', password: pw }) });
     const cookie = (lr.headers.get('set-cookie') || '').split(';')[0];
     ok('login sets cookie', !!cookie);
-    const consentAuthed = await (await fetch(BASE + '/mcp-consent?return=' + encodeURIComponent('/authorize?x=1'), { headers: { Cookie: cookie } })).text();
+    // Nothing in the authorize URL grants access: authorize parks the request in
+    // the session and the consent page must POST back its random id.
+    const noPending = await fetch(BASE + '/mcp-consent?return=' + encodeURIComponent('/authorize?x=1'), { headers: { Cookie: cookie }, redirect: 'manual' });
+    ok('consent page (authed, no pending request) returns to authorize', noPending.status === 302 && (noPending.headers.get('location') || '').includes('/authorize'));
+
+    // authorize WITH session → consent redirect (never a code directly)
+    const notApproved = await fetch(authUrl('&mcp_approved=1'), { headers: { Cookie: cookie }, redirect: 'manual' });
+    ok('authorize authed → consent, even with mcp_approved=1', (notApproved.headers.get('location') || '').includes('/mcp-consent'));
+    const consentAuthed = await (await fetch(BASE + '/mcp-consent', { headers: { Cookie: cookie } })).text();
     ok('consent page (authed) shows Allow + username', consentAuthed.includes('Allow') && consentAuthed.includes('zz_mcp_admin'));
+    const pendingId = JSON.parse((consentAuthed.match(/id: ("[^"]+")/) || [, 'null'])[1]);
+    const decide = (id, decision) => fetch(BASE + '/mcp-consent', { method: 'POST', headers: { 'Content-Type': 'application/json', Cookie: cookie }, body: JSON.stringify({ id, decision }) });
+    const forged = await decide('not-the-id', 'allow');
+    ok('consent POST with a wrong id → 403', forged.status === 403);
 
-    // authorize WITH session but NOT approved → still consent redirect
-    const notApproved = await fetch(authUrl(), { headers: { Cookie: cookie }, redirect: 'manual' });
-    ok('authorize authed but not approved → consent', (notApproved.headers.get('location') || '').includes('/mcp-consent'));
+    // A fresh authorize + consent round trip; returns the redirect location.
+    async function approve(decision = 'allow') {
+        await fetch(authUrl(), { headers: { Cookie: cookie }, redirect: 'manual' });
+        const page = await (await fetch(BASE + '/mcp-consent', { headers: { Cookie: cookie } })).text();
+        const id = JSON.parse((page.match(/id: ("[^"]+")/) || [, 'null'])[1]);
+        const d = await (await decide(id, decision)).json();
+        return d.redirect || '';
+    }
+    const codeOf = (loc) => new URL(loc, BASE).searchParams.get('code');
 
-    // authorize approved → code
-    const approved = await fetch(authUrl('&mcp_approved=1'), { headers: { Cookie: cookie }, redirect: 'manual' });
-    const loc = approved.headers.get('location') || '';
-    const code = new URL(loc, BASE).searchParams.get('code');
-    ok('authorize approved → code + state', !!code && new URL(loc, BASE).searchParams.get('state') === 'st');
+    // A wrong id is refused without consuming the pending request, so the real id still works.
+    const firstDecision = await (await decide(pendingId, 'allow')).json();
+    const loc = firstDecision.redirect || '';
+    const code = codeOf(loc);
+    ok('consent allow → code + state', !!code && new URL(loc, BASE).searchParams.get('state') === 'st', loc);
+    const denied = await approve('deny');
+    ok('consent deny → access_denied, no code', new URL(denied, BASE).searchParams.get('error') === 'access_denied' && !codeOf(denied), denied);
 
     const tokenReq = (params) => fetch(BASE + '/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(params) });
     // success
@@ -219,13 +239,11 @@ const callJson = async (c, name, args = {}) => {
     const reuse = await tokenReq({ grant_type: 'authorization_code', code, redirect_uri: 'http://localhost:9999/cb', client_id: reg0.client_id, code_verifier: verifier });
     ok('code reuse → 400', reuse.status === 400);
     // wrong PKCE → 400
-    const a2 = await fetch(authUrl('&mcp_approved=1'), { headers: { Cookie: cookie }, redirect: 'manual' });
-    const code2 = new URL(a2.headers.get('location'), BASE).searchParams.get('code');
+    const code2 = codeOf(await approve());
     const wrongPkce = await tokenReq({ grant_type: 'authorization_code', code: code2, redirect_uri: 'http://localhost:9999/cb', client_id: reg0.client_id, code_verifier: 'wrong' });
     ok('wrong PKCE verifier → 400', wrongPkce.status === 400);
     // redirect_uri mismatch → 400
-    const a3 = await fetch(authUrl('&mcp_approved=1'), { headers: { Cookie: cookie }, redirect: 'manual' });
-    const code3 = new URL(a3.headers.get('location'), BASE).searchParams.get('code');
+    const code3 = codeOf(await approve());
     const badRedir = await tokenReq({ grant_type: 'authorization_code', code: code3, redirect_uri: 'http://localhost:9999/OTHER', client_id: reg0.client_id, code_verifier: verifier });
     ok('redirect_uri mismatch → 400', badRedir.status === 400);
     // expired code → 400 (insert directly with valid challenge, past expiry)
@@ -244,8 +262,7 @@ const callJson = async (c, name, args = {}) => {
     ok('revoked token rejected on /mcp (401)', afterRevoke.status === 401);
 
     // a fresh server-issued token for tool tests
-    const a4 = await fetch(authUrl('&mcp_approved=1'), { headers: { Cookie: cookie }, redirect: 'manual' });
-    const code4 = new URL(a4.headers.get('location'), BASE).searchParams.get('code');
+    const code4 = codeOf(await approve());
     const toolTok = (await (await tokenReq({ grant_type: 'authorization_code', code: code4, redirect_uri: 'http://localhost:9999/cb', client_id: reg0.client_id, code_verifier: verifier })).json()).access_token;
 
     // ----------------------------------------------- bad bearer + transport
