@@ -12,9 +12,9 @@ export default defineConfig({
         src: './src/assets/salt_logo.png',
         replacesTitle: true,
       },
-      social: {
-        github: 'https://github.com/cdcgov/salt',
-      },
+      social: [
+        { icon: 'github', label: 'GitHub', href: 'https://github.com/cdcgov/salt' },
+      ],
       sidebar: [
         {
           label: 'Getting Started',

@@ -7,7 +7,7 @@
 #   ./deploy.sh --target user@host:/path # Build and rsync to remote
 #
 # Prerequisites:
-#   - Node.js 18+ and npm installed
+#   - Node.js 22.23.4+ and npm installed (Astro 7)
 #   - Run from inside salt_website/
 
 set -euo pipefail
