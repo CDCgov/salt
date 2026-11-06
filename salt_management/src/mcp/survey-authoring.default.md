@@ -129,8 +129,31 @@ Other keys are stored but the tablet never shows them.
   reach every facility's tablets at their next login, so confirm with the user
   before creating or changing one. A test with results keeps its code, type and
   options; to change those, create a new test and deactivate the old one.
-  `jexl_condition` decides when the test is offered. In it, a multiple-choice
-  answer is the option's **text**, not its number.
+
+### Lab test conditions
+
+`jexl_condition` decides when a lab test is offered (true = offered; blank =
+always offered). It is evaluated after the interview and rapid tests, and its
+variables differ from survey scripts:
+
+- **Rapid test results**: one variable per rapid test, named by its **test id**
+  (e.g. `hivrapid`). The value is lowercase text: `'negative'`, `'positive'`,
+  `'indeterminate'` or `'not_performed'`. Comparison is case-sensitive, so
+  `hivrapid == 'Positive'` never matches. Example: `hivrapid == 'positive'`.
+- **Multiple choice**: the option's **text in the survey's first language**,
+  not its number: `sex == 'Female'`, not `sex == 1`. Rewording that option
+  changes the condition's meaning.
+- **Multi-select**: still a list of positions, as in survey scripts (`2 =~ q`).
+- **Numeric** and **text**: as in survey scripts. Built-in variables
+  (`_facility_id`, ...) are available.
+- If a question's short name equals a rapid test id, the rapid test result
+  replaces the answer. Avoid such names.
+- A condition that errors **hides** the test. A rapid test that wasn't
+  recorded, or a question with no answer, may be undefined rather than null,
+  and using it is an error even with a `!= null` guard. So
+  `hivrapid != 'negative'` hides the test (not shows it) when there is no
+  result. Write conditions so that hidden is the right outcome when a
+  variable is missing.
 
 ## Audio
 

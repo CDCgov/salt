@@ -391,7 +391,7 @@ function registerSurveyTools(server) {
         unit: z.string().nullable().optional(),
         description: z.string().nullable().optional(),
         display_order: z.number().int().optional(),
-        jexl_condition: z.string().nullable().optional().describe('JEXL over survey answers; the test is offered only when true. Option answers are the option TEXT here, not the number.'),
+        jexl_condition: z.string().nullable().optional().describe('JEXL over survey answers; the test is offered only when true. Option answers are the option TEXT here, not the number; a rapid test result is a variable named by its test id with a lowercase value (e.g. hivrapid == "positive"). See the authoring guide.'),
     };
 
     server.registerTool('create_lab_test', {
